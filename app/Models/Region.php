@@ -16,6 +16,8 @@ class Region extends Model
         'name',
         'type',
         'parent_id',
+        'link',
+        'alamat'
     ];
 
     public function parent()
