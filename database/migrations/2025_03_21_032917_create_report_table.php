@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->foreign('id_geojson')->references('id_geojson')->on('geojson')->onDelete('cascade');
             $table->string('file_path');
             $table->text('description')->nullable();
+            $table->softDeletes();
             $table->string('nomor')->unique();
             $table->enum('sifat', ['Biasa', 'Rahasia', 'Penting', 'Segera'])->default('Biasa');
             $table->string('hal');

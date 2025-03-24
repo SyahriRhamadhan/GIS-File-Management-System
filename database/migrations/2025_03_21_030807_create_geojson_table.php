@@ -8,8 +8,9 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('geojson', function (Blueprint $table) {
-            $table->id('id_geojson'); 
-            $table->json('geojson'); 
+            $table->id('id_geojson');
+            $table->json('geojson');
+            $table->softDeletes();
 
             $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
 

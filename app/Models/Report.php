@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Report extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'report';
     protected $primaryKey = 'id_report';
@@ -19,6 +20,7 @@ class Report extends Model
         'nomor',
         'sifat',
         'hal',
+        'deleted_at',
         'kepada',
     ];
 

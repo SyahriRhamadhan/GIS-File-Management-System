@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Region extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'region';
     protected $primaryKey = 'id_region';
@@ -17,7 +18,8 @@ class Region extends Model
         'type',
         'parent_id',
         'link',
-        'alamat'
+        'alamat',
+        'deleted_at',
     ];
 
     public function parent()

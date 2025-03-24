@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('wali')->nullable();
             $table->enum('type', ['PT', 'CV', 'Yayasan/Lembaga', 'Perorangan']);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

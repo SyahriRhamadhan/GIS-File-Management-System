@@ -14,8 +14,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('link');
             $table->string('alamat');
-
-
+            $table->softDeletes();
             $table->foreign('parent_id')->references('id_region')->on('region')->onDelete('cascade');
 
             $table->timestamps();
