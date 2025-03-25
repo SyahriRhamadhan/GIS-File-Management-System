@@ -17,6 +17,26 @@ class RegionController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        return Inertia::render('region/create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => ['required', Rule::in(['provinsi', 'kabupaten', 'kecamatan', 'desa'])],
+            'parent_id' => 'nullable|exists:region,id_region',
+            'link' => 'required|string|max:255',
+            'alamat' => 'required|string|max:255',
+        ]);
+
+        Region::create($validated);
+
+        return redirect()->route('dashboard.region.index')->with('success', 'Data wilayah berhasil ditambahkan.');
+    }
+
     public function show($id)
     {
         $region = Region::with('parent')->findOrFail($id);
