@@ -1,8 +1,14 @@
-import { Link, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
+import { Link, usePage } from '@inertiajs/react';
 
 const GeojsonIndex = () => {
-    const { geojsons, regions } = usePage<{ geojsons: Array<{ id_geojson: number; geojson: string; id_user: number; id_region: number; id_owner: number }>, regions: Array<{ id_region: number; name: string }> }>().props;
+    const { geojsons, regions, user } = usePage<{
+        geojsons: Array<{ id_geojson: number; geojson: any; id_user: number; id_region: number; id_owner: number }>;
+        regions: Array<{ id_region: number; name: string }>;
+        user: Array<{ id_user: number; name: string }>;
+    }>().props;
+
+    console.log(geojsons);
 
     return (
         <AppLayout
@@ -21,33 +27,45 @@ const GeojsonIndex = () => {
                     <thead>
                         <tr>
                             <th className="border px-4 py-2">#</th>
-                            {/* <th className="border px-4 py-2">Geojson</th> */}
+                            <th className="border px-4 py-2">Geojson</th>
                             <th className="border px-4 py-2">User ID</th>
                             <th className="border px-4 py-2">Region ID</th>
                             <th className="border px-4 py-2">Owner ID</th>
-                            <th className="border px-4 py-2">Aksi</th>
+                            <th className="border px-4 py-2">GeoJSON Info</th>
+                            <th className="border px-4 py-2">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {geojsons.map((geojson) => (
+                        {geojsons.map((geojson: any) => (
                             <tr key={geojson.id_geojson}>
-                                {/* <td className="border px-4 py-2">{geojson.id_geojson}</td> */}
-                                <td className="border px-4 py-2">{geojson.geojson}</td>
+                                <td className="border px-4 py-2">{geojson.id_geojson}</td>
+                                <td className="border px-4 py-2">{geojson.geojson ? 'Valid GeoJSON' : 'No GeoJSON'}</td>
                                 <td className="border px-4 py-2">{geojson.id_user}</td>
-                                <td className="border px-4 py-2">
-                                    <select
-                                        value={geojson.id_region} 
-                                        disabled
-                                        className="w-full rounded-md border px-3 py-2"
-                                    >
-                                        {regions.map((region) => (
-                                            <option key={region.id_region} value={region.id_region}>
-                                                {region.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </td>
+                                <td className="border px-4 py-2">{geojson.id_region}</td>
                                 <td className="border px-4 py-2">{geojson.id_owner}</td>
+                                <td className="border px-4 py-2">
+                                    {/* Render specific feature properties */}
+                                    {geojson.geojson && geojson.geojson.features && geojson.geojson.features.length > 0 ? (
+                                        geojson.geojson.features.map((feature: any, index: number) => (
+                                            <div key={index}>
+                                                <p>
+                                                    <strong>FID_POLARU:</strong> {feature.properties.FID_POLARU}
+                                                </p>
+                                                <p>
+                                                    <strong>KLS_I:</strong> {feature.properties.KLS_I}
+                                                </p>
+                                                <p>
+                                                    <strong>KLS_III:</strong> {feature.properties.KLS_III}
+                                                </p>
+                                                <p>
+                                                    <strong>LUAS_Km2:</strong> {feature.properties.LUAS_Km2}
+                                                </p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>No features available</p>
+                                    )}
+                                </td>
                                 <td className="border px-4 py-2">
                                     <Link
                                         href={`/dashboard/geojson/${geojson.id_geojson}/edit`}

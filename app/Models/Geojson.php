@@ -18,6 +18,7 @@ class Geojson extends Model
         'id_user',
         'id_region',
         'id_owner',
+        'source_name',
     ];
 
     protected $casts = [

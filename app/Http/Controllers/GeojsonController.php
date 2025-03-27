@@ -14,12 +14,16 @@ class GeojsonController extends Controller
     public function index()
     {
         $geojsons = Geojson::all();
+        $regions = Region::all();
+        $user = Auth::user();
 
         return Inertia::render('geojson/index', [
             'geojsons' => $geojsons,
+            'regions' => $regions,
+            'user' => $user,
         ]);
     }
-
+    
     public function create()
     {
         $user_name = Auth::user()->name;
@@ -39,25 +43,32 @@ class GeojsonController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'geojson' => 'required|json',  // Ensure it is valid JSON
+            'geojson' => 'required|json',
             'id_user' => 'required|exists:users,id',
             'id_region' => 'required|exists:region,id_region',
             'id_owner' => 'required|exists:owner,id_owner',
         ]);
 
-        // If the geojson data is a string with escape sequences like \n, decode it
-        $geojsonData = json_decode($validated['geojson'], true); // Decode JSON if it's a string
+        $geojson = json_decode($validated['geojson'], true);
 
-        // Create new geojson
-        Geojson::create([
-            'geojson' => json_decode($validated['geojson'], true),
-            'id_user' => $validated['id_user'],
-            'id_region' => $validated['id_region'],
-            'id_owner' => $validated['id_owner'],
-        ]);
+        // Pastikan formatnya FeatureCollection
+        if ($geojson['type'] !== 'FeatureCollection' || !isset($geojson['features'])) {
+            return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection.']);
+        }
 
-        return redirect()->route('geojson.index')->with('success', 'Geojson created successfully.');
+        foreach ($geojson['features'] as $feature) {
+            Geojson::create([
+                'geojson' => $feature,
+                'source_name' => $geojson['name'],
+                'id_user' => $validated['id_user'],
+                'id_region' => $validated['id_region'],
+                'id_owner' => $validated['id_owner'],
+            ]);
+        }
+
+        return redirect()->route('geojson.index')->with('success', 'Seluruh fitur berhasil disimpan sebagai record terpisah.');
     }
+
 
 
     public function edit($id)

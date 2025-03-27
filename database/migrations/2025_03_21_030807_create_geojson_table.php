@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->json('geojson');
             $table->softDeletes();
 
+            $table->string('source_name')->nullable();
             $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
 
             $table->unsignedBigInteger('id_region');
