@@ -3,14 +3,13 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
     },
 ];
-
-
 
 const Dashboard = ({ geojsons, regions, user }: { geojsons: any; regions: any; user: any }) => {
     return (
@@ -30,8 +29,7 @@ const Dashboard = ({ geojsons, regions, user }: { geojsons: any; regions: any; u
                 </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-auto flex-1 overflow-hidden rounded-xl border md:min-h-min">
                     {/* Menampilkan komponen MapView dengan data GeoJSON */}
-                    <MapView geojsonData={geojsons} regions={regions} />
-                    
+                    <MapView geojsonData={geojsons}  />
                 </div>
             </div>
         </AppLayout>

@@ -21,5 +21,5 @@ class DashboardController extends Controller
             'regions' => $regions,
             'user' => $user,
         ]);
-    }//
+    }
 }
