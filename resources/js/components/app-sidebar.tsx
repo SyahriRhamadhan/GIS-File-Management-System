@@ -20,7 +20,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Tambah Map',
-        href: '/dashboard/map',
+        href: '/dashboard/geojson',
         icon: Earth,
     },
 ];
