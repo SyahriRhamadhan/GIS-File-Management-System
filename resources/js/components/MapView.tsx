@@ -4,8 +4,8 @@ import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet';
 
 // MapView komponen
 const MapView = ({ geojsonData }: { geojsonData: any }) => {
-    const center: [number, number] = [1.029868, 104.521117]; 
-    const zoom = 10; 
+    const center: [number, number] = [1.029868, 104.521117];
+    const zoom = 10;
     const [activePopup, setActivePopup] = useState<string | null>(null);
     console.log(geojsonData);
     const formattedGeojson = geojsonData.map((item: any) => {
@@ -18,16 +18,12 @@ const MapView = ({ geojsonData }: { geojsonData: any }) => {
 
     const onEachFeature = (feature: any, layer: any) => {
         if (feature.properties) {
-            const popupContent = `
-                <div>
-                    <h4>FID_POLARU: ${feature.properties.FID_POLARU}</h4>
-                    <p>KLS_I: ${feature.properties.KLS_I}</p>
-                    <p>KLS_III: ${feature.properties.KLS_III}</p>
-                    <p>LUAS_Km2: ${feature.properties.LUAS_Km2}</p>
-                    <p>SUMBER: ${feature.properties.SUMBER}</p>
-                </div>
-            `;
-            layer.bindPopup(popupContent); 
+            let popupContent = '<div>';
+            Object.entries(feature.properties).forEach(([key, value]) => {
+                popupContent += `<p><strong>${key}:</strong> ${value}</p>`;
+            });
+            popupContent += '</div>';
+            layer.bindPopup(popupContent);
         }
     };
 
