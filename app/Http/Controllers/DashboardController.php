@@ -12,7 +12,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $geojsons = Geojson::all();
+        $geojsons = Geojson::all()->map(function ($geojson) {
+            if (is_string($geojson->geojson)) {
+                $geojson->geojson = json_decode($geojson->geojson, true);
+            }
+            return $geojson;
+        });
+
         $regions = Region::all();
         $user = Auth::user();
 
