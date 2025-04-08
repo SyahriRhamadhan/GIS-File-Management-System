@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 interface GeojsonFormProps {
     user_name: string;
     user_id: number; // The authenticated user's ID
-    // user_id: number;
     regions: { id_region: number; name: string }[];
     owner: { id_owner: number; name: string }[];
 }
@@ -15,21 +14,29 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
         register,
         handleSubmit,
         formState: { errors },
+        setValue,
     } = useForm();
 
     const onSubmit = (data: any) => {
-        // Ensure geojson is a valid JSON object
-        try {
-            const geojsonObject = JSON.parse(data.geojson); // Parsing the geojson string into an object
-            const requestData = {
-                ...data,
-                geojson: JSON.stringify(geojsonObject),
-                id_user: user_id, // Use the authenticated user's ID
-            };
-            router.post('/dashboard/geojson', requestData);
-        } catch (error) {
-            console.error('Invalid GeoJSON:', error);
+        const formData = new FormData();
+
+        if (data.geojson_file?.[0]) {
+            formData.append('geojson_file', data.geojson_file[0]);
+        } else {
+            try {
+                const geojsonObject = JSON.parse(data.geojson);
+                formData.append('geojson', JSON.stringify(geojsonObject));
+            } catch (error) {
+                console.error('Invalid GeoJSON:', error);
+                return;
+            }
         }
+
+        formData.append('id_user', user_id.toString());
+        formData.append('id_region', data.id_region);
+        formData.append('id_owner', data.id_owner);
+
+        router.post('/dashboard/geojson', formData);
     };
 
     return (
@@ -46,15 +53,29 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>
                         <label htmlFor="geojson" className="block">
-                            Geojson
+                            Geojson (Text Format)
                         </label>
                         <textarea
                             id="geojson"
-                            {...register('geojson', { required: 'Geojson is required' })}
+                            {...register('geojson', )}
                             rows={4}
                             className="w-full rounded-md border px-3 py-2"
                         />
                         {errors.geojson && <p className="text-sm text-red-500">{String(errors.geojson.message)}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="geojson_file" className="block">
+                            Geojson (File Upload)
+                        </label>
+                        <input
+                            id="geojson_file"
+                            type="file"
+                            accept=".geojson"
+                            {...register('geojson_file')}
+                            className="w-full rounded-md border px-3 py-2"
+                        />
+                        {errors.geojson_file && <p className="text-sm text-red-500">{String(errors.geojson_file.message)}</p>}
                     </div>
 
                     <div>

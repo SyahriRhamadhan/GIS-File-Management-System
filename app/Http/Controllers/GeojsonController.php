@@ -40,147 +40,49 @@ class GeojsonController extends Controller
         ]);
     }
 
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'geojson' => 'required|json', // Validasi jika geojson adalah string JSON yang valid
-    //         'id_user' => 'required|exists:users,id',
-    //         'id_region' => 'required|exists:region,id_region',
-    //         'id_owner' => 'required|exists:owner,id_owner',
-    //     ]);
-
-    //     // Mendecode geojson dari request
-    //     $geojson = json_decode($validated['geojson'], true);
-
-    //     // Pastikan formatnya FeatureCollection
-    //     if ($geojson['type'] !== 'FeatureCollection' || !isset($geojson['features'])) {
-    //         return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection.']);
-    //     }
-
-    //     // Proses untuk menghapus elemen ketiga (elevasi) dalam koordinat
-    //     foreach ($geojson['features'] as &$feature) {
-    //         if ($feature['geometry']['type'] === 'Polygon') {
-    //             $feature['geometry']['coordinates'] = array_map(function ($polygon) {
-    //                 return array_map(function ($coord) {
-    //                     return array_slice($coord, 0, 2); // Ambil hanya longitude dan latitude
-    //                 }, $polygon);
-    //             }, $feature['geometry']['coordinates']);
-    //         } elseif ($feature['geometry']['type'] === 'MultiPolygon') {
-    //             $feature['geometry']['coordinates'] = array_map(function ($polygon) {
-    //                 return array_map(function ($ring) {
-    //                     return array_map(function ($coord) {
-    //                         return array_slice($coord, 0, 2); // Ambil hanya longitude dan latitude
-    //                     }, $ring);
-    //                 }, $polygon);
-    //             }, $feature['geometry']['coordinates']);
-    //         }
-    //     }
-
-    //     // Menyimpan data GeoJSON dalam database tanpa meng-encode ulang sebagai string
-    //     Geojson::create([
-    //         'geojson' => $geojson,  // Menyimpan data GeoJSON dalam format array PHP, tanpa encoding
-    //         'source_name' => $geojson['name'],
-    //         'id_user' => $validated['id_user'],
-    //         'id_region' => $validated['id_region'],
-    //         'id_owner' => $validated['id_owner'],
-    //     ]);
-
-    //     return redirect()->route('geojson.index')->with('success', 'Seluruh fitur berhasil disimpan sebagai record terpisah.');
-    // }
-
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'geojson' => 'required|json', // Validasi jika geojson adalah string JSON yang valid
-    //         'id_user' => 'required|exists:users,id',
-    //         'id_region' => 'required|exists:region,id_region',
-    //         'id_owner' => 'required|exists:owner,id_owner',
-    //     ]);
-
-    //     // Mendecode geojson dari request
-    //     $geojson = json_decode($validated['geojson'], true);
-
-    //     // Pastikan formatnya FeatureCollection
-    //     if ($geojson['type'] !== 'FeatureCollection' || !isset($geojson['features'])) {
-    //         return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection.']);
-    //     }
-
-    //     // Proses untuk menghapus elemen ketiga (elevasi) dalam koordinat
-    //     foreach ($geojson['features'] as &$feature) {
-    //         if ($feature['geometry']['type'] === 'Polygon') {
-    //             $feature['geometry']['coordinates'] = array_map(function ($polygon) {
-    //                 return array_map(function ($coord) {
-    //                     return array_slice($coord, 0, 2); // Ambil hanya longitude dan latitude
-    //                 }, $polygon);
-    //             }, $feature['geometry']['coordinates']);
-    //         } elseif ($feature['geometry']['type'] === 'MultiPolygon') {
-    //             $feature['geometry']['coordinates'] = array_map(function ($polygon) {
-    //                 return array_map(function ($ring) {
-    //                     return array_map(function ($coord) {
-    //                         return array_slice($coord, 0, 2); // Ambil hanya longitude dan latitude
-    //                     }, $ring);
-    //                 }, $polygon);
-    //             }, $feature['geometry']['coordinates']);
-    //         }
-    //     }
-
-    //     // Iterasi untuk menyimpan setiap fitur dalam baris terpisah
-    //     foreach ($geojson['features'] as $feature) {
-    //         // Menyimpan data GeoJSON dalam database sebagai baris terpisah
-    //         Geojson::create([
-    //             'geojson' => json_encode($feature),  // Menyimpan data GeoJSON fitur dalam bentuk string JSON
-    //             'source_name' => $geojson['name'], // Menyimpan nama sumber dari FeatureCollection
-    //             'id_user' => $validated['id_user'],
-    //             'id_region' => $validated['id_region'],
-    //             'id_owner' => $validated['id_owner'],
-    //         ]);
-    //     }
-
-    //     return redirect()->route('geojson.index')->with('success', 'Seluruh fitur berhasil disimpan sebagai record terpisah.');
-    // }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'geojson' => 'required|json', // Validasi jika geojson adalah string JSON yang valid
+            'geojson' => 'required_without:geojson_file|json',
+            'geojson_file' => 'required_without:geojson|file|mimes:json,geojson', 
             'id_user' => 'required|exists:users,id',
             'id_region' => 'required|exists:region,id_region',
             'id_owner' => 'required|exists:owner,id_owner',
         ]);
 
-        // Mendecode geojson dari request
-        $geojson = json_decode($validated['geojson'], true);
+        if ($request->hasFile('geojson_file')) {
+            $file = $request->file('geojson_file');
+            $geojson = json_decode(file_get_contents($file), true);
+        } else {
+            $geojson = json_decode($validated['geojson'], true);
+        }
 
-        // Pastikan formatnya FeatureCollection
         if ($geojson['type'] !== 'FeatureCollection' || !isset($geojson['features'])) {
             return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection.']);
         }
 
-        // Proses untuk menghapus elemen ketiga (elevasi) dalam koordinat
         foreach ($geojson['features'] as &$feature) {
             if ($feature['geometry']['type'] === 'Polygon') {
                 $feature['geometry']['coordinates'] = array_map(function ($polygon) {
                     return array_map(function ($coord) {
-                        return array_slice($coord, 0, 2); // Ambil hanya longitude dan latitude
+                        return array_slice($coord, 0, 2);
                     }, $polygon);
                 }, $feature['geometry']['coordinates']);
             } elseif ($feature['geometry']['type'] === 'MultiPolygon') {
                 $feature['geometry']['coordinates'] = array_map(function ($polygon) {
                     return array_map(function ($ring) {
                         return array_map(function ($coord) {
-                            return array_slice($coord, 0, 2); // Ambil hanya longitude dan latitude
+                            return array_slice($coord, 0, 2);
                         }, $ring);
                     }, $polygon);
                 }, $feature['geometry']['coordinates']);
             }
         }
 
-        // Iterasi untuk menyimpan setiap fitur dalam baris terpisah
         foreach ($geojson['features'] as $feature) {
-            // Menyimpan data GeoJSON dalam database sebagai baris terpisah
             Geojson::create([
-                'geojson' => $feature,  // Menyimpan data GeoJSON fitur dalam bentuk array PHP, bukan string JSON yang di-encode
-                'source_name' => $geojson['name'], // Menyimpan nama sumber dari FeatureCollection
+                'geojson' => $feature,
+                'source_name' => $geojson['name'],
                 'id_user' => $validated['id_user'],
                 'id_region' => $validated['id_region'],
                 'id_owner' => $validated['id_owner'],
@@ -189,6 +91,7 @@ class GeojsonController extends Controller
 
         return redirect()->route('geojson.index')->with('success', 'Seluruh fitur berhasil disimpan sebagai record terpisah.');
     }
+
 
 
     public function edit($id)
