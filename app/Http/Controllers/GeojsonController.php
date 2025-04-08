@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Region;
 use App\Models\Owner;
+use App\Models\User;
 
 class GeojsonController extends Controller
 {
@@ -15,12 +16,14 @@ class GeojsonController extends Controller
     {
         $geojsons = Geojson::all();
         $regions = Region::all();
-        $user = Auth::user();
+        $users = User::all();
+        $owners = Owner::all(); 
 
         return Inertia::render('geojson/index', [
             'geojsons' => $geojsons,
             'regions' => $regions,
-            'user' => $user,
+            'users' => $users,
+            'owners' => $owners,
         ]);
     }
 
@@ -44,7 +47,7 @@ class GeojsonController extends Controller
     {
         $validated = $request->validate([
             'geojson' => 'required_without:geojson_file|json',
-            'geojson_file' => 'required_without:geojson|file|mimes:json,geojson', 
+            'geojson_file' => 'required_without:geojson|file|mimes:json,geojson',
             'id_user' => 'required|exists:users,id',
             'id_region' => 'required|exists:region,id_region',
             'id_owner' => 'required|exists:owner,id_owner',
