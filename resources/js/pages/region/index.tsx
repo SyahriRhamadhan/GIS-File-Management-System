@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast'; // 🔥 Import toast
 
@@ -25,27 +25,11 @@ export default function RegionIndex() {
 
     const [kecamatanFilter, setKecamatanFilter] = useState('');
 
-    // const filteredRegions = useMemo(() => {
-    //     let data = [...regions];
-    //     if (search) {
-    //         data = data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
-    //     }
-    //     data.sort((a, b) => {
-    //         const aVal = (a as any)[sortBy]?.toString().toLowerCase();
-    //         const bVal = (b as any)[sortBy]?.toString().toLowerCase();
-    //         if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-    //         if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-    //         return 0;
-    //     });
-    //     return data;
-    // }, [regions, search, sortBy, sortDirection]);
 
     const filteredRegions = useMemo(() => {
         let data = [...regions];
         if (search) {
-            data = data.filter((item) =>
-                item.name.toLowerCase().includes(search.toLowerCase())
-            );
+            data = data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
         }
         if (kecamatanFilter) {
             data = data.filter((item) => item.kecamatan === kecamatanFilter);
@@ -59,7 +43,6 @@ export default function RegionIndex() {
         });
         return data;
     }, [regions, search, kecamatanFilter, sortBy, sortDirection]);
-    
 
     const toggleSort = (column: string) => {
         if (sortBy === column) {
@@ -126,7 +109,15 @@ export default function RegionIndex() {
         >
             <Head title="Region" />
             <div className="p-6">
-                <h1 className="mb-4 text-2xl font-bold">Daftar Wilayah</h1>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+                    <h1 className="text-2xl font-bold">Daftar Wilayah</h1>
+                    <Link
+                        href={route('dashboard.region.create')}
+                        className="inline-block rounded bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700"
+                    >
+                        + Tambah Wilayah
+                    </Link>
+                </div>
 
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                     <input
