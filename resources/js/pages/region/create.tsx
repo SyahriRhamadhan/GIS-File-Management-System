@@ -1,8 +1,22 @@
+// CreateRegion.tsx
 import AppLayout from '@/layouts/app-layout';
 import { Combobox } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { Head, useForm, usePage } from '@inertiajs/react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+
+function LocationPicker({ onSelect }: { onSelect: (latlng: { lat: number; lng: number }) => void }) {
+    useMapEvents({
+        click(e) {
+            onSelect(e.latlng);
+        },
+    });
+    return null;
+}
 
 type RegionEntry = { provinsi: string; kabupaten: string; kecamatan: string; desa: string };
 
@@ -22,7 +36,14 @@ export default function CreateRegion() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('dashboard.region.store'));
+        post(route('dashboard.region.store'), {
+            onSuccess: () => {
+                toast.success('Data wilayah berhasil ditambahkan!');
+            },
+            onError: () => {
+                toast.error('Terjadi kesalahan saat menyimpan data.');
+            },
+        });
     };
 
     const provinsiList = useMemo(() => [...new Set(regionOptions.map((r) => r.provinsi))], [regionOptions]);
@@ -80,15 +101,11 @@ export default function CreateRegion() {
         return (
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{labelWithStep[field]}</label>
-                <Combobox value={data[field] || ''} onChange={(val: string) => handleSelect(val)} by={(a, b) => a === b} disabled={disabled}>
+                <Combobox value={data[field] || ''} onChange={handleSelect} by={(a, b) => a === b} disabled={disabled}>
                     <div className="relative mt-1">
                         <div className="relative w-full cursor-default overflow-hidden rounded-md border text-left shadow-sm focus:outline-none sm:text-sm">
                             <Combobox.Input
-                                placeholder={
-                                    disabled
-                                        ? `Isi ${field === 'kabupaten' ? 'provinsi' : field === 'kecamatan' ? 'kabupaten' : 'kecamatan'} terlebih dahulu`
-                                        : `Pilih ${labelWithStep[field].split('. ')[1]}`
-                                }
+                                placeholder={disabled ? `Isi sebelumnya terlebih dahulu` : `Pilih ${labelWithStep[field].split('. ')[1]}`}
                                 className={`w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:ring-indigo-500 focus:outline-none ${
                                     errors[field] ? 'border-red-500' : 'border-gray-300'
                                 } dark:border-gray-600 dark:bg-gray-800 dark:text-white`}
@@ -98,8 +115,7 @@ export default function CreateRegion() {
                                 <ChevronUpDownIcon className="h-5 w-5 text-gray-400" />
                             </Combobox.Button>
                         </div>
-
-                        <Combobox.Options className="ring-opacity-5 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black focus:outline-none dark:bg-gray-800 dark:text-white">
+                        <Combobox.Options className="ring-opacity-5 absolute z-[999] mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black focus:outline-none dark:bg-gray-800 dark:text-white">
                             {combo.options.map((item) => (
                                 <Combobox.Option
                                     key={item}
@@ -114,7 +130,6 @@ export default function CreateRegion() {
                                     )}
                                 </Combobox.Option>
                             ))}
-
                             {allowAddNew && (
                                 <Combobox.Option
                                     value={combo.query}
@@ -123,7 +138,6 @@ export default function CreateRegion() {
                                     + Tambah "{combo.query}"
                                 </Combobox.Option>
                             )}
-
                             {!combo.options.length && !allowAddNew && (
                                 <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Tidak ditemukan</div>
                             )}
@@ -171,9 +185,7 @@ export default function CreateRegion() {
                             type="text"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            className={`mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:ring-indigo-500 focus:outline-none ${
-                                errors.name ? 'border-red-500' : 'border-gray-300'
-                            } dark:border-gray-600 dark:bg-gray-800 dark:text-white`}
+                            className={`mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:ring-indigo-500 focus:outline-none ${errors.name ? 'border-red-500' : 'border-gray-300'} dark:border-gray-600 dark:bg-gray-800 dark:text-white`}
                         />
                         {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                     </div>
@@ -189,24 +201,42 @@ export default function CreateRegion() {
                             type="text"
                             value={data.detail}
                             onChange={(e) => setData('detail', e.target.value)}
-                            className={`mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:ring-indigo-500 focus:outline-none ${
-                                errors.detail ? 'border-red-500' : 'border-gray-300'
-                            } dark:border-gray-600 dark:bg-gray-800 dark:text-white`}
+                            className={`mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:ring-indigo-500 focus:outline-none ${errors.detail ? 'border-red-500' : 'border-gray-300'} dark:border-gray-600 dark:bg-gray-800 dark:text-white`}
                         />
                         {errors.detail && <p className="mt-1 text-sm text-red-500">{errors.detail}</p>}
                     </div>
 
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Link Google Maps</label>
-                        <input
-                            type="text"
-                            value={data.link}
-                            onChange={(e) => setData('link', e.target.value)}
-                            className={`mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:ring-indigo-500 focus:outline-none ${
-                                errors.link ? 'border-red-500' : 'border-gray-300'
-                            } dark:border-gray-600 dark:bg-gray-800 dark:text-white`}
-                        />
-                        {errors.link && <p className="mt-1 text-sm text-red-500">{errors.link}</p>}
+                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Pilih Lokasi di Peta</label>
+                        <div className="relative z-10 h-[400px] w-full rounded-md">
+                            <MapContainer center={[1.029868, 104.521117]} zoom={10} scrollWheelZoom={true} className="h-full w-full">
+                                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+                                <LocationPicker onSelect={({ lat, lng }) => setData('link', `https://www.google.com/maps?q=${lat},${lng}`)} />
+                                {data.link &&
+                                    (() => {
+                                        const [lat, lng] = data.link.split('=')[1]?.split(',').map(Number) || [0, 0];
+                                        return (
+                                            <Marker
+                                                position={[lat, lng]}
+                                                icon={L.icon({
+                                                    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+                                                    iconSize: [25, 41],
+                                                    iconAnchor: [12, 41],
+                                                    popupAnchor: [1, -34],
+                                                })}
+                                            />
+                                        );
+                                    })()}
+                            </MapContainer>
+                        </div>
+                        {data.link && (
+                            <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                                Link otomatis diisi:{' '}
+                                <a href={data.link} className="underline" target="_blank" rel="noopener noreferrer">
+                                    {data.link}
+                                </a>
+                            </p>
+                        )}
                     </div>
 
                     <div className="flex justify-end gap-3 pt-2 md:col-span-2">
