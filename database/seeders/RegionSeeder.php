@@ -9,40 +9,62 @@ class RegionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Seed data Provinsi
-        $provinsi = Region::create([
-            'name' => 'Jawa Barat',
-            'type' => 'provinsi',
-            'parent_id' => null,
-            'link' => 'https://jabar.go.id',
-            'alamat' => 'Bandung, Jawa Barat',
-        ]);
+        $regions = [
+            ['Air Gelubi', 'Bintan Pesisir'],
+            ['Batu Lepuk', 'Tambelan'],
+            ['Berakit', 'Teluk Sebong'],
+            ['Bintan Buyu', 'Teluk Bintan'],
+            ['Busung', 'Seri Kuala Lobam'],
+            ['Dendun', 'Mantang'],
+            ['Ekang Anculai', 'Teluk Sebong'],
+            ['Gunung Kijang', 'Gunung Kijang'],
+            ['Kampung Hilir', 'Tambelan'],
+            ['Kampung Melayu', 'Tambelan'],
+            ['Kawal', 'Gunung Kijang'],
+            ['Kelong', 'Bintan Pesisir'],
+            ['Kuala Sempang', 'Seri Kuala Lobam'],
+            ['Kukup', 'Tambelan'],
+            ['Lancang Kuning', 'Bintan Utara'],
+            ['Malang Rapat', 'Gunung Kijang'],
+            ['Mantang Baru', 'Mantang'],
+            ['Mantang Besar', 'Mantang'],
+            ['Mantang Lama', 'Mantang'],
+            ['Mapur', 'Bintan Pesisir'],
+            ['Numbing', 'Bintan Pesisir'],
+            ['Pangkil', 'Teluk Bintan'],
+            ['Penaga', 'Teluk Bintan'],
+            ['Pengikik', 'Tambelan'],
+            ['Pengudang', 'Teluk Sebong'],
+            ['Pengujan', 'Teluk Bintan'],
+            ['Pulau Mentebung', 'Tambelan'],
+            ['Pulau Pinang', 'Tambelan'],
+            ['Sebong Lagoi', 'Teluk Sebong'],
+            ['Sebong Pereh', 'Teluk Sebong'],
+            ['Tanjung Uban Timur', 'Bintan Utara'],
+            ['Tanjung Uban Utara', 'Bintan Utara'],
+            ['Teluk Bakau', 'Gunung Kijang'],
+            ['Teluk Sekuni', 'Tambelan'],
+            ['Tembeling Tanjung', 'Teluk Bintan'],
+            ['Tembeling', 'Teluk Bintan'],
+            ['Toapaya', 'Toapaya'],
+        ];
 
-        // Seed data Kabupaten
-        $kabupaten = Region::create([
-            'name' => 'Kabupaten Bandung',
-            'type' => 'kabupaten',
-            'parent_id' => $provinsi->id_region,
-            'link' => 'https://kab-bandung.go.id',
-            'alamat' => 'Soreang, Kabupaten Bandung',
-        ]);
+        foreach ($regions as [$desa, $kecamatan]) {
+            $kabupaten = 'Bintan';
+            $provinsi = 'Kepulauan Riau';
+            $detail = "$desa, $kecamatan, $kabupaten, $provinsi";
+            $query = urlencode($detail);
+            $link = "https://www.google.com/maps/search/?api=1&query=$query";
 
-        // Seed data Kecamatan
-        $kecamatan = Region::create([
-            'name' => 'Kecamatan Baleendah',
-            'type' => 'kecamatan',
-            'parent_id' => $kabupaten->id_region,
-            'link' => 'https://baleendah.bandungkab.go.id',
-            'alamat' => 'Baleendah, Kabupaten Bandung',
-        ]);
-
-        // Seed data Desa
-        Region::create([
-            'name' => 'Desa Rancamanyar',
-            'type' => 'desa',
-            'parent_id' => $kecamatan->id_region,
-            'link' => 'https://rancamanyar.desa.id',
-            'alamat' => 'Rancamanyar, Baleendah',
-        ]);
+            Region::create([
+                'name'      => $desa,
+                'provinsi'  => $provinsi,
+                'kabupaten' => $kabupaten,
+                'kecamatan' => $kecamatan,
+                'desa'      => $desa,
+                'detail'    => $detail,
+                'link'      => $link,
+            ]);
+        }
     }
 }

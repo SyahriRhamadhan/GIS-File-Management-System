@@ -5,7 +5,16 @@ import toast from 'react-hot-toast'; // 🔥 Import toast
 
 export default function RegionIndex() {
     const { props } = usePage<{
-        regions: { id_region: number; name: string; type: string; link: string; alamat: string }[];
+        regions: {
+            id_region: number;
+            name: string;
+            link: string;
+            detail: string;
+            desa: string;
+            kecamatan: string;
+            kabupaten: string;
+            provinsi: string;
+        }[];
         flash?: { success?: string; error?: string };
     }>();
     const { regions, flash } = props;
@@ -13,15 +22,33 @@ export default function RegionIndex() {
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-    const [typeFilter, setTypeFilter] = useState('');
+
+    const [kecamatanFilter, setKecamatanFilter] = useState('');
+
+    // const filteredRegions = useMemo(() => {
+    //     let data = [...regions];
+    //     if (search) {
+    //         data = data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
+    //     }
+    //     data.sort((a, b) => {
+    //         const aVal = (a as any)[sortBy]?.toString().toLowerCase();
+    //         const bVal = (b as any)[sortBy]?.toString().toLowerCase();
+    //         if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+    //         if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+    //         return 0;
+    //     });
+    //     return data;
+    // }, [regions, search, sortBy, sortDirection]);
 
     const filteredRegions = useMemo(() => {
         let data = [...regions];
         if (search) {
-            data = data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
+            data = data.filter((item) =>
+                item.name.toLowerCase().includes(search.toLowerCase())
+            );
         }
-        if (typeFilter) {
-            data = data.filter((item) => item.type === typeFilter);
+        if (kecamatanFilter) {
+            data = data.filter((item) => item.kecamatan === kecamatanFilter);
         }
         data.sort((a, b) => {
             const aVal = (a as any)[sortBy]?.toString().toLowerCase();
@@ -31,7 +58,8 @@ export default function RegionIndex() {
             return 0;
         });
         return data;
-    }, [regions, search, sortBy, sortDirection, typeFilter]);
+    }, [regions, search, kecamatanFilter, sortBy, sortDirection]);
+    
 
     const toggleSort = (column: string) => {
         if (sortBy === column) {
@@ -51,13 +79,8 @@ export default function RegionIndex() {
         return filteredRegions.slice(start, end);
     }, [filteredRegions, currentPage]);
 
-    const handleView = (id: number) => {
-        router.visit(`/dashboard/region/${id}`);
-    };
-
-    const handleEdit = (id: number) => {
-        router.visit(`/dashboard/region/${id}/edit`);
-    };
+    const handleView = (id: number) => router.visit(`/dashboard/region/${id}`);
+    const handleEdit = (id: number) => router.visit(`/dashboard/region/${id}/edit`);
 
     const [showConfirm, setShowConfirm] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -75,16 +98,19 @@ export default function RegionIndex() {
                     setShowConfirm(false);
                     setSelectedId(null);
                 },
-                onError: () => {
-                    toast.error('Gagal menghapus data');
-                },
+                onError: () => toast.error('Gagal menghapus data'),
             });
         }
     };
 
+    const kecamatanOptions = useMemo(() => {
+        const values = regions.map((r) => r.kecamatan);
+        return [...new Set(values)].sort();
+    }, [regions]);
+
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, typeFilter]);
+    }, [search, kecamatanFilter]);
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -103,18 +129,6 @@ export default function RegionIndex() {
                 <h1 className="mb-4 text-2xl font-bold">Daftar Wilayah</h1>
 
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                    <select
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="w-full max-w-xs rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
-                    >
-                        <option value="">Semua Tipe</option>
-                        <option value="provinsi">Provinsi</option>
-                        <option value="kabupaten">Kabupaten</option>
-                        <option value="kecamatan">Kecamatan</option>
-                        <option value="desa">Desa</option>
-                    </select>
-
                     <input
                         type="text"
                         placeholder="Cari nama wilayah..."
@@ -122,21 +136,32 @@ export default function RegionIndex() {
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full max-w-md rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
                     />
+
+                    <select
+                        value={kecamatanFilter}
+                        onChange={(e) => setKecamatanFilter(e.target.value)}
+                        className="w-full max-w-xs rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
+                    >
+                        <option value="">Semua Kecamatan</option>
+                        {kecamatanOptions.map((kec) => (
+                            <option key={kec} value={kec}>
+                                {kec}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="overflow-x-auto rounded-lg shadow-sm">
-                    <table className="w-full min-w-[600px] border text-sm">
+                    <table className="w-full min-w-[800px] border text-sm">
                         <thead className="bg-gray-100 dark:bg-gray-800">
                             <tr>
                                 <th className="border px-4 py-2 text-left">#</th>
                                 <th className="cursor-pointer border px-4 py-2 text-left" onClick={() => toggleSort('name')}>
                                     Nama {sortBy === 'name' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
                                 </th>
-                                <th className="cursor-pointer border px-4 py-2 text-left" onClick={() => toggleSort('type')}>
-                                    Tipe {sortBy === 'type' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
-                                </th>
+                                <th className="border px-4 py-2 text-left">Kecamatan</th>
                                 <th className="border px-4 py-2 text-left">Link</th>
-                                <th className="border px-4 py-2 text-left">Alamat</th>
+                                <th className="border px-4 py-2 text-left">Detail</th>
                                 <th className="border px-4 py-2 text-left">Aksi</th>
                             </tr>
                         </thead>
@@ -145,9 +170,13 @@ export default function RegionIndex() {
                                 <tr key={region.id_region}>
                                     <td className="border px-4 py-2">{(currentPage - 1) * perPage + index + 1}</td>
                                     <td className="border px-4 py-2">{region.name}</td>
-                                    <td className="border px-4 py-2 capitalize">{region.type}</td>
-                                    <td className="border px-4 py-2">{region.link}</td>
-                                    <td className="border px-4 py-2">{region.alamat}</td>
+                                    <td className="border px-4 py-2">{region.kecamatan}</td>
+                                    <td className="border px-4 py-2">
+                                        <a href={region.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                            Link
+                                        </a>
+                                    </td>
+                                    <td className="border px-4 py-2">{region.detail}</td>
                                     <td className="flex flex-wrap items-center justify-center gap-1 border px-4 py-2">
                                         <button
                                             onClick={() => handleView(region.id_region)}
@@ -168,7 +197,6 @@ export default function RegionIndex() {
                                             Delete
                                         </button>
 
-                                        {/* Modal Sederhana */}
                                         {showConfirm && (
                                             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                                                 <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
@@ -193,7 +221,7 @@ export default function RegionIndex() {
                             ))}
                         </tbody>
                     </table>
-                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                    <div className="my-4 flex flex-wrap items-center justify-center gap-2">
                         {Array.from({ length: Math.ceil(filteredRegions.length / perPage) }, (_, i) => i + 1).map((page) => (
                             <button
                                 key={page}

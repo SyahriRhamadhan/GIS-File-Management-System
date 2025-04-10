@@ -15,22 +15,15 @@ class Region extends Model
 
     protected $fillable = [
         'name',
-        'type',
-        'parent_id',
+        'provinsi',
+        'kabupaten',
+        'kecamatan',
+        'desa',
+        'detail',
         'link',
-        'alamat',
         'deleted_at',
     ];
 
-    public function parent()
-    {
-        return $this->belongsTo(Region::class, 'parent_id');
-    }
-
-    public function children()
-    {
-        return $this->hasMany(Region::class, 'parent_id');
-    }
 
     public function geojsons()
     {
