@@ -24,7 +24,7 @@ export default function RegionIndex() {
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const [kecamatanFilter, setKecamatanFilter] = useState('');
-
+    const [desaFilter, setDesaFilter] = useState('');
 
     const filteredRegions = useMemo(() => {
         let data = [...regions];
@@ -34,6 +34,9 @@ export default function RegionIndex() {
         if (kecamatanFilter) {
             data = data.filter((item) => item.kecamatan === kecamatanFilter);
         }
+        if (desaFilter) {
+            data = data.filter((item) => item.desa === desaFilter);
+        }
         data.sort((a, b) => {
             const aVal = (a as any)[sortBy]?.toString().toLowerCase();
             const bVal = (b as any)[sortBy]?.toString().toLowerCase();
@@ -42,7 +45,7 @@ export default function RegionIndex() {
             return 0;
         });
         return data;
-    }, [regions, search, kecamatanFilter, sortBy, sortDirection]);
+    }, [regions, search, kecamatanFilter, desaFilter, sortBy, sortDirection]);
 
     const toggleSort = (column: string) => {
         if (sortBy === column) {
@@ -91,9 +94,19 @@ export default function RegionIndex() {
         return [...new Set(values)].sort();
     }, [regions]);
 
+    const desaOptions = useMemo(() => {
+        const filtered = kecamatanFilter ? regions.filter((r) => r.kecamatan === kecamatanFilter) : regions;
+        const values = filtered.map((r) => r.desa);
+        return [...new Set(values)].sort();
+    }, [regions, kecamatanFilter]);
+
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, kecamatanFilter]);
+    }, [search, kecamatanFilter, desaFilter]);
+    
+    useEffect(() => {
+        setDesaFilter('');
+    }, [kecamatanFilter]);
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -140,6 +153,19 @@ export default function RegionIndex() {
                             </option>
                         ))}
                     </select>
+
+                    <select
+                        value={desaFilter}
+                        onChange={(e) => setDesaFilter(e.target.value)}
+                        className="w-full max-w-xs rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
+                    >
+                        <option value="">Semua Desa</option>
+                        {desaOptions.map((desa) => (
+                            <option key={desa} value={desa}>
+                                {desa}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="overflow-x-auto rounded-lg shadow-sm">
@@ -150,7 +176,10 @@ export default function RegionIndex() {
                                 <th className="cursor-pointer border px-4 py-2 text-left" onClick={() => toggleSort('name')}>
                                     Nama {sortBy === 'name' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
                                 </th>
+                                <th className="border px-4 py-2 text-left">Provinsi</th>
+                                <th className="border px-4 py-2 text-left">Kabupaten</th>
                                 <th className="border px-4 py-2 text-left">Kecamatan</th>
+                                <th className="border px-4 py-2 text-left">Desa</th>
                                 <th className="border px-4 py-2 text-left">Link</th>
                                 <th className="border px-4 py-2 text-left">Detail</th>
                                 <th className="border px-4 py-2 text-left">Aksi</th>
@@ -161,7 +190,10 @@ export default function RegionIndex() {
                                 <tr key={region.id_region}>
                                     <td className="border px-4 py-2">{(currentPage - 1) * perPage + index + 1}</td>
                                     <td className="border px-4 py-2">{region.name}</td>
+                                    <td className="border px-4 py-2">{region.provinsi}</td>
+                                    <td className="border px-4 py-2">{region.kabupaten}</td>
                                     <td className="border px-4 py-2">{region.kecamatan}</td>
+                                    <td className="border px-4 py-2">{region.desa}</td>
                                     <td className="border px-4 py-2">
                                         <a href={region.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                                             Link

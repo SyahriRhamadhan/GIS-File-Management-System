@@ -14,10 +14,11 @@ return new class extends Migration {
             $table->string('kabupaten');
             $table->string('kecamatan');
             $table->string('desa');
-            $table->string('detail');
-            $table->string('link');
+            $table->string('detail')->nullable();
+            $table->string('link')->nullable();
             $table->softDeletes();
             $table->timestamps();
+            $table->unique(['provinsi', 'kabupaten', 'kecamatan', 'desa'], 'unique_region_combination');
         });
     }
 
