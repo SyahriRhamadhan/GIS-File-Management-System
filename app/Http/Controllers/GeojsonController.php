@@ -92,7 +92,7 @@ class GeojsonController extends Controller
             ]);
         }
 
-        return redirect()->route('geojson.index')->with('success', 'Seluruh fitur berhasil disimpan sebagai record terpisah.');
+        return redirect()->route('dashboard.geojson.index')->with('success', 'Seluruh fitur berhasil disimpan sebagai record terpisah.');
     }
 
 
@@ -124,7 +124,7 @@ class GeojsonController extends Controller
             'id_owner' => $validated['id_owner'],
         ]);
 
-        return redirect()->route('geojson.index')->with('success', 'Geojson updated successfully.');
+        return redirect()->route('dashboard.geojson.index')->with('success', 'Geojson updated successfully.');
     }
 
     public function destroy($id)
@@ -133,6 +133,6 @@ class GeojsonController extends Controller
 
         $geojson->delete();
 
-        return redirect()->route('geojson.index')->with('success', 'Geojson deleted successfully.');
+        return redirect()->route('dashboard.geojson.index')->with('success', 'Geojson deleted successfully.');
     }
 }
