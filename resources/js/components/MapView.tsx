@@ -4,8 +4,8 @@ import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet';
 
 // MapView komponen
 const MapView = ({ geojsonData }: { geojsonData: any }) => {
-    const center: [number, number] = [1.029868, 104.521117];
-    const zoom = 10;
+    const center: [number, number] = [1.0, 104.521117];
+    const zoom = 11;
     const [activePopup, setActivePopup] = useState<string | null>(null);
     console.log(geojsonData);
     const formattedGeojson = geojsonData.map((item: any) => {
@@ -29,7 +29,7 @@ const MapView = ({ geojsonData }: { geojsonData: any }) => {
 
     return (
         <div style={{ height: '500px', width: '100%' }}>
-            <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100vh', width: '100%' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <GeoJSON data={formattedGeojson} onEachFeature={onEachFeature} />
             </MapContainer>
