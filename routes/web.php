@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\GeojsonController;
+use App\Http\Controllers\ReportController;
 
 // Halaman utama
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
@@ -34,6 +35,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/geojson/{id}/edit', [GeojsonController::class, 'edit'])->name('geojson.edit');
         Route::put('/geojson/{id}', [GeojsonController::class, 'update'])->name('geojson.update');
         Route::delete('/geojson/{id}', [GeojsonController::class, 'destroy'])->name('geojson.destroy');
+
+        // --- PDF ROUTES ---
+        Route::get('/tambah-pdf', [ReportController::class, 'index'])->name('report.index');
+        Route::get('/tambah-pdf/create', [ReportController::class, 'create'])->name('report.create');
+        Route::post('/tambah-pdf', [ReportController::class, 'store'])->name('report.store');
+        Route::get('/tambah-pdf/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
+        Route::put('/tambah-pdf/{id}', [ReportController::class, 'update'])->name('report.update');
+        Route::delete('/tambah-pdf/{id}', [ReportController::class, 'destroy'])->name('report.destroy');
     });
 });
 
