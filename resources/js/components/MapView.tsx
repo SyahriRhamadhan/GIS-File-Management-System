@@ -28,7 +28,7 @@ const MapView = ({ geojsonData }: { geojsonData: any }) => {
     };
 
     return (
-        <div style={{ height: '500px', width: '100%' }}>
+        <div className="relative z-0 h-[500px] w-full" style={{ height: '500px', width: '100%' }}>
             <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100vh', width: '100%' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <GeoJSON data={formattedGeojson} onEachFeature={onEachFeature} />
