@@ -85,7 +85,7 @@ class GeojsonController extends Controller
         foreach ($geojson['features'] as $feature) {
             Geojson::create([
                 'geojson' => $feature,
-                'source_name' => $geojson['name'],
+                'source_name' => $geojson['name'] ?? 'Geojson Upload',
                 'id_user' => $validated['id_user'],
                 'id_region' => $validated['id_region'],
                 'id_owner' => $validated['id_owner'],

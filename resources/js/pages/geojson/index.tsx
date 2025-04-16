@@ -3,7 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 
 const GeojsonIndex = () => {
     const { geojsons, regions, users, owners } = usePage<{
-        geojsons: Array<{ id_geojson: number; geojson: any; id_user: number; id_region: number; id_owner: number }>;
+        geojsons: Array<{ source_name: string; id_geojson: number; geojson: any; id_user: number; id_region: number; id_owner: number }>;
         regions: Array<{ id_region: number; name: string }>;
         users: Array<{ id: number; name: string }>;
         owners: Array<{ id_owner: number; name: string }>;
@@ -26,6 +26,7 @@ const GeojsonIndex = () => {
                     <thead>
                         <tr>
                             <th className="border px-4 py-2">#</th>
+                            <th className="border px-4 py-2">Nama/Kategori</th>
                             <th className="border px-4 py-2">User</th>
                             <th className="border px-4 py-2">Region</th>
                             <th className="border px-4 py-2">Owner</th>
@@ -34,13 +35,15 @@ const GeojsonIndex = () => {
                     </thead>
                     <tbody>
                         {geojsons.map((geojson: any) => {
-                            const userData = users.find((u) => u.id === geojson.id_user); 
+                            // const nameKategori = geojson.find((u) => u.id === geojson.source_name);
+                            const userData = users.find((u) => u.id === geojson.id_user);
                             const regionData = regions.find((r) => r.id_region === geojson.id_region);
-                            const ownerData = owners.find((o) => o.id_owner === geojson.id_owner); 
+                            const ownerData = owners.find((o) => o.id_owner === geojson.id_owner);
 
                             return (
                                 <tr key={geojson.id_geojson}>
                                     <td className="border px-4 py-2">{geojson.id_geojson}</td>
+                                    <td className="border px-4 py-2">{geojson.source_name ?? 'Unknown User'}</td>
                                     <td className="border px-4 py-2">{userData?.name ?? 'Unknown User'}</td>
                                     <td className="border px-4 py-2">{regionData?.name ?? 'Unknown Region'}</td>
                                     <td className="border px-4 py-2">{ownerData?.name ?? 'Unknown Owner'}</td>

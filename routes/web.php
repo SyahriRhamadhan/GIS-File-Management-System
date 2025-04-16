@@ -10,9 +10,10 @@ use App\Http\Controllers\ReportController;
 // Halaman utama
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
 
+
 // Hanya untuk pengguna yang sudah login & verifikasi
 Route::middleware(['auth', 'verified'])->group(function () {
-
+    Route::get('/convert-shp', fn() => Inertia::render('ShpToGeojson'))->name('ShpToGeojson');
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
