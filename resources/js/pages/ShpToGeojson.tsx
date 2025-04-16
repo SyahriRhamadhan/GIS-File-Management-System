@@ -60,7 +60,7 @@ export default function ShpClientFullscreen() {
         >
             <Head title="Full Map SHP Viewer" />
 
-            <div className="relative h-[calc(100vh-64px)] w-full">
+            <div className="z-0 relative h-[calc(100vh-64px)] w-full">
                 {' '}
                 <div className="absolute z-[999] ms-4 mt-20 flex flex-col space-y-4 rounded bg-white/90 p-4 shadow-lg">
                     <div className="flex items-center justify-between">
@@ -107,7 +107,7 @@ export default function ShpClientFullscreen() {
                     </div>
                 </div>
                 {/* Full Height Map */}
-                <MapContainer ref={mapRef} center={[1, 104.521117]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+                <MapContainer className="relative z-0 h-[500px] w-full" ref={mapRef} center={[1, 104.521117]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     {geojson && (
                         <GeoJSON
