@@ -1,0 +1,62 @@
+[
+    {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "bbox": [104.61708830600008, 0.8540490350000596, 104.66749992600009, 0.9005373440000595],
+                    "type": "MultiPolygon",
+                    "coordinates": [
+                        [
+                            [
+                                [104.61708830600008, 0.8540490350000596],
+                                [104.61708830600008, 0.9005373440000595],
+                                [104.66749992600009, 0.9005373440000595],
+                                [104.66749992600009, 0.8540490350000596],
+                                [104.61708830600008, 0.8540490350000596]
+                            ]
+                        ]
+                    ]
+                },
+                "properties": {
+                    "KABUPATEN": "Bintan",
+                    "KECAMATAN": "BINTAN PESISIR",
+                    "DESA_KEL": "Desa Air Glubi",
+                    "SUMBER": "RBI Sumatera Skala 1:50.000 Tahun 2007"
+                }
+            }
+        ],
+        "fileName": "BATAS KELURAHAN DESA KABUPATEN BINTAN/AIR_GLUBI_AR"
+    },
+    {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "bbox": [104.61708830600008, 0.8540490350000596, 104.66749992600009, 0.9005373440000595],
+                    "type": "MultiPolygon",
+                    "coordinates": [
+                        [
+                            [
+                                [104.61708830600008, 0.8540490350000596],
+                                [104.61708830600008, 0.9005373440000595],
+                                [104.66749992600009, 0.9005373440000595],
+                                [104.66749992600009, 0.8540490350000596],
+                                [104.61708830600008, 0.8540490350000596]
+                            ]
+                        ]
+                    ]
+                },
+                "properties": {
+                    "KABUPATEN": "Bintan",
+                    "KECAMATAN": "BINTAN PESISIR",
+                    "DESA_KEL": "Desa Air Glubi",
+                    "SUMBER": "RBI Sumatera Skala 1:50.000 Tahun 2007"
+                }
+            }
+        ],
+        "fileName": "BATAS KELURAHAN DESA KABUPATEN BINTAN/AIR_GLUBI_AR"
+    }
+]

@@ -17,7 +17,7 @@ class GeojsonController extends Controller
         $geojsons = Geojson::all();
         $regions = Region::all();
         $users = User::all();
-        $owners = Owner::all(); 
+        $owners = Owner::all();
 
         return Inertia::render('geojson/index', [
             'geojsons' => $geojsons,
@@ -60,42 +60,67 @@ class GeojsonController extends Controller
             $geojson = json_decode($validated['geojson'], true);
         }
 
-        if ($geojson['type'] !== 'FeatureCollection' || !isset($geojson['features'])) {
-            return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection.']);
-        }
+        if (is_array($geojson) && isset($geojson[0]['type']) && $geojson[0]['type'] === 'FeatureCollection') {
+            foreach ($geojson as $singleGeojson) {
+                if ($singleGeojson['type'] !== 'FeatureCollection' || !isset($singleGeojson['features'])) {
+                    return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection yang valid.']);
+                }
 
-        foreach ($geojson['features'] as &$feature) {
-            if ($feature['geometry']['type'] === 'Polygon') {
-                $feature['geometry']['coordinates'] = array_map(function ($polygon) {
-                    return array_map(function ($coord) {
-                        return array_slice($coord, 0, 2);
-                    }, $polygon);
-                }, $feature['geometry']['coordinates']);
-            } elseif ($feature['geometry']['type'] === 'MultiPolygon') {
-                $feature['geometry']['coordinates'] = array_map(function ($polygon) {
-                    return array_map(function ($ring) {
-                        return array_map(function ($coord) {
-                            return array_slice($coord, 0, 2);
-                        }, $ring);
-                    }, $polygon);
-                }, $feature['geometry']['coordinates']);
+                foreach ($singleGeojson['features'] as &$feature) {
+                    $this->processCoordinates($feature);
+                }
+
+                foreach ($singleGeojson['features'] as $feature) {
+                    Geojson::create([
+                        'geojson' => $feature,
+                        'source_name' => $singleGeojson['fileName'] ?? 'Geojson Upload',
+                        'id_user' => $validated['id_user'],
+                        'id_region' => $validated['id_region'],
+                        'id_owner' => $validated['id_owner'],
+                    ]);
+                }
             }
-        }
+        } else {
+            if ($geojson['type'] !== 'FeatureCollection' || !isset($geojson['features'])) {
+                return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection.']);
+            }
 
-        foreach ($geojson['features'] as $feature) {
-            Geojson::create([
-                'geojson' => $feature,
-                'source_name' => $geojson['name'] ?? 'Geojson Upload',
-                'id_user' => $validated['id_user'],
-                'id_region' => $validated['id_region'],
-                'id_owner' => $validated['id_owner'],
-            ]);
+            foreach ($geojson['features'] as &$feature) {
+                $this->processCoordinates($feature);
+            }
+
+            foreach ($geojson['features'] as $feature) {
+                Geojson::create([
+                    'geojson' => $feature,
+                    'source_name' => $geojson['name'] ?? 'Geojson Upload',
+                    'id_user' => $validated['id_user'],
+                    'id_region' => $validated['id_region'],
+                    'id_owner' => $validated['id_owner'],
+                ]);
+            }
         }
 
         return redirect()->route('dashboard.geojson.index')->with('success', 'Seluruh fitur berhasil disimpan sebagai record terpisah.');
     }
 
-
+    private function processCoordinates(&$feature)
+    {
+        if ($feature['geometry']['type'] === 'Polygon') {
+            $feature['geometry']['coordinates'] = array_map(function ($polygon) {
+                return array_map(function ($coord) {
+                    return array_slice($coord, 0, 2);
+                }, $polygon);
+            }, $feature['geometry']['coordinates']);
+        } elseif ($feature['geometry']['type'] === 'MultiPolygon') {
+            $feature['geometry']['coordinates'] = array_map(function ($polygon) {
+                return array_map(function ($ring) {
+                    return array_map(function ($coord) {
+                        return array_slice($coord, 0, 2);
+                    }, $ring);
+                }, $polygon);
+            }, $feature['geometry']['coordinates']);
+        }
+    }
 
     public function edit($id)
     {
