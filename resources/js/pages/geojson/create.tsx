@@ -33,8 +33,12 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
         }
 
         formData.append('id_user', user_id.toString());
-        formData.append('id_region', data.id_region);
-        formData.append('id_owner', data.id_owner);
+        if (data.id_region) {
+            formData.append('id_region', data.id_region);
+        }
+        if (data.id_owner) {
+            formData.append('id_owner', data.id_owner);
+        }
 
         router.post('/dashboard/geojson', formData);
     };
@@ -55,12 +59,7 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
                         <label htmlFor="geojson" className="block">
                             Geojson (Text Format)
                         </label>
-                        <textarea
-                            id="geojson"
-                            {...register('geojson', )}
-                            rows={4}
-                            className="w-full rounded-md border px-3 py-2"
-                        />
+                        <textarea id="geojson" {...register('geojson')} rows={4} className="w-full rounded-md border px-3 py-2" />
                         {errors.geojson && <p className="text-sm text-red-500">{String(errors.geojson.message)}</p>}
                     </div>
 
@@ -89,15 +88,11 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
                         <label htmlFor="id_region" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Region
                         </label>
-                        <select
-                            id="id_region"
-                            {...register('id_region', { required: 'Region is required' })}
-                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-black focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        >
-                            <option value="">Pilih Region</option>
-                            {regions.map((region) => (
-                                <option key={region.id_region} value={region.id_region}>
-                                    {region.name}
+                        <select id="id_region" {...register('id_region')} className="mt-1 w-full rounded-md border bg-white px-3 py-2">
+                            <option value="">— Tidak Memilih —</option>
+                            {regions.map((r) => (
+                                <option key={r.id_region} value={r.id_region}>
+                                    {r.name}
                                 </option>
                             ))}
                         </select>
@@ -105,22 +100,18 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
                     </div>
 
                     <div>
-                        <label htmlFor="id_owner" className="block">
-                            Owner ID
+                        <label htmlFor="id_owner" className="block text-sm font-medium text-gray-700">
+                            Owner
                         </label>
-                        <select
-                            id="id_owner"
-                            {...register('id_owner', { required: 'Owner is required' })}
-                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-black focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        >
-                            <option value="">Pilih Owner</option>
-                            {owner.map((owner) => (
-                                <option key={owner.id_owner} value={owner.id_owner}>
-                                    {owner.name}
+                        <select id="id_owner" {...register('id_owner')} className="mt-1 w-full rounded-md border bg-white px-3 py-2">
+                            <option value="">— Tidak Memilih —</option>
+                            {owner.map((o) => (
+                                <option key={o.id_owner} value={o.id_owner}>
+                                    {o.name}
                                 </option>
                             ))}
                         </select>
-                        {errors.id_owner && <p className="text-sm text-red-500">{String(errors.id_owner.message)}</p>}
+                        {errors.id_owner && <p className="mt-1 text-sm text-red-500">{String(errors.id_owner.message)}</p>}
                     </div>
 
                     <div className="flex justify-end gap-2">

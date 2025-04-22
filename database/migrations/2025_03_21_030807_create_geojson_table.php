@@ -15,11 +15,15 @@ return new class extends Migration {
             $table->string('source_name')->nullable();
             $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
 
-            $table->unsignedBigInteger('id_region');
-            $table->foreign('id_region')->nullable()->references('id_region')->on('region')->onDelete('cascade');
+            $table->foreignId('id_region')
+                ->nullable()
+                ->constrained('region', 'id_region')
+                ->onDelete('cascade');
 
-            $table->unsignedBigInteger('id_owner');
-            $table->foreign('id_owner')->nullable()->references('id_owner')->on('owner')->onDelete('cascade');
+            $table->foreignId('id_owner')
+                ->nullable()
+                ->constrained('owner', 'id_owner')
+                ->onDelete('cascade');
 
             $table->timestamps();
         });

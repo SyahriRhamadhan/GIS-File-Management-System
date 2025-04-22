@@ -48,9 +48,9 @@ class GeojsonController extends Controller
         $validated = $request->validate([
             'geojson' => 'required_without:geojson_file|json',
             'geojson_file' => 'required_without:geojson|file|mimes:json,geojson',
-            'id_user' => 'required|exists:users,id',
-            'id_region' => 'required|exists:region,id_region',
-            'id_owner' => 'required|exists:owner,id_owner',
+            'id_user'      => 'required|exists:users,id',
+            'id_region'    => 'nullable|exists:region,id_region',
+            'id_owner'     => 'nullable|exists:owner,id_owner',
         ]);
 
         if ($request->hasFile('geojson_file')) {
@@ -59,6 +59,8 @@ class GeojsonController extends Controller
         } else {
             $geojson = json_decode($validated['geojson'], true);
         }
+        $idRegion = $validated['id_region'] ?? null;
+        $idOwner  = $validated['id_owner']  ?? null;
 
         if (is_array($geojson) && isset($geojson[0]['type']) && $geojson[0]['type'] === 'FeatureCollection') {
             foreach ($geojson as $singleGeojson) {
@@ -75,8 +77,8 @@ class GeojsonController extends Controller
                         'geojson' => $feature,
                         'source_name' => $singleGeojson['fileName'] ?? 'Geojson Upload',
                         'id_user' => $validated['id_user'],
-                        'id_region' => $validated['id_region'],
-                        'id_owner' => $validated['id_owner'],
+                        'id_region'   => $idRegion,                    // bisa null
+                        'id_owner'    => $idOwner,
                     ]);
                 }
             }
@@ -92,10 +94,10 @@ class GeojsonController extends Controller
             foreach ($geojson['features'] as $feature) {
                 Geojson::create([
                     'geojson' => $feature,
-                    'source_name' => $geojson['name'] ?? 'Geojson Upload',
+                    'source_name' => $geojson['fileName'] ?? 'Geojson Upload',
                     'id_user' => $validated['id_user'],
-                    'id_region' => $validated['id_region'],
-                    'id_owner' => $validated['id_owner'],
+                    'id_region'   => $idRegion,                    // bisa null
+                    'id_owner'    => $idOwner,
                 ]);
             }
         }
