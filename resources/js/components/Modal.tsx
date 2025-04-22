@@ -8,6 +8,17 @@ const Modal = ({ geojson, onClose }: { geojson: any; onClose: () => void }) => {
     const [center, setCenter] = useState<[number, number]>([1.0, 104.521117]);
     const [zoom, setZoom] = useState(11);
 
+    const onEachFeature = (feature: any, layer: any) => {
+        if (feature.properties) {
+            let popupContent = '<div>';
+            Object.entries(feature.properties).forEach(([key, value]) => {
+                popupContent += `<p><strong>${key}:</strong> ${value}</p>`;
+            });
+            popupContent += '</div>';
+            layer.bindPopup(popupContent);
+        }
+    };
+
     useEffect(() => {
         if (geojson && geojson.geojson) {
             const geojsonLayer = L.geoJSON(geojson.geojson);
@@ -35,7 +46,7 @@ const Modal = ({ geojson, onClose }: { geojson: any; onClose: () => void }) => {
                 <div style={{ height: '60vh', width: '100%' }}>
                     <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        <GeoJSON data={geojson.geojson} />
+                        <GeoJSON data={geojson.geojson} onEachFeature={onEachFeature} />
                     </MapContainer>
                 </div>
             </div>
