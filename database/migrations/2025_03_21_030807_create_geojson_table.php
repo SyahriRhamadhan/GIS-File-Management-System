@@ -16,10 +16,10 @@ return new class extends Migration {
             $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
 
             $table->unsignedBigInteger('id_region');
-            $table->foreign('id_region')->references('id_region')->on('region')->onDelete('cascade');
+            $table->foreign('id_region')->nullable()->references('id_region')->on('region')->onDelete('cascade');
 
             $table->unsignedBigInteger('id_owner');
-            $table->foreign('id_owner')->references('id_owner')->on('owner')->onDelete('cascade');
+            $table->foreign('id_owner')->nullable()->references('id_owner')->on('owner')->onDelete('cascade');
 
             $table->timestamps();
         });
