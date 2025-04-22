@@ -71,13 +71,14 @@ export default function ShpClientFullscreen() {
     function PreviewGeoJSON({ data }: { data: any }) {
         const map = useMap();
         useEffect(() => {
-            const layer = L.geoJSON(data);
+            // Buat layer manual supaya bisa hitung bounds + bind popup
+            const layer = L.geoJSON(data, { onEachFeature });
             const bounds = layer.getBounds();
-            if (bounds.isValid()) {
-                map.fitBounds(bounds, { padding: [20, 20] });
-            }
+            if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
         }, [data, map]);
-        return <GeoJSON data={data} />;
+
+        // Render GeoJSON dengan popup
+        return <GeoJSON data={data} onEachFeature={onEachFeature} />;
     }
 
     const downloadSingle = (file: { filename: string; data: any }) => {
@@ -208,32 +209,10 @@ export default function ShpClientFullscreen() {
 
                                     {/* Konten kartu: peta */}
                                     <div className="flex-1">
-                                        <MapContainer
-                                            className="relative z-0 h-[500px] w-full"
-                                            ref={mapRef}
-                                            center={[1, 104.521117]}
-                                            zoom={11}
-                                            scrollWheelZoom
-                                            style={{ height: '100%', width: '100%' }}
-                                        >
+                                        <MapContainer style={{ height: '300px', width: '100%' }} scrollWheelZoom>
                                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-                                            {previewGeojsons.length > 0
-                                                ? previewGeojsons.map((file, idx) => (
-                                                      <GeoJSON
-                                                          key={idx}
-                                                          data={file.data}
-                                                          onEachFeature={onEachFeature}
-                                                          eventHandlers={{ add: (e) => handleGeoJsonReady(e.target) }}
-                                                      />
-                                                  ))
-                                                : geojson && (
-                                                      <GeoJSON
-                                                          data={geojson}
-                                                          onEachFeature={onEachFeature}
-                                                          eventHandlers={{ add: (e) => handleGeoJsonReady(e.target) }}
-                                                      />
-                                                  )}
+                                            {/* Ini yang menampilkan popup saat klik feature */}
+                                            <PreviewGeoJSON data={file.data} />
                                         </MapContainer>
                                     </div>
                                 </li>
