@@ -1,6 +1,7 @@
+import Modal from '@/components/Modal';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 interface Geojson {
@@ -12,33 +13,29 @@ interface Geojson {
     id_owner?: number;
 }
 
-import { PageProps as InertiaPageProps } from '@inertiajs/core';
-
-interface PageProps extends InertiaPageProps {
+interface PageProps {
     geojsons: Geojson[];
     users: { id: number; name: string }[];
     regions: { id_region: number; name: string }[];
     owners: { id_owner: number; name: string }[];
     flash?: { success?: string; error?: string };
+    [key: string]: any; // Add index signature
 }
 
 export default function GeojsonIndex() {
     const { geojsons, users, regions, owners, flash } = usePage<PageProps>().props;
 
-    // toast flash
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
-
-    // search / filters
     const [search, setSearch] = useState('');
     const [userFilter, setUserFilter] = useState<number | string>('');
     const [regionFilter, setRegionFilter] = useState<number | string>('');
     const [ownerFilter, setOwnerFilter] = useState<number | string>('');
-
     const [sortBy, setSortBy] = useState<keyof Geojson>('source_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    const [currentPage, setCurrentPage] = useState(1);
+    const perPage = 10;
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedGeojson, setSelectedGeojson] = useState<any>(null);
 
     const filtered = useMemo(() => {
         return geojsons
@@ -58,22 +55,15 @@ export default function GeojsonIndex() {
             });
     }, [geojsons, search, userFilter, regionFilter, ownerFilter, sortBy, sortDirection]);
 
-    // paginate
-    const [currentPage, setCurrentPage] = useState(1);
-    const perPage = 10;
     const pages = Math.ceil(filtered.length / perPage);
     const displayed = useMemo(() => {
         const start = (currentPage - 1) * perPage;
         return filtered.slice(start, start + perPage);
     }, [filtered, currentPage]);
 
-    // utils
-    const toggleSort = (col: keyof Geojson) => {
-        if (sortBy === col) setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
-        else {
-            setSortBy(col);
-            setSortDirection('asc');
-        }
+    const handleView = (geojson: Geojson) => {
+        setSelectedGeojson(geojson);
+        setIsModalOpen(true);
     };
 
     const handleDelete = (id: number) => {
@@ -82,6 +72,14 @@ export default function GeojsonIndex() {
             onSuccess: () => toast.success('GeoJSON berhasil dihapus'),
             onError: () => toast.error('Gagal menghapus GeoJSON'),
         });
+    };
+
+    const toggleSort = (col: keyof Geojson) => {
+        if (sortBy === col) setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
+        else {
+            setSortBy(col);
+            setSortDirection('asc');
+        }
     };
 
     return (
@@ -185,6 +183,9 @@ export default function GeojsonIndex() {
                                     <td className="border px-4 py-2">{regions.find((r) => r.id_region === g.id_region)?.name ?? '-'}</td>
                                     <td className="border px-4 py-2">{owners.find((o) => o.id_owner === g.id_owner)?.name ?? '-'}</td>
                                     <td className="flex justify-center gap-1 border px-4 py-2">
+                                        <button onClick={() => handleView(g)} className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600">
+                                            View
+                                        </button>
                                         <Link
                                             href={`/dashboard/geojson/${g.id_geojson}/edit`}
                                             className="rounded bg-yellow-500 px-2 py-1 text-white hover:bg-yellow-600"
@@ -217,6 +218,8 @@ export default function GeojsonIndex() {
                     ))}
                 </div>
             </div>
+
+            {isModalOpen && <Modal geojson={selectedGeojson} onClose={() => setIsModalOpen(false)} />}
         </AppLayout>
     );
 }
