@@ -46,7 +46,7 @@ class GeojsonController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'geojson' => 'required_without:geojson_file|json',
+            'geojson'      => 'required_without:geojson_file|json',
             'geojson_file' => 'required_without:geojson|file|mimes:json,geojson',
             'id_user'      => 'required|exists:users,id',
             'id_region'    => 'nullable|exists:region,id_region',
@@ -128,38 +128,65 @@ class GeojsonController extends Controller
     {
         $geojson = Geojson::findOrFail($id);
 
-        return Inertia::render('geojson/edit', [
-            'geojson' => $geojson,
+        return Inertia::render('geojson/update', [
+            'geojson'   => $geojson,
+            'user_name' => Auth::user()->name,
+            'user_id'   => Auth::id(),
+            'regions'   => Region::all(),
+            'owner'     => Owner::all(),
+            'flash'     => session('success') ? ['success' => session('success')] : null,
         ]);
     }
 
+
     public function update(Request $request, $id)
     {
-        $geojson = Geojson::findOrFail($id);
+        $geojsonModel = Geojson::findOrFail($id);
 
         $validated = $request->validate([
-            'geojson' => 'required|json',
-            'id_user' => 'required|exists:users,id',
-            'id_region' => 'required|exists:region,id_region',
-            'id_owner' => 'required|exists:owner,id_owner',
+            'geojson'      => 'required_without:geojson_file|json',
+            'geojson_file' => 'required_without:geojson|file|mimes:json,geojson',
+            'id_user'      => 'required|exists:users,id',
+            'id_region'    => 'nullable|exists:region,id_region',
+            'id_owner'     => 'nullable|exists:owner,id_owner',
         ]);
 
-        $geojson->update([
-            'geojson' => $validated['geojson'],
-            'id_user' => $validated['id_user'],
-            'id_region' => $validated['id_region'],
-            'id_owner' => $validated['id_owner'],
+        // parse ulang GeoJSON (ambil fitur pertama jika FeatureCollection)
+        if ($request->hasFile('geojson_file')) {
+            $raw  = json_decode(file_get_contents($request->file('geojson_file')), true);
+        } else {
+            $raw  = json_decode($validated['geojson'], true);
+        }
+
+        // jika masuk array multi-feature, ambil yang pertama
+        if (isset($raw['features']) && is_array($raw['features'])) {
+            $feature = $raw['features'][0];
+        } else {
+            $feature = $raw;
+        }
+
+        // sesuaikan koordinat seperti di store
+        $this->processCoordinates($feature);
+
+        // update model
+        $geojsonModel->update([
+            'geojson'   => $feature,
+            'id_user'   => $validated['id_user'],
+            'id_region' => $validated['id_region'] ?? null,
+            'id_owner'  => $validated['id_owner']  ?? null,
         ]);
 
-        return redirect()->route('dashboard.geojson.index')->with('success', 'Geojson updated successfully.');
+        return redirect()
+            ->route('dashboard.geojson.index')
+            ->with('success', 'GeoJSON berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $geojson = Geojson::findOrFail($id);
+        Geojson::findOrFail($id)->delete();
 
-        $geojson->delete();
-
-        return redirect()->route('dashboard.geojson.index')->with('success', 'Geojson deleted successfully.');
+        return redirect()
+            ->route('dashboard.geojson.index')
+            ->with('success', 'GeoJSON berhasil dihapus.');
     }
 }
