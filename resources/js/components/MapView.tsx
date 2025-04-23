@@ -1,37 +1,116 @@
 import 'leaflet/dist/leaflet.css';
-import { useState } from 'react';
-import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet';
+import { GeoJSON, LayersControl, MapContainer, ScaleControl, TileLayer } from 'react-leaflet';
 
-// MapView komponen
-const MapView = ({ geojsonData }: { geojsonData: any }) => {
+const { BaseLayer, Overlay } = LayersControl;
+
+interface MapViewProps {
+    geojsonData: any[];
+}
+
+const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
-    const [activePopup, setActivePopup] = useState<string | null>(null);
-    console.log(geojsonData);
-    const formattedGeojson = geojsonData.map((item: any) => {
-        return {
+
+    const formattedGeojson: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: geojsonData.map((item) => ({
             type: 'Feature',
             geometry: item.geojson.geometry,
             properties: item.geojson.properties,
-        };
-    });
+        })),
+    };
 
     const onEachFeature = (feature: any, layer: any) => {
         if (feature.properties) {
-            let popupContent = '<div>';
-            Object.entries(feature.properties).forEach(([key, value]) => {
-                popupContent += `<p><strong>${key}:</strong> ${value}</p>`;
+            let html = '<div>';
+            Object.entries(feature.properties).forEach(([k, v]) => {
+                html += `<p><strong>${k}:</strong> ${v}</p>`;
             });
-            popupContent += '</div>';
-            layer.bindPopup(popupContent);
+            html += '</div>';
+            layer.bindPopup(html);
         }
     };
 
     return (
         <div className="relative z-0 h-[500px] w-full" style={{ height: '500px', width: '100%' }}>
             <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100vh', width: '100%' }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <GeoJSON data={formattedGeojson} onEachFeature={onEachFeature} />
+                {/* Scale Bar */}
+                <ScaleControl position="bottomleft" />
+
+                {/* Layer Switcher */}
+                <LayersControl position="topright">
+                    {/* Base Layers */}
+                    <BaseLayer checked name="Esri Satellite">
+                        <TileLayer
+                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                            attribution="Tiles &copy; Esri — Source: Esri, USDA, USGS"
+                        />
+                    </BaseLayer>
+
+                    <BaseLayer name="OSM Standard">
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+                    </BaseLayer>
+
+                    <BaseLayer name="Stamen Toner">
+                        <TileLayer
+                            url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png"
+                            attribution={`
+    &copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> 
+    &copy; <a href="https://stamen.com/" target="_blank">Stamen Design</a> 
+    &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> 
+    &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+    `}
+                        />
+                    </BaseLayer>
+
+                    <BaseLayer name="Stamen Terrain">
+                        <TileLayer
+                            url="https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png"
+                            maxZoom={20}
+                            attribution={`
+    &copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>
+    &copy; <a href="https://stamen.com/" target="_blank">Stamen Design</a>
+    &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>
+    &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+  `}
+                        />
+                    </BaseLayer>
+
+                    <BaseLayer name="Carto Positron">
+                        <TileLayer
+                            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                            attribution="&copy; CARTO &copy; OpenStreetMap"
+                        />
+                    </BaseLayer>
+
+                    <BaseLayer name="Carto Dark">
+                        <TileLayer
+                            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                            attribution="&copy; CARTO &copy; OpenStreetMap"
+                        />
+                    </BaseLayer>
+
+                    <BaseLayer name="OpenTopoMap">
+                        <TileLayer
+                            url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                            attribution="Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap"
+                        />
+                    </BaseLayer>
+
+                    <BaseLayer name="NASA City Lights">
+                        <TileLayer
+                            url="https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_CityLights_2012/default/2012-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpg"
+                            attribution="Imagery courtesy NASA EOSDIS GIBS"
+                            maxNativeZoom={8}
+                            maxZoom={18}
+                        />
+                    </BaseLayer>
+
+                    {/* GeoJSON Overlay */}
+                    <Overlay checked name="GeoJSON Data">
+                        <GeoJSON data={formattedGeojson} onEachFeature={onEachFeature} />
+                    </Overlay>
+                </LayersControl>
             </MapContainer>
         </div>
     );
