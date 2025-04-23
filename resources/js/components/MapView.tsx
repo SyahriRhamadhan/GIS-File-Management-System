@@ -1,6 +1,9 @@
+import '@geoman-io/leaflet-geoman-free'; // side-effect: register map.pm
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import 'leaflet/dist/leaflet.css';
-import { GeoJSON, LayersControl, MapContainer, ScaleControl, TileLayer } from 'react-leaflet';
 
+import { GeoJSON, LayersControl, MapContainer, ScaleControl, TileLayer } from 'react-leaflet';
+import GeomanControl from './GeomanControl';
 const { BaseLayer, Overlay } = LayersControl;
 
 interface MapViewProps {
@@ -36,7 +39,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
             <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100vh', width: '100%' }}>
                 {/* Scale Bar */}
                 <ScaleControl position="bottomleft" />
-
+                <GeomanControl  />
                 {/* Layer Switcher */}
                 <LayersControl position="topright">
                     {/* Base Layers */}
