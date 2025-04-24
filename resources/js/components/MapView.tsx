@@ -19,19 +19,39 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         features: geojsonData.map((item) => ({
             type: 'Feature',
             geometry: item.geojson.geometry,
-            properties: item.geojson.properties,
+            properties: {
+                ...item.geojson.properties,
+                id_geojson: item.id_geojson,
+            },
         })),
     };
 
     const onEachFeature = (feature: any, layer: any) => {
-        if (feature.properties) {
-            let html = '<div>';
-            Object.entries(feature.properties).forEach(([k, v]) => {
-                html += `<p><strong>${k}:</strong> ${v}</p>`;
-            });
-            html += '</div>';
-            layer.bindPopup(html);
-        }
+        if (!feature.properties) return;
+
+        let html = '<div>';
+        Object.entries(feature.properties).forEach(([k, v]) => {
+            if (k === 'id_geojson') return; // skip showing the id itself
+            html += `<p><strong>${k}:</strong> ${v}</p>`;
+        });
+        html += `
+          <div style="text-align:right; margin-top:8px;">
+          <hr/>
+            <a 
+              href="/dashboard/geojson/${feature.properties.id_geojson}/edit"
+             class="inline-block rounded bg-white-600 px-2 py-1 text-white hover:bg-white-700"
+
+              target="_blank"
+            >
+              Edit
+            </a>
+          </div>
+        `;
+        html += '</div>';
+
+        layer.bindPopup(html, {
+            maxWidth: 240,
+        });
     };
 
     return (

@@ -74,6 +74,14 @@ export default function GeojsonEdit() {
         router.post(`/dashboard/geojson/${geojson.id_geojson}`, formData);
     };
 
+    const handleDelete = (id: number) => {
+        if (!confirm('Yakin hapus data ini?')) return;
+        router.delete(`/dashboard/geojson/${id}`, {
+            onSuccess: () => toast.success('GeoJSON berhasil dihapus'),
+            onError: () => toast.error('Gagal menghapus GeoJSON'),
+        });
+    };
+
     return (
         <AppLayout
             breadcrumbs={[
@@ -165,7 +173,15 @@ export default function GeojsonEdit() {
                         {errors.id_owner && <p className="mt-1 text-sm text-red-500">{String(errors.id_owner.message)}</p>}
                     </div>
 
+                    {/* Actions */}
                     <div className="flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => handleDelete(geojson.id_geojson)}
+                            className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                        >
+                            Delete
+                        </button>
                         <Link
                             href="/dashboard/geojson"
                             className="rounded-md bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
