@@ -91,7 +91,7 @@ export default function GeojsonIndex() {
         >
             <Head title="GeoJSON Index" />
 
-            <div className="p-6">
+            <div className="bg-white p-6 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
                     <h1 className="text-2xl font-bold">Daftar GeoJSON</h1>
                     <Link href="/dashboard/geojson/create" className="rounded bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700">
@@ -108,7 +108,7 @@ export default function GeojsonIndex() {
                             setSearch(e.target.value);
                             setCurrentPage(1);
                         }}
-                        className="w-full max-w-md rounded border px-3 py-2 shadow-sm"
+                        className="w-full max-w-md rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                     />
 
                     <select
@@ -117,7 +117,7 @@ export default function GeojsonIndex() {
                             setUserFilter(e.target.value);
                             setCurrentPage(1);
                         }}
-                        className="w-full max-w-xs rounded border px-3 py-2 shadow-sm"
+                        className="w-full max-w-xs rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                     >
                         <option value="">Semua User</option>
                         {users.map((u) => (
@@ -133,7 +133,7 @@ export default function GeojsonIndex() {
                             setRegionFilter(e.target.value);
                             setCurrentPage(1);
                         }}
-                        className="w-full max-w-xs rounded border px-3 py-2 shadow-sm"
+                        className="w-full max-w-xs rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                     >
                         <option value="">Semua Region</option>
                         {regions.map((r) => (
@@ -149,7 +149,7 @@ export default function GeojsonIndex() {
                             setOwnerFilter(e.target.value);
                             setCurrentPage(1);
                         }}
-                        className="w-full max-w-xs rounded border px-3 py-2 shadow-sm"
+                        className="w-full max-w-xs rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                     >
                         <option value="">Semua Owner</option>
                         {owners.map((o) => (
@@ -163,7 +163,7 @@ export default function GeojsonIndex() {
                 <div className="overflow-x-auto rounded-lg shadow-sm">
                     <table className="w-full min-w-[800px] border text-sm">
                         <thead className="bg-gray-100">
-                            <tr>
+                            <tr className="dark:bg-gray-700">
                                 <th className="border px-4 py-2">#</th>
                                 <th className="cursor-pointer border px-4 py-2" onClick={() => toggleSort('source_name')}>
                                     Source {sortBy === 'source_name' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
@@ -176,7 +176,7 @@ export default function GeojsonIndex() {
                         </thead>
                         <tbody>
                             {displayed.map((g, i) => (
-                                <tr key={g.id_geojson}>
+                                <tr key={g.id_geojson} className="bg-white even:bg-gray-50 dark:bg-gray-800 dark:even:bg-gray-700">
                                     <td className="border px-4 py-2">{(currentPage - 1) * perPage + i + 1}</td>
                                     <td className="border px-4 py-2">{g.source_name}</td>
                                     <td className="border px-4 py-2">{users.find((u) => u.id === g.id_user)?.name}</td>
@@ -211,7 +211,9 @@ export default function GeojsonIndex() {
                         <button
                             key={p}
                             onClick={() => setCurrentPage(p)}
-                            className={`rounded border px-3 py-1 text-sm ${currentPage === p ? 'bg-blue-600 text-white' : 'hover:bg-gray-200'}`}
+                            className={`rounded border px-3 py-1 text-sm ${
+                                currentPage === p ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:text-gray-200 dark:hover:bg-gray-700'
+                            }`}
                         >
                             {p}
                         </button>
