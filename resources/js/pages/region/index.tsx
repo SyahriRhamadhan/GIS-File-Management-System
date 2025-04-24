@@ -202,12 +202,6 @@ export default function RegionIndex() {
                                     <td className="border px-4 py-2">{region.detail}</td>
                                     <td className="flex flex-wrap items-center justify-center gap-1 border px-4 py-2">
                                         <button
-                                            onClick={() => handleView(region.id_region)}
-                                            className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
-                                        >
-                                            View
-                                        </button>
-                                        <button
                                             onClick={() => handleEdit(region.id_region)}
                                             className="rounded bg-yellow-500 px-2 py-1 text-white hover:bg-yellow-600"
                                         >

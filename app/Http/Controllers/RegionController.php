@@ -67,8 +67,12 @@ class RegionController extends Controller
     public function edit($id)
     {
         $region = Region::findOrFail($id);
-        return Inertia::render('region/edit', [
-            'region' => $region,
+
+        $regionOptions = Region::select('provinsi', 'kabupaten', 'kecamatan', 'desa')->get();
+
+        return Inertia::render('region/update', [
+            'region'        => $region,
+            'regionOptions' => $regionOptions,
         ]);
     }
 
@@ -82,7 +86,7 @@ class RegionController extends Controller
             'kabupaten' => 'required|string|max:255',
             'kecamatan' => 'required|string|max:255',
             'desa'      => 'required|string|max:255',
-            'detail'    => 'nullable|string|max:255',
+            'alamat'    => 'nullable|string|max:255',
             'link'      => 'nullable|url|max:255',
         ]);
 
@@ -101,7 +105,9 @@ class RegionController extends Controller
 
         $region->update($validated);
 
-        return redirect()->route('dashboard.region.index')->with('success', 'Data wilayah berhasil diperbarui.');
+        return redirect()
+            ->route('dashboard.region.index')
+            ->with('success', 'Data wilayah berhasil diperbarui.');
     }
 
 
