@@ -24,6 +24,10 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained('owner', 'id_owner')
                 ->onDelete('cascade');
+            $table->foreignId('id_kategori')
+                ->nullable()
+                ->constrained('kategori', 'id_kategori')
+                ->onDelete('cascade');
 
             $table->timestamps();
         });

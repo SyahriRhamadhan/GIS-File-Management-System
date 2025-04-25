@@ -7,9 +7,10 @@ interface GeojsonFormProps {
     user_id: number; // The authenticated user's ID
     regions: { id_region: number; name: string }[];
     owner: { id_owner: number; name: string }[];
+    kategoris: { id_kategori: number; nama_kategori: string }[];
 }
 
-const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions, owner }) => {
+const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions, owner, kategoris }) => {
     const {
         register,
         handleSubmit,
@@ -38,6 +39,9 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
         }
         if (data.id_owner) {
             formData.append('id_owner', data.id_owner);
+        }
+        if (data.id_kategori) {
+            formData.append('id_kategori', data.id_kategori);
         }
 
         router.post('/dashboard/geojson', formData);
@@ -135,6 +139,25 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
                             ))}
                         </select>
                         {errors.id_owner && <p className="mt-1 text-sm text-red-500">{String(errors.id_owner.message)}</p>}
+                    </div>
+                    {/* Category */}
+                    <div>
+                        <label htmlFor="id_kategori" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Category
+                        </label>
+                        <select
+                            id="id_kategori"
+                            {...register('id_kategori')}
+                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                        >
+                            <option value="">— Tidak Memilih —</option>
+                            {kategoris.map((k) => (
+                                <option key={k.id_kategori} value={k.id_kategori}>
+                                    {k.nama_kategori}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.id_kategori && <p className="mt-1 text-sm text-red-500">{String(errors.id_kategori.message)}</p>}
                     </div>
 
                     {/* Buttons */}

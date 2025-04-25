@@ -11,6 +11,7 @@ interface Geojson {
     id_user: number;
     id_region?: number;
     id_owner?: number;
+    id_kategori?: number;
 }
 
 interface PageProps {
@@ -168,6 +169,7 @@ export default function GeojsonIndex() {
                                 <th className="cursor-pointer border px-4 py-2" onClick={() => toggleSort('source_name')}>
                                     Source {sortBy === 'source_name' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
                                 </th>
+                                <th className="border px-4 py-2">Kategori</th>
                                 <th className="border px-4 py-2">User</th>
                                 <th className="border px-4 py-2">Region</th>
                                 <th className="border px-4 py-2">Owner</th>
@@ -179,6 +181,7 @@ export default function GeojsonIndex() {
                                 <tr key={g.id_geojson} className="bg-white even:bg-gray-50 dark:bg-gray-800 dark:even:bg-gray-700">
                                     <td className="border px-4 py-2">{(currentPage - 1) * perPage + i + 1}</td>
                                     <td className="border px-4 py-2">{g.source_name}</td>
+                                    <td className="border px-4 py-2">{g.id_kategori}</td>
                                     <td className="border px-4 py-2">{users.find((u) => u.id === g.id_user)?.name}</td>
                                     <td className="border px-4 py-2">{regions.find((r) => r.id_region === g.id_region)?.name ?? '-'}</td>
                                     <td className="border px-4 py-2">{owners.find((o) => o.id_owner === g.id_owner)?.name ?? '-'}</td>

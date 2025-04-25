@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Region;
 use App\Models\Owner;
 use App\Models\User;
+use App\Models\Kategori;
 
 class GeojsonController extends Controller
 {
@@ -18,12 +19,14 @@ class GeojsonController extends Controller
         $regions = Region::all();
         $users = User::all();
         $owners = Owner::all();
+        $kategoris  = Kategori::all();
 
         return Inertia::render('geojson/index', [
             'geojsons' => $geojsons,
             'regions' => $regions,
             'users' => $users,
             'owners' => $owners,
+            'kategoris' => $kategoris,
         ]);
     }
 
@@ -33,6 +36,7 @@ class GeojsonController extends Controller
         $regions = Region::all();
         $owners = Owner::all();
         $user_id = Auth::id();
+        $kategoris  = Kategori::all();
 
 
         return Inertia::render('geojson/create', [
@@ -40,6 +44,7 @@ class GeojsonController extends Controller
             'regions' => $regions,
             'owner' => $owners,
             'user_id' => $user_id,
+            'kategoris' => $kategoris,
         ]);
     }
 
@@ -51,6 +56,7 @@ class GeojsonController extends Controller
             'id_user'      => 'required|exists:users,id',
             'id_region'    => 'nullable|exists:region,id_region',
             'id_owner'     => 'nullable|exists:owner,id_owner',
+            'id_kategori'    => 'nullable|exists:kategori,id_kategori',
         ]);
 
         if ($request->hasFile('geojson_file')) {
@@ -61,6 +67,7 @@ class GeojsonController extends Controller
         }
         $idRegion = $validated['id_region'] ?? null;
         $idOwner  = $validated['id_owner']  ?? null;
+        $idKategori  = $validated['id_kategori']  ?? null;
 
         if (is_array($geojson) && isset($geojson[0]['type']) && $geojson[0]['type'] === 'FeatureCollection') {
             foreach ($geojson as $singleGeojson) {
@@ -79,6 +86,7 @@ class GeojsonController extends Controller
                         'id_user' => $validated['id_user'],
                         'id_region'   => $idRegion,                    // bisa null
                         'id_owner'    => $idOwner,
+                        'id_kategori' => $idKategori,
                     ]);
                 }
             }
@@ -96,8 +104,9 @@ class GeojsonController extends Controller
                     'geojson' => $feature,
                     'source_name' => $geojson['fileName'] ?? 'Geojson Upload',
                     'id_user' => $validated['id_user'],
-                    'id_region'   => $idRegion,                    // bisa null
+                    'id_region'   => $idRegion,
                     'id_owner'    => $idOwner,
+                    'id_kategori' => $idKategori,
                 ]);
             }
         }
@@ -134,6 +143,7 @@ class GeojsonController extends Controller
             'user_id'   => Auth::id(),
             'regions'   => Region::all(),
             'owner'     => Owner::all(),
+            'kategoris' => Kategori::all(),
             'flash'     => session('success') ? ['success' => session('success')] : null,
         ]);
     }
@@ -149,6 +159,7 @@ class GeojsonController extends Controller
             'id_user'      => 'required|exists:users,id',
             'id_region'    => 'nullable|exists:region,id_region',
             'id_owner'     => 'nullable|exists:owner,id_owner',
+            'id_kategori'  => 'nullable|exists:kategori,id_kategori',
         ]);
 
         // parse ulang GeoJSON (ambil fitur pertama jika FeatureCollection)
@@ -174,6 +185,7 @@ class GeojsonController extends Controller
             'id_user'   => $validated['id_user'],
             'id_region' => $validated['id_region'] ?? null,
             'id_owner'  => $validated['id_owner']  ?? null,
+            'id_kategori' => $validated['id_kategori'] ?? null,
         ]);
 
         return redirect()

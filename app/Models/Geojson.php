@@ -19,6 +19,7 @@ class Geojson extends Model
         'id_region',
         'id_owner',
         'source_name',
+        'id_kategori',
     ];
 
     protected $casts = [
@@ -44,4 +45,10 @@ class Geojson extends Model
     {
         return $this->hasMany(Report::class, 'id_geojson');
     }
+
+    public function kategori()
+    {
+        return $this->belongsTo(Kategori::class, 'id_kategori', 'id_kategori');
+    }
+
 }
