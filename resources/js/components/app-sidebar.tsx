@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Earth, FileText, Folder, LayoutGrid, MapPin } from 'lucide-react';
+import { Layers2, Earth, FileText, Folder, LayoutGrid, MapPin } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -27,6 +27,11 @@ const mainNavItems: NavItem[] = [
         title: 'Tambah Map',
         href: '/dashboard/geojson',
         icon: Earth,
+    },
+    {
+        title: 'Tambah Kategori',
+        href: '/dashboard/kategori',
+        icon: Layers2,
     },
 ];
 
