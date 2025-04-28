@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/core';
 import { useMemo, useState } from 'react';
 
 interface Kategori {
@@ -67,15 +68,22 @@ export default function Index({ kategoris }: IndexProps) {
                                     </td>
                                     <td className="border px-4 py-2">{k.ket_warna || '-'}</td>
                                     <td className="flex justify-center gap-2 border px-4 py-2">
-                                        <Link href={`/dashboard/kategori/${k.id_kategori}/edit`} className="text-blue-600 hover:underline">
+                                        <Link
+                                            href={`/dashboard/kategori/${k.id_kategori}/edit`}
+                                            className="rounded bg-yellow-500 px-2 py-1 text-white hover:bg-yellow-600"
+                                        >
                                             Edit
                                         </Link>
-                                        <form method="POST" action={`/dashboard/kategori/${k.id_kategori}`} className="inline-block">
-                                            <input type="hidden" name="_method" value="DELETE" />
-                                            <button type="submit" className="text-red-600 hover:underline">
-                                                Delete
-                                            </button>
-                                        </form>
+                                        <button
+                                            onClick={() => {
+                                                if (confirm('Yakin menghapus kategori ini?')) {
+                                                    router.delete(`/dashboard/kategori/${k.id_kategori}`);
+                                                }
+                                            }}
+                                            className="text-red-600 hover:underline"
+                                        >
+                                            Delete
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

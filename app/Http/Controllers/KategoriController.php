@@ -35,7 +35,7 @@ class KategoriController extends Controller
         // Create category
         Kategori::create($validated);
 
-        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil ditambahkan.');
+        return redirect()->route('dashboard.kategori.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
 
     // Display the specified resource
@@ -51,7 +51,7 @@ class KategoriController extends Controller
     public function edit($id)
     {
         $kategori = Kategori::findOrFail($id);
-        return Inertia::render('kategori/edit', [
+        return Inertia::render('kategori/update', [
             'kategori' => $kategori,
         ]);
     }
@@ -68,7 +68,7 @@ class KategoriController extends Controller
         $kategori = Kategori::findOrFail($id);
         $kategori->update($validated);
 
-        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil diperbarui.');
+        return redirect()->route('dashboard.kategori.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
     // Remove the specified resource from storage
@@ -77,6 +77,6 @@ class KategoriController extends Controller
         $kategori = Kategori::findOrFail($id);
         $kategori->delete(); // Soft delete
 
-        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus.');
+        return redirect()->route('dashboard.kategori.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }

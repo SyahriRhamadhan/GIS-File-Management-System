@@ -1,12 +1,19 @@
 import AppLayout from '@/layouts/app-layout';
-import { useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
         nama_kategori: '',
-        kode_warna: '',
+        kode_warna: '#000000',
         ket_warna: '',
     });
+
+    const palette = ['#f7a1cc', '#34a853', '#ff6f61', '#4285f4', '#fbbc05'];
+
+    const inputClasses =
+        'mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 shadow-sm ' +
+        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ' +
+        'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100';
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -21,48 +28,68 @@ export default function Create() {
                 { title: 'Tambah Kategori', href: '/dashboard/kategori/create' },
             ]}
         >
+            <Head title="Tambah Kategori" />
+
             <div className="p-6">
                 <h1 className="text-2xl font-bold">Tambah Kategori</h1>
 
-                <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+                <form onSubmit={handleSubmit} className="mt-4 space-y-6">
+                    {/* Nama Kategori */}
                     <div>
-                        <label className="block">Nama Kategori</label>
+                        <label className="block font-medium">Nama Kategori</label>
                         <input
                             type="text"
                             value={data.nama_kategori}
                             onChange={(e) => setData('nama_kategori', e.target.value)}
-                            className="mt-1 w-full rounded border p-2"
+                            className={inputClasses}
                         />
-                        {errors.nama_kategori && <div className="text-red-600">{errors.nama_kategori}</div>}
+                        {errors.nama_kategori && <div className="mt-1 text-red-600">{errors.nama_kategori}</div>}
                     </div>
 
+                    {/* Kode Warna */}
                     <div>
-                        <label className="block">Kode Warna</label>
-                        <input
-                            type="text"
-                            value={data.kode_warna}
-                            onChange={(e) => setData('kode_warna', e.target.value)}
-                            className="mt-1 w-full rounded border p-2"
-                        />
-                        {errors.kode_warna && <div className="text-red-600">{errors.kode_warna}</div>}
+                        <label className="block font-medium">Kode Warna</label>
+                        <div className="mt-1 flex items-center gap-3">
+                            <input
+                                type="color"
+                                value={data.kode_warna}
+                                onChange={(e) => setData('kode_warna', e.target.value)}
+                                className="h-10 w-10 border-0 p-0"
+                            />
+                            <input
+                                type="text"
+                                value={data.kode_warna}
+                                onChange={(e) => setData('kode_warna', e.target.value)}
+                                className={inputClasses + ' w-24'}
+                            />
+                        </div>
+                        {errors.kode_warna && <div className="mt-1 text-red-600">{errors.kode_warna}</div>}
+                        <div className="mt-2 flex gap-2">
+                            {palette.map((c) => (
+                                <button
+                                    key={c}
+                                    type="button"
+                                    onClick={() => setData('kode_warna', c)}
+                                    className="h-6 w-6 rounded border"
+                                    style={{ backgroundColor: c }}
+                                />
+                            ))}
+                        </div>
                     </div>
 
+                    {/* Keterangan Warna */}
                     <div>
-                        <label className="block">Keterangan Warna</label>
-                        <input
-                            type="text"
-                            value={data.ket_warna}
-                            onChange={(e) => setData('ket_warna', e.target.value)}
-                            className="mt-1 w-full rounded border p-2"
-                        />
-                        {errors.ket_warna && <div className="text-red-600">{errors.ket_warna}</div>}
+                        <label className="block font-medium">Keterangan Warna</label>
+                        <input type="text" value={data.ket_warna} onChange={(e) => setData('ket_warna', e.target.value)} className={inputClasses} />
+                        {errors.ket_warna && <div className="mt-1 text-red-600">{errors.ket_warna}</div>}
                     </div>
 
-                    <div className="mt-4">
+                    {/* Submit */}
+                    <div className="flex justify-end space-x-4 pt-4">
                         <button
                             type="submit"
                             disabled={processing}
-                            className="rounded bg-blue-600 p-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
                         >
                             {processing ? 'Menyimpan...' : 'Simpan'}
                         </button>
