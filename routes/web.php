@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\GeojsonController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\KategoriController;
 
 // Halaman utama
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
@@ -44,6 +45,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/tambah-pdf/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
         Route::put('/tambah-pdf/{id}', [ReportController::class, 'update'])->name('report.update');
         Route::delete('/tambah-pdf/{id}', [ReportController::class, 'destroy'])->name('report.destroy');
+
+        // --- KATEGORI ROUTES ---
+        Route::get('/kategori', [KategoriController::class, 'index'])->name('kategori.index');
+        Route::get('/kategori/create', [KategoriController::class, 'create'])->name('kategori.create');
+        Route::post('/kategori', [KategoriController::class, 'store'])->name('kategori.store');
+        Route::get('/kategori/{id}/edit', [KategoriController::class, 'edit'])->name('kategori.edit');
+        Route::put('/kategori/{id}', [KategoriController::class, 'update'])->name('kategori.update');
+        Route::delete('/kategori/{id}', [KategoriController::class, 'destroy'])->name('kategori.destroy');
     });
 });
 

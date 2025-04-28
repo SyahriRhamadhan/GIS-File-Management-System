@@ -24,6 +24,8 @@ class Region extends Model
         'deleted_at',
     ];
 
+    protected $dates = ['deleted_at'];
+
 
     public function geojsons()
     {

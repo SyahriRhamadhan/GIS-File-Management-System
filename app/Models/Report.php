@@ -20,9 +20,9 @@ class Report extends Model
         'nomor',
         'sifat',
         'hal',
-        'deleted_at',
         'kepada',
     ];
+    protected $dates = ['deleted_at'];
 
     public function geojson()
     {

@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Kategori extends Model
 {
+    use HasFactory, SoftDeletes;
     protected $table = 'kategori';
     protected $primaryKey = 'id_kategori';
     public $incrementing = true;
@@ -16,6 +18,8 @@ class Kategori extends Model
         'kode_warna',
         'ket_warna',
     ];
+
+    protected $dates = ['deleted_at'];
 
     /**
      * GeoJSON items under this category

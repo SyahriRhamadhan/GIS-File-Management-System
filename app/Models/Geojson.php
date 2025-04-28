@@ -25,6 +25,7 @@ class Geojson extends Model
     protected $casts = [
         'geojson' => 'array',
     ];
+    protected $dates = ['deleted_at'];
 
     public function user()
     {
@@ -50,5 +51,4 @@ class Geojson extends Model
     {
         return $this->belongsTo(Kategori::class, 'id_kategori', 'id_kategori');
     }
-
 }

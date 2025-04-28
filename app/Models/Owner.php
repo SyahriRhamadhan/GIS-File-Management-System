@@ -18,6 +18,7 @@ class Owner extends Model
         'wali',
         'type',
     ];
+    protected $dates = ['deleted_at'];
 
     public function geojsons()
     {

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama_kategori')->unique();
             $table->string('kode_warna', 7);
             $table->string('ket_warna')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
