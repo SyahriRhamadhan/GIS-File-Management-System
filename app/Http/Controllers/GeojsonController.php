@@ -162,26 +162,23 @@ class GeojsonController extends Controller
             'id_kategori'  => 'nullable|exists:kategori,id_kategori',
         ]);
 
-        // parse ulang GeoJSON (ambil fitur pertama jika FeatureCollection)
         if ($request->hasFile('geojson_file')) {
             $raw  = json_decode(file_get_contents($request->file('geojson_file')), true);
         } else {
             $raw  = json_decode($validated['geojson'], true);
         }
 
-        // jika masuk array multi-feature, ambil yang pertama
         if (isset($raw['features']) && is_array($raw['features'])) {
             $feature = $raw['features'][0];
         } else {
             $feature = $raw;
         }
 
-        // sesuaikan koordinat seperti di store
         $this->processCoordinates($feature);
 
-        // update model
         $geojsonModel->update([
             'geojson'   => $feature,
+            'source_name' => $geojson['fileName'] ?? 'Geojson Upload',
             'id_user'   => $validated['id_user'],
             'id_region' => $validated['id_region'] ?? null,
             'id_owner'  => $validated['id_owner']  ?? null,
