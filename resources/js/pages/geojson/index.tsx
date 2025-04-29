@@ -12,6 +12,9 @@ interface Geojson {
     id_region?: number;
     id_owner?: number;
     id_kategori?: number;
+    kode_warna?: string;
+    nama_kategori?: string;
+    ket_warna?: string;
 }
 
 interface PageProps {
@@ -181,7 +184,18 @@ export default function GeojsonIndex() {
                                 <tr key={g.id_geojson} className="bg-white even:bg-gray-50 dark:bg-gray-800 dark:even:bg-gray-700">
                                     <td className="border px-4 py-2">{(currentPage - 1) * perPage + i + 1}</td>
                                     <td className="border px-4 py-2">{g.source_name}</td>
-                                    <td className="border px-4 py-2">{g.id_kategori}</td>
+                                    <td className="border px-4 py-2">
+                                        <div className="flex items-center gap-2">
+                                            {/* Swatch */}
+                                            <span className="h-4 w-4 flex-shrink-0 rounded" style={{ backgroundColor: g.kode_warna ?? '#000' }} />
+                                            {/* Teks: nama kategori + kode warna */}
+                                            <div className="flex flex-col">
+                                                <span className="m-auto text-sm font-medium text-gray-800 dark:text-gray-100">{g.nama_kategori}</span>
+                                                {/* <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{g.ket_warna}</span> */}
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">{g.kode_warna}</span>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td className="border px-4 py-2">{users.find((u) => u.id === g.id_user)?.name}</td>
                                     <td className="border px-4 py-2">{regions.find((r) => r.id_region === g.id_region)?.name ?? '-'}</td>
                                     <td className="border px-4 py-2">{owners.find((o) => o.id_owner === g.id_owner)?.name ?? '-'}</td>

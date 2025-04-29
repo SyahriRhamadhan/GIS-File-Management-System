@@ -7,7 +7,7 @@ interface GeojsonFormProps {
     user_id: number; // The authenticated user's ID
     regions: { id_region: number; name: string }[];
     owner: { id_owner: number; name: string }[];
-    kategoris: { id_kategori: number; nama_kategori: string }[];
+    kategoris: { id_kategori: number; nama_kategori: string; kode_warna: string; ket_warna: string }[];
 }
 
 const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions, owner, kategoris }) => {
@@ -46,6 +46,8 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
 
         router.post('/dashboard/geojson', formData);
     };
+    const selectedKatId = ''; // Define selectedKatId with an initial value
+    const selectedKat = kategoris.find((k) => k.id_kategori.toString() === selectedKatId);
 
     return (
         <AppLayout
@@ -152,12 +154,28 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
                         >
                             <option value="">— Tidak Memilih —</option>
                             {kategoris.map((k) => (
-                                <option key={k.id_kategori} value={k.id_kategori}>
-                                    {k.nama_kategori}
+                                <option
+                                    key={k.id_kategori}
+                                    value={k.id_kategori}
+                                    style={{ backgroundColor: k.kode_warna, color: '#fff' }}
+                                >
+                                    {k.nama_kategori}  {(k.kode_warna ? `(${k.kode_warna})` : '')} {k.ket_warna ? `- ${k.ket_warna}` : ''}
                                 </option>
                             ))}
                         </select>
                         {errors.id_kategori && <p className="mt-1 text-sm text-red-500">{String(errors.id_kategori.message)}</p>}
+                        {selectedKat && (
+                            <div className="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+                                {/* swatch */}
+                                <span className="block h-5 w-5 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
+                                <div className="text-sm">
+                                    <p>
+                                        <strong>{selectedKat.nama_kategori}</strong>
+                                    </p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">{selectedKat.ket_warna}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Buttons */}

@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, usePage } from '@inertiajs/react';
 import { router } from '@inertiajs/core';
+import { Head, Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 interface Kategori {
@@ -80,7 +80,7 @@ export default function Index({ kategoris }: IndexProps) {
                                                     router.delete(`/dashboard/kategori/${k.id_kategori}`);
                                                 }
                                             }}
-                                            className="text-red-600 hover:underline"
+                                            className="rounded bg-red-500 px-2 py-1 text-white hover:bg-red-800"
                                         >
                                             Delete
                                         </button>

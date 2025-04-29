@@ -25,6 +25,7 @@ class Geojson extends Model
     protected $casts = [
         'geojson' => 'array',
     ];
+    protected $appends = ['kode_warna', 'nama_kategori', 'ket_warna'];
     protected $dates = ['deleted_at'];
 
     public function user()
@@ -50,5 +51,20 @@ class Geojson extends Model
     public function kategori()
     {
         return $this->belongsTo(Kategori::class, 'id_kategori', 'id_kategori');
+    }
+
+    public function getKodeWarnaAttribute(): ?string
+    {
+        return $this->kategori?->kode_warna;
+    }
+
+    public function getNamaKategoriAttribute(): ?string
+    {
+        return $this->kategori?->nama_kategori;
+    }
+
+    public function getKetWarnaAttribute(): ?string
+    {
+        return $this->kategori?->ket_warna;
     }
 }
