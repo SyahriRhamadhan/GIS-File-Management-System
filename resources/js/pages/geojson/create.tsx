@@ -4,50 +4,65 @@ import { useForm } from 'react-hook-form';
 
 interface GeojsonFormProps {
     user_name: string;
-    user_id: number; // The authenticated user's ID
+    user_id: number;
     regions: { id_region: number; name: string }[];
     owner: { id_owner: number; name: string }[];
-    kategoris: { id_kategori: number; nama_kategori: string; kode_warna: string; ket_warna: string }[];
+    kategoris: {
+        id_kategori: number;
+        nama_kategori: string;
+        kode_warna: string;
+        ket_warna: string;
+    }[];
+}
+
+interface FormValues {
+    geojson?: string;
+    geojson_file?: FileList;
+    id_region?: string;
+    id_owner?: string;
+    id_kategori?: string;
 }
 
 const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions, owner, kategoris }) => {
     const {
         register,
         handleSubmit,
+        watch,
         formState: { errors },
-        // Removed unused setValue
-    } = useForm();
+    } = useForm<FormValues>({
+        defaultValues: {
+            id_region: '',
+            id_owner: '',
+            id_kategori: '',
+        },
+    });
 
-    const onSubmit = (data: any) => {
+    // Watch the selected category ID
+    const selectedKatId = watch('id_kategori') || '';
+    const selectedKat = kategoris.find((k) => k.id_kategori.toString() === selectedKatId);
+
+    const onSubmit = (data: FormValues) => {
         const formData = new FormData();
 
         if (data.geojson_file?.[0]) {
             formData.append('geojson_file', data.geojson_file[0]);
-        } else {
+        } else if (data.geojson) {
             try {
-                const geojsonObject = JSON.parse(data.geojson);
-                formData.append('geojson', JSON.stringify(geojsonObject));
-            } catch (error) {
-                console.error('Invalid GeoJSON:', error);
+                const obj = JSON.parse(data.geojson);
+                formData.append('geojson', JSON.stringify(obj));
+            } catch {
+                console.error('Invalid GeoJSON');
                 return;
             }
         }
 
         formData.append('id_user', user_id.toString());
-        if (data.id_region) {
-            formData.append('id_region', data.id_region);
-        }
-        if (data.id_owner) {
-            formData.append('id_owner', data.id_owner);
-        }
-        if (data.id_kategori) {
-            formData.append('id_kategori', data.id_kategori);
-        }
+        if (data.id_region) formData.append('id_region', data.id_region);
+        if (data.id_owner) formData.append('id_owner', data.id_owner);
+        if (data.id_kategori) formData.append('id_kategori', data.id_kategori);
 
         router.post('/dashboard/geojson', formData);
     };
-    const selectedKatId = ''; // Define selectedKatId with an initial value
-    const selectedKat = kategoris.find((k) => k.id_kategori.toString() === selectedKatId);
 
     return (
         <AppLayout
@@ -142,6 +157,7 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
                         </select>
                         {errors.id_owner && <p className="mt-1 text-sm text-red-500">{String(errors.id_owner.message)}</p>}
                     </div>
+
                     {/* Category */}
                     <div>
                         <label htmlFor="id_kategori" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -154,25 +170,19 @@ const GeojsonCreate: React.FC<GeojsonFormProps> = ({ user_name, user_id, regions
                         >
                             <option value="">— Tidak Memilih —</option>
                             {kategoris.map((k) => (
-                                <option
-                                    key={k.id_kategori}
-                                    value={k.id_kategori}
-                                    style={{ backgroundColor: k.kode_warna, color: '#fff' }}
-                                >
-                                    {k.nama_kategori}  {(k.kode_warna ? `(${k.kode_warna})` : '')} {k.ket_warna ? `- ${k.ket_warna}` : ''}
+                                <option key={k.id_kategori} value={k.id_kategori}>
+                                    {k.nama_kategori}
                                 </option>
                             ))}
                         </select>
-                        {errors.id_kategori && <p className="mt-1 text-sm text-red-500">{String(errors.id_kategori.message)}</p>}
+
+                        {/* Live preview of the selected category */}
                         {selectedKat && (
-                            <div className="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
-                                {/* swatch */}
-                                <span className="block h-5 w-5 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
+                            <div className="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                                <span className="block h-6 w-6 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
                                 <div className="text-sm">
-                                    <p>
-                                        <strong>{selectedKat.nama_kategori}</strong>
-                                    </p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">{selectedKat.ket_warna}</p>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">{selectedKat.nama_kategori}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{selectedKat.ket_warna}</p>
                                 </div>
                             </div>
                         )}
