@@ -51,13 +51,16 @@ class GeojsonController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'geojson'         => 'required_without_all:geojson_file|json',
-            'geojson_file'    => 'nullable|array',
-            'geojson_file.*'  => 'file|mimes:json,geojson',
-            'id_user'         => 'required|exists:users,id',
-            'id_region'       => 'nullable|exists:region,id_region',
-            'id_owner'        => 'nullable|exists:owner,id_owner',
-            'id_kategori'     => 'nullable|exists:kategori,id_kategori',
+            'geojson'        => 'required_without_all:geojson_file|json',
+            'geojson_file'   => 'nullable|array',
+            'geojson_file.*' => [
+                'file',
+                'mimetypes:application/json,application/geo+json,text/plain,application/octet-stream',
+            ],
+            'id_user'      => 'required|exists:users,id',
+            'id_region'    => 'nullable|exists:region,id_region',
+            'id_owner'     => 'nullable|exists:owner,id_owner',
+            'id_kategori'  => 'nullable|exists:kategori,id_kategori',
         ]);
 
         $idUser     = $validated['id_user'];
