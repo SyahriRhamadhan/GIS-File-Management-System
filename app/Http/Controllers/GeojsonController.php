@@ -51,67 +51,89 @@ class GeojsonController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'geojson'      => 'required_without:geojson_file|json',
-            'geojson_file' => 'required_without:geojson|file|mimes:json,geojson',
-            'id_user'      => 'required|exists:users,id',
-            'id_region'    => 'nullable|exists:region,id_region',
-            'id_owner'     => 'nullable|exists:owner,id_owner',
-            'id_kategori'    => 'nullable|exists:kategori,id_kategori',
+            'geojson'         => 'required_without_all:geojson_file|json',
+            'geojson_file'    => 'nullable|array',
+            'geojson_file.*'  => 'file|mimes:json,geojson',
+            'id_user'         => 'required|exists:users,id',
+            'id_region'       => 'nullable|exists:region,id_region',
+            'id_owner'        => 'nullable|exists:owner,id_owner',
+            'id_kategori'     => 'nullable|exists:kategori,id_kategori',
         ]);
 
-        if ($request->hasFile('geojson_file')) {
-            $file = $request->file('geojson_file');
-            $geojson = json_decode(file_get_contents($file), true);
-        } else {
-            $geojson = json_decode($validated['geojson'], true);
+        $idUser     = $validated['id_user'];
+        $idRegion   = $validated['id_region']   ?? null;
+        $idOwner    = $validated['id_owner']    ?? null;
+        $idKategori = $validated['id_kategori'] ?? null;
+
+        $uploadErrors = [];
+
+        // 1) Jika ada file(s)
+        if (! empty($validated['geojson_file'])) {
+            foreach ($validated['geojson_file'] as $file) {
+                $fileName = $file->getClientOriginalName();
+                $raw      = @json_decode(file_get_contents($file), true);
+
+                if (! is_array($raw) || ! isset($raw['features']) || ! is_array($raw['features'])) {
+                    $uploadErrors[] = "File “{$fileName}” bukan FeatureCollection yang valid.";
+                    continue;
+                }
+
+                $sourceName = $raw['fileName'] ?? $fileName;
+                foreach ($raw['features'] as $feature) {
+                    try {
+                        $this->processCoordinates($feature);
+                        Geojson::create([
+                            'geojson'     => $feature,
+                            'source_name' => $sourceName,
+                            'id_user'     => $idUser,
+                            'id_region'   => $idRegion,
+                            'id_owner'    => $idOwner,
+                            'id_kategori' => $idKategori,
+                        ]);
+                    } catch (\Throwable $e) {
+                        $uploadErrors[] = "Gagal menyimpan fitur di “{$fileName}”: " . $e->getMessage();
+                    }
+                }
+            }
         }
-        $idRegion = $validated['id_region'] ?? null;
-        $idOwner  = $validated['id_owner']  ?? null;
-        $idKategori  = $validated['id_kategori']  ?? null;
+        // 2) Kalau tidak ada file, pakai GeoJSON teks
+        else {
+            $raw        = @json_decode($validated['geojson'], true);
+            $sourceName = $raw['fileName'] ?? 'Geojson Upload (Text)';
 
-        if (is_array($geojson) && isset($geojson[0]['type']) && $geojson[0]['type'] === 'FeatureCollection') {
-            foreach ($geojson as $singleGeojson) {
-                if ($singleGeojson['type'] !== 'FeatureCollection' || !isset($singleGeojson['features'])) {
-                    return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection yang valid.']);
-                }
+            if (! is_array($raw) || ! isset($raw['features']) || ! is_array($raw['features'])) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['geojson' => 'JSON teks harus FeatureCollection yang valid.']);
+            }
 
-                foreach ($singleGeojson['features'] as &$feature) {
+            foreach ($raw['features'] as $i => $feature) {
+                try {
                     $this->processCoordinates($feature);
-                }
-
-                foreach ($singleGeojson['features'] as $feature) {
                     Geojson::create([
-                        'geojson' => $feature,
-                        'source_name' => $singleGeojson['fileName'] ?? 'Geojson Upload',
-                        'id_user' => $validated['id_user'],
-                        'id_region'   => $idRegion,                    // bisa null
+                        'geojson'     => $feature,
+                        'source_name' => $sourceName,
+                        'id_user'     => $idUser,
+                        'id_region'   => $idRegion,
                         'id_owner'    => $idOwner,
                         'id_kategori' => $idKategori,
                     ]);
+                } catch (\Throwable $e) {
+                    $uploadErrors[] = "Gagal fitur ke-" . ($i + 1) . ": " . $e->getMessage();
                 }
-            }
-        } else {
-            if ($geojson['type'] !== 'FeatureCollection' || !isset($geojson['features'])) {
-                return back()->withErrors(['geojson' => 'GeoJSON harus berupa FeatureCollection.']);
-            }
-
-            foreach ($geojson['features'] as &$feature) {
-                $this->processCoordinates($feature);
-            }
-
-            foreach ($geojson['features'] as $feature) {
-                Geojson::create([
-                    'geojson' => $feature,
-                    'source_name' => $geojson['fileName'] ?? 'Geojson Upload',
-                    'id_user' => $validated['id_user'],
-                    'id_region'   => $idRegion,
-                    'id_owner'    => $idOwner,
-                    'id_kategori' => $idKategori,
-                ]);
             }
         }
 
-        return redirect()->route('dashboard.geojson.index')->with('success', 'Seluruh fitur berhasil disimpan sebagai record terpisah.');
+        // kalau ada uploadErrors, kirim sebagai flash.upload_errors
+        if (! empty($uploadErrors)) {
+            return back()
+                ->with('flash', ['upload_errors' => $uploadErrors])
+                ->with('success', 'Sebagian file berhasil diupload, beberapa gagal.');
+        }
+
+        return redirect()
+            ->route('dashboard.geojson.index')
+            ->with('success', 'Semua fitur berhasil disimpan.');
     }
 
     private function processCoordinates(&$feature)
