@@ -18,27 +18,36 @@ export default function ShpClientFullscreen() {
 
     const handleZipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (!files || files.length === 0) return;
-
-        const zipFile = files[0];
-        setFilename(zipFile.name.replace(/\.[^/.]+$/, '') + '.geojson');
+        if (!files?.length) return;
 
         try {
-            const arrayBuffer = await zipFile.arrayBuffer();
+            const arrayBuffer = await files[0].arrayBuffer();
             const result = await shp(arrayBuffer);
 
+            // kasus banyak part
             if (Array.isArray(result) && result.length > 1) {
-                // Pisahkan hasil menjadi preview GeoJSON dan simpan untuk di-download nanti
-                const previewData = result.map((featureCollection, index) => ({
-                    filename: `${filename.replace('.geojson', '')}_part${index + 1}.geojson`,
-                    data: featureCollection,
-                }));
-                setPreviewGeojsons(previewData); // Menyimpan preview GeoJSON
-            } else {
-                setGeojson(result);
+                const previewData = result.map((fc: any) => {
+                    // jika ada fc.fileName ambil itu, kalau tidak fallback
+                    const name = fc.fileName
+                        ? `${fc.fileName.replace(/\.[^/.]+$/, '')}.geojson`
+                        : `${files[0].name.replace(/\.[^/.]+$/, '')}_part.geojson`;
+
+                    return {
+                        filename: name,
+                        data: fc,
+                    };
+                });
+                setPreviewGeojsons(previewData);
             }
-        } catch (error) {
-            alert('Gagal mengonversi file: ' + error);
+            // kasus satu file
+            else {
+                const fc = Array.isArray(result) ? result[0] : result;
+                setGeojson(fc);
+                const name = fc.fileName ? `${fc.fileName.replace(/\.[^/.]+$/, '')}.geojson` : `${files[0].name.replace(/\.[^/.]+$/, '')}.geojson`;
+                setFilename(name);
+            }
+        } catch (err) {
+            alert('Gagal mengonversi file: ' + err);
         }
     };
 
