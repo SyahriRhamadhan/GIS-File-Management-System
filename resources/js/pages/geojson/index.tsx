@@ -17,30 +17,39 @@ interface Geojson {
     ket_warna?: string;
 }
 
+interface Kategori {
+    id_kategori: number;
+    nama_kategori: string;
+    kode_warna: string;
+}
+
 interface PageProps {
     geojsons: Geojson[];
     users: { id: number; name: string }[];
     regions: { id_region: number; name: string }[];
     owners: { id_owner: number; name: string }[];
+    kategoris: Kategori[];
     flash?: { success?: string; error?: string };
-    [key: string]: any; // Add index signature
+    [key: string]: any;
 }
 
 export default function GeojsonIndex() {
-    const { geojsons, users, regions, owners, flash } = usePage<PageProps>().props;
+    const { geojsons, users, regions, owners, kategoris, flash } = usePage<PageProps>().props;
 
     const [search, setSearch] = useState('');
     const [userFilter, setUserFilter] = useState<number | string>('');
     const [regionFilter, setRegionFilter] = useState<number | string>('');
     const [ownerFilter, setOwnerFilter] = useState<number | string>('');
+    const [categoryFilter, setCategoryFilter] = useState<number | string>(''); // ← new
     const [sortBy, setSortBy] = useState<keyof Geojson>('source_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
     const perPage = 10;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedGeojson, setSelectedGeojson] = useState<any>(null);
+    const [selectedGeojson, setSelectedGeojson] = useState<Geojson | null>(null);
 
+    // Apply all four filters
     const filtered = useMemo(() => {
         return geojsons
             .filter(
@@ -48,7 +57,8 @@ export default function GeojsonIndex() {
                     (!search || g.source_name.toLowerCase().includes(search.toLowerCase())) &&
                     (!userFilter || g.id_user === +userFilter) &&
                     (!regionFilter || g.id_region === +regionFilter) &&
-                    (!ownerFilter || g.id_owner === +ownerFilter),
+                    (!ownerFilter || g.id_owner === +ownerFilter) &&
+                    (!categoryFilter || g.id_kategori === +categoryFilter),
             )
             .sort((a, b) => {
                 const aVal = (a[sortBy] ?? '').toString().toLowerCase();
@@ -57,7 +67,7 @@ export default function GeojsonIndex() {
                 if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
                 return 0;
             });
-    }, [geojsons, search, userFilter, regionFilter, ownerFilter, sortBy, sortDirection]);
+    }, [geojsons, search, userFilter, regionFilter, ownerFilter, categoryFilter, sortBy, sortDirection]);
 
     const pages = Math.ceil(filtered.length / perPage);
     const displayed = useMemo(() => {
@@ -65,8 +75,8 @@ export default function GeojsonIndex() {
         return filtered.slice(start, start + perPage);
     }, [filtered, currentPage]);
 
-    const handleView = (geojson: Geojson) => {
-        setSelectedGeojson(geojson);
+    const handleView = (g: Geojson) => {
+        setSelectedGeojson(g);
         setIsModalOpen(true);
     };
 
@@ -96,6 +106,7 @@ export default function GeojsonIndex() {
             <Head title="GeoJSON Index" />
 
             <div className="bg-white p-6 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+                {/* header + add button */}
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
                     <h1 className="text-2xl font-bold">Daftar GeoJSON</h1>
                     <Link href="/dashboard/geojson/create" className="rounded bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700">
@@ -103,7 +114,9 @@ export default function GeojsonIndex() {
                     </Link>
                 </div>
 
+                {/* filters */}
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                    {/* search */}
                     <input
                         type="text"
                         placeholder="Cari source name..."
@@ -115,6 +128,7 @@ export default function GeojsonIndex() {
                         className="w-full max-w-md rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                     />
 
+                    {/* user */}
                     <select
                         value={userFilter}
                         onChange={(e) => {
@@ -131,6 +145,7 @@ export default function GeojsonIndex() {
                         ))}
                     </select>
 
+                    {/* region */}
                     <select
                         value={regionFilter}
                         onChange={(e) => {
@@ -147,6 +162,7 @@ export default function GeojsonIndex() {
                         ))}
                     </select>
 
+                    {/* owner */}
                     <select
                         value={ownerFilter}
                         onChange={(e) => {
@@ -162,8 +178,26 @@ export default function GeojsonIndex() {
                             </option>
                         ))}
                     </select>
+
+                    {/* ** kategori ** */}
+                    <select
+                        value={categoryFilter}
+                        onChange={(e) => {
+                            setCategoryFilter(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                        className="w-full max-w-xs rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                    >
+                        <option value="">Semua Kategori</option>
+                        {kategoris.map((k) => (
+                            <option key={k.id_kategori} value={k.id_kategori}>
+                                {k.nama_kategori}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
+                {/* table */}
                 <div className="overflow-x-auto rounded-lg shadow-sm">
                     <table className="w-full min-w-[800px] border text-sm">
                         <thead className="bg-gray-100">
@@ -186,12 +220,9 @@ export default function GeojsonIndex() {
                                     <td className="border px-4 py-2">{g.source_name}</td>
                                     <td className="border px-4 py-2">
                                         <div className="flex items-center gap-2">
-                                            {/* Swatch */}
                                             <span className="h-4 w-4 flex-shrink-0 rounded" style={{ backgroundColor: g.kode_warna ?? '#000' }} />
-                                            {/* Teks: nama kategori + kode warna */}
                                             <div className="flex flex-col">
-                                                <span className="m-auto text-sm font-medium text-gray-800 dark:text-gray-100">{g.nama_kategori}</span>
-                                                {/* <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{g.ket_warna}</span> */}
+                                                <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{g.nama_kategori}</span>
                                                 <span className="text-xs text-gray-500 dark:text-gray-400">{g.kode_warna}</span>
                                             </div>
                                         </div>
@@ -238,7 +269,7 @@ export default function GeojsonIndex() {
                 </div>
             </div>
 
-            {isModalOpen && <Modal geojson={selectedGeojson} onClose={() => setIsModalOpen(false)} />}
+            {isModalOpen && selectedGeojson && <Modal geojson={selectedGeojson} onClose={() => setIsModalOpen(false)} />}
         </AppLayout>
     );
 }
