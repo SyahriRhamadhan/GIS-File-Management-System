@@ -38,7 +38,7 @@ class KategoriController extends Controller
         return redirect()->route('dashboard.kategori.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    // Display the specified resource
+    // Display the specified resourc
     public function show($id)
     {
         $kategori = Kategori::findOrFail($id);
