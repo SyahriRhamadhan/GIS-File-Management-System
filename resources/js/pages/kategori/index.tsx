@@ -28,21 +28,83 @@ export default function Index({ kategoris }: IndexProps) {
     const perPage = 10;
     const maxButtons = 5;
 
+    const [namaFilter, setNamaFilter] = useState('');
+    const [orde1Filter, setOrde1Filter] = useState('');
+    const [orde2Filter, setOrde2Filter] = useState('');
+    const [orde3Filter, setOrde3Filter] = useState('');
+    const [layerFilter, setLayerFilter] = useState<number | ''>('');
+
+    /* ── OPTION SET ── (unik, diurutkan) */
+    const namaOptions = useMemo(() => [...new Set(kategoris.map((k) => k.nama_kategori).filter(Boolean))].sort(), [kategoris]);
+
+    const orde1Options = useMemo(
+        () =>
+            [
+                ...new Set(
+                    kategoris
+                        .filter((k) => !namaFilter || k.nama_kategori === namaFilter)
+                        .map((k) => k.orde1)
+                        .filter(Boolean),
+                ),
+            ].sort(),
+        [kategoris, namaFilter],
+    );
+
+    const orde2Options = useMemo(
+        () =>
+            [
+                ...new Set(
+                    kategoris
+                        .filter((k) => (!namaFilter || k.nama_kategori === namaFilter) && (!orde1Filter || k.orde1 === orde1Filter))
+                        .map((k) => k.orde2)
+                        .filter(Boolean),
+                ),
+            ].sort(),
+        [kategoris, namaFilter, orde1Filter],
+    );
+
+    const orde3Options = useMemo(
+        () =>
+            [
+                ...new Set(
+                    kategoris
+                        .filter(
+                            (k) =>
+                                (!namaFilter || k.nama_kategori === namaFilter) &&
+                                (!orde1Filter || k.orde1 === orde1Filter) &&
+                                (!orde2Filter || k.orde2 === orde2Filter),
+                        )
+                        .map((k) => k.orde3)
+                        .filter(Boolean),
+                ),
+            ].sort(),
+        [kategoris, namaFilter, orde1Filter, orde2Filter],
+    );
+
+    const layerOptions = useMemo(() => [...new Set(kategoris.map((k) => k.layer_order))].sort((a, b) => a - b), [kategoris]);
     // ──────────────────── FILTER & SORT
     const filtered = useMemo(
         () =>
             kategoris
                 .slice()
                 .sort((a, b) => a.layer_order - b.layer_order)
-                .filter((k) => k.nama_kategori.toLowerCase().includes(search.toLowerCase())),
-        [kategoris, search],
+                .filter(
+                    (k) =>
+                        k.nama_kategori.toLowerCase().includes(search.toLowerCase()) &&
+                        (!namaFilter || k.nama_kategori === namaFilter) &&
+                        (!orde1Filter || k.orde1 === orde1Filter) &&
+                        (!orde2Filter || k.orde2 === orde2Filter) &&
+                        (!orde3Filter || k.orde3 === orde3Filter) &&
+                        (!layerFilter || k.layer_order === layerFilter),
+                ),
+        [kategoris, search, namaFilter, orde1Filter, orde2Filter, orde3Filter, layerFilter],
     );
 
     // total halaman
     const pages = Math.ceil(filtered.length / perPage);
 
     // reset page ke 1 jika keyword berubah
-    useEffect(() => setCurrentPage(1), [search]);
+    useEffect(() => setCurrentPage(1), [search, namaFilter, orde1Filter, orde2Filter, orde3Filter, layerFilter]);
 
     // data yang ditampilkan
     const displayed = useMemo(() => {
@@ -82,14 +144,97 @@ export default function Index({ kategoris }: IndexProps) {
                 </div>
 
                 {/* search */}
-                <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                {/* ‑‑‑ filters ‑‑‑ */}
+                <div className="mb-4 flex flex-wrap items-center gap-4">
+                    {/* Search Nama */}
                     <input
                         type="text"
-                        placeholder="Cari kategori..."
+                        placeholder="Cari nama kategori…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full max-w-md rounded border border-gray-300 bg-white px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                        className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
                     />
+
+                    <select
+                        value={namaFilter}
+                        onChange={(e) => {
+                            setNamaFilter(e.target.value);
+                            setOrde1Filter('');
+                            setOrde2Filter('');
+                            setOrde3Filter('');
+                        }}
+                        className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
+                    >
+                        <option value="">Semua Nama</option>
+                        {namaOptions.map((n) => (
+                            <option key={n} value={n}>
+                                {n}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Orde 1 */}
+                    <select
+                        value={orde1Filter}
+                        onChange={(e) => {
+                            setOrde1Filter(e.target.value);
+                            setOrde2Filter('');
+                            setOrde3Filter('');
+                        }}
+                        className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
+                    >
+                        <option value="">Semua O1</option>
+                        {orde1Options.map((o) => (
+                            <option key={o} value={o}>
+                                {o}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Orde 2 */}
+                    <select
+                        value={orde2Filter}
+                        onChange={(e) => {
+                            setOrde2Filter(e.target.value);
+                            setOrde3Filter('');
+                        }}
+                        className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
+                    >
+                        <option value="">Semua O2</option>
+                        {orde2Options.map((o) => (
+                            <option key={o} value={o}>
+                                {o}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Orde 3 */}
+                    <select
+                        value={orde3Filter}
+                        onChange={(e) => setOrde3Filter(e.target.value)}
+                        className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
+                    >
+                        <option value="">Semua O3</option>
+                        {orde3Options.map((o) => (
+                            <option key={o} value={o}>
+                                {o}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Urutan Layer */}
+                    <select
+                        value={layerFilter}
+                        onChange={(e) => setLayerFilter(e.target.value ? Number(e.target.value) : '')}
+                        className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
+                    >
+                        <option value="">Semua Layer</option>
+                        {layerOptions.map((l) => (
+                            <option key={l} value={l}>
+                                {l}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 {/* table */}
