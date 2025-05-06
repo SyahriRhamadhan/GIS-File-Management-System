@@ -12,10 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kategori', function (Blueprint $table) {
-            $table->id('id_kategori');  
+            $table->id('id_kategori');
             $table->string('nama_kategori')->unique();
             $table->string('kode_warna', 7);
             $table->string('ket_warna')->nullable();
+            $table->unsignedSmallInteger('layer_order')
+                ->default(0)
+                ->index()
+                ->comment('Urutan rendering layer/polygon pada peta GeoJSON');
             $table->softDeletes();
             $table->timestamps();
         });

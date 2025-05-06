@@ -6,6 +6,7 @@ export default function Create() {
         nama_kategori: '',
         kode_warna: '#000000',
         ket_warna: '',
+        layer_order: 1,
     });
 
     const palette = ['#f7a1cc', '#34a853', '#ff6f61', '#4285f4', '#fbbc05'];
@@ -77,11 +78,32 @@ export default function Create() {
                         </div>
                     </div>
 
-                    {/* Keterangan Warna */}
-                    <div>
-                        <label className="block font-medium">Keterangan Warna</label>
-                        <input type="text" value={data.ket_warna} onChange={(e) => setData('ket_warna', e.target.value)} className={inputClasses} />
-                        {errors.ket_warna && <div className="mt-1 text-red-600">{errors.ket_warna}</div>}
+                    {/* ── 2 kolom responsif ──────────────────────────── */}
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        {/* Urutan Layer */}
+                        <div>
+                            <label className="block font-medium">Urutan Layer</label>
+                            <input
+                                type="number"
+                                min={0}
+                                value={data.layer_order}
+                                onChange={(e) => setData('layer_order', Number(e.target.value) || 0)}
+                                className={inputClasses + ' w-32'}
+                            />
+                            {errors.layer_order && <div className="mt-1 text-red-600">{errors.layer_order}</div>}
+                        </div>
+
+                        {/* Keterangan Warna */}
+                        <div>
+                            <label className="block font-medium">Keterangan Warna</label>
+                            <input
+                                type="text"
+                                value={data.ket_warna}
+                                onChange={(e) => setData('ket_warna', e.target.value)}
+                                className={inputClasses}
+                            />
+                            {errors.ket_warna && <div className="mt-1 text-red-600">{errors.ket_warna}</div>}
+                        </div>
                     </div>
 
                     {/* Submit */}

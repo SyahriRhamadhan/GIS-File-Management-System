@@ -7,6 +7,7 @@ interface Kategori {
     nama_kategori: string;
     kode_warna: string;
     ket_warna?: string;
+    layer_order: number; // ⬅️ tambah tipe
 }
 
 interface PageProps {
@@ -20,6 +21,7 @@ export default function Edit() {
         nama_kategori: kategori.nama_kategori,
         kode_warna: kategori.kode_warna,
         ket_warna: kategori.ket_warna || '',
+        layer_order: kategori.layer_order,
     });
 
     const palette = ['#f7a1cc', '#34a853', '#ff6f61', '#4285f4', '#fbbc05'];
@@ -31,7 +33,6 @@ export default function Edit() {
         });
     };
 
-    // shared input classes
     const inputClasses =
         'mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100';
 
@@ -95,11 +96,32 @@ export default function Edit() {
                         </div>
                     </div>
 
-                    {/* Keterangan Warna */}
-                    <div>
-                        <label className="block font-medium">Keterangan Warna</label>
-                        <input type="text" value={data.ket_warna} onChange={(e) => setData('ket_warna', e.target.value)} className={inputClasses} />
-                        {errors.ket_warna && <div className="mt-1 text-red-600">{errors.ket_warna}</div>}
+                    {/* ── 2 kolom responsif ──────────────────────────── */}
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        {/* Urutan Layer */}
+                        <div>
+                            <label className="block font-medium">Urutan Layer</label>
+                            <input
+                                type="number"
+                                min={0}
+                                value={data.layer_order}
+                                onChange={(e) => setData('layer_order', Number(e.target.value) || 0)}
+                                className={inputClasses + ' w-32'}
+                            />
+                            {errors.layer_order && <div className="mt-1 text-red-600">{errors.layer_order}</div>}
+                        </div>
+
+                        {/* Keterangan Warna */}
+                        <div>
+                            <label className="block font-medium">Keterangan Warna</label>
+                            <input
+                                type="text"
+                                value={data.ket_warna}
+                                onChange={(e) => setData('ket_warna', e.target.value)}
+                                className={inputClasses}
+                            />
+                            {errors.ket_warna && <div className="mt-1 text-red-600">{errors.ket_warna}</div>}
+                        </div>
                     </div>
 
                     {/* Actions */}

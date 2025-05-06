@@ -29,7 +29,8 @@ class KategoriController extends Controller
         $validated = $request->validate([
             'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori',
             'kode_warna' => 'required|string|max:7', // Assuming it's a hex color
-            'ket_warna' => 'nullable|string|max:255'
+            'ket_warna' => 'nullable|string|max:255',
+            'layer_order'   => 'required|integer|between:0,65535',
         ]);
 
         // Create category
@@ -62,7 +63,8 @@ class KategoriController extends Controller
         $validated = $request->validate([
             'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori,' . $id . ',id_kategori',
             'kode_warna' => 'required|string|max:7', // Assuming it's a hex color
-            'ket_warna' => 'nullable|string|max:255'
+            'ket_warna' => 'nullable|string|max:255',
+            'layer_order'   => 'required|integer|between:0,65535',
         ]);
 
         $kategori = Kategori::findOrFail($id);

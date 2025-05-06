@@ -8,6 +8,7 @@ interface Kategori {
     nama_kategori: string;
     kode_warna: string;
     ket_warna?: string;
+    layer_order: number;
 }
 
 interface IndexProps {
@@ -17,7 +18,14 @@ interface IndexProps {
 export default function Index({ kategoris }: IndexProps) {
     const [search, setSearch] = useState('');
 
-    const filtered = useMemo(() => kategoris.filter((k) => k.nama_kategori.toLowerCase().includes(search.toLowerCase())), [kategoris, search]);
+    const filtered = useMemo(
+        () =>
+            kategoris
+                .slice()
+                .sort((a, b) => a.layer_order - b.layer_order)
+                .filter((k) => k.nama_kategori.toLowerCase().includes(search.toLowerCase())),
+        [kategoris, search],
+    );
 
     return (
         <AppLayout
@@ -53,6 +61,7 @@ export default function Index({ kategoris }: IndexProps) {
                                 <th className="border px-4 py-2 text-left">#</th>
                                 <th className="border px-4 py-2 text-left">Nama Kategori</th>
                                 <th className="border px-4 py-2 text-left">Kode Warna</th>
+                                <th className="border px-4 py-2 text-left">Urutan Layer</th>
                                 <th className="border px-4 py-2 text-left">Keterangan</th>
                                 <th className="border px-4 py-2 text-center">Aksi</th>
                             </tr>
@@ -66,6 +75,7 @@ export default function Index({ kategoris }: IndexProps) {
                                         <span className="mr-2 inline-block h-4 w-4 rounded align-middle" style={{ backgroundColor: k.kode_warna }} />
                                         <span className="align-middle">{k.kode_warna}</span>
                                     </td>
+                                    <td className="border px-4 py-2">{k.layer_order}</td>
                                     <td className="border px-4 py-2">{k.ket_warna || '-'}</td>
                                     <td className="flex justify-center gap-2 border px-4 py-2">
                                         <Link
@@ -89,7 +99,7 @@ export default function Index({ kategoris }: IndexProps) {
                             ))}
                             {filtered.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="border px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                                    <td colSpan={6} className="border px-4 py-6 text-center text-gray-500 dark:text-gray-400">
                                         Tidak ada kategori ditemukan.
                                     </td>
                                 </tr>

@@ -17,6 +17,7 @@ class Kategori extends Model
         'nama_kategori',
         'kode_warna',
         'ket_warna',
+        'layer_order',
     ];
 
     protected $dates = ['deleted_at'];
