@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('kategori', function (Blueprint $table) {
             $table->id('id_kategori');
-            $table->string('nama_kategori')->unique();
+            $table->string('nama_kategori');
             $table->string('orde1')->nullable();
             $table->string('orde2')->nullable();
             $table->string('orde3')->nullable();

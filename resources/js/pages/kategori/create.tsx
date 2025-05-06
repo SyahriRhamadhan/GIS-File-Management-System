@@ -4,6 +4,11 @@ import { Head, useForm } from '@inertiajs/react';
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
         nama_kategori: '',
+        kode: '',
+        orde1: '',
+        orde2: '',
+        orde3: '',
+        orde4: '',
         kode_warna: '#000000',
         ket_warna: '',
         layer_order: 1,
@@ -13,8 +18,8 @@ export default function Create() {
 
     const inputClasses =
         'mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 shadow-sm ' +
-        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ' +
-        'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100';
+        'focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 ' +
+        'dark:bg-gray-800 dark:text-gray-100';
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -35,16 +40,40 @@ export default function Create() {
                 <h1 className="text-2xl font-bold">Tambah Kategori</h1>
 
                 <form onSubmit={handleSubmit} className="mt-4 space-y-6">
-                    {/* Nama Kategori */}
-                    <div>
-                        <label className="block font-medium">Nama Kategori</label>
-                        <input
-                            type="text"
-                            value={data.nama_kategori}
-                            onChange={(e) => setData('nama_kategori', e.target.value)}
-                            className={inputClasses}
-                        />
-                        {errors.nama_kategori && <div className="mt-1 text-red-600">{errors.nama_kategori}</div>}
+                    {/* Nama & Kode */}
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div>
+                            <label className="block font-medium">Nama Kategori</label>
+                            <input
+                                type="text"
+                                value={data.nama_kategori}
+                                onChange={(e) => setData('nama_kategori', e.target.value)}
+                                className={inputClasses}
+                            />
+                            {errors.nama_kategori && <div className="mt-1 text-red-600">{errors.nama_kategori}</div>}
+                        </div>
+
+                        <div>
+                            <label className="block font-medium">Kode (unik)</label>
+                            <input
+                                type="text"
+                                value={data.kode}
+                                onChange={(e) => setData('kode', e.target.value.toUpperCase())}
+                                className={inputClasses}
+                            />
+                            {errors.kode && <div className="mt-1 text-red-600">{errors.kode}</div>}
+                        </div>
+                    </div>
+
+                    {/* Orde1‑4 */}
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-4">
+                        {(['orde1', 'orde2', 'orde3', 'orde4'] as const).map((o) => (
+                            <div key={o}>
+                                <label className="block font-medium capitalize">{o}</label>
+                                <input type="text" value={(data as any)[o]} onChange={(e) => setData(o, e.target.value)} className={inputClasses} />
+                                {errors[o] && <div className="mt-1 text-red-600">{(errors as any)[o]}</div>}
+                            </div>
+                        ))}
                     </div>
 
                     {/* Kode Warna */}
@@ -78,9 +107,8 @@ export default function Create() {
                         </div>
                     </div>
 
-                    {/* ── 2 kolom responsif ──────────────────────────── */}
+                    {/* Layer order & Keterangan */}
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        {/* Urutan Layer */}
                         <div>
                             <label className="block font-medium">Urutan Layer</label>
                             <input
@@ -93,7 +121,6 @@ export default function Create() {
                             {errors.layer_order && <div className="mt-1 text-red-600">{errors.layer_order}</div>}
                         </div>
 
-                        {/* Keterangan Warna */}
                         <div>
                             <label className="block font-medium">Keterangan Warna</label>
                             <input
@@ -113,7 +140,7 @@ export default function Create() {
                             disabled={processing}
                             className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
                         >
-                            {processing ? 'Menyimpan...' : 'Simpan'}
+                            {processing ? 'Menyimpan…' : 'Simpan'}
                         </button>
                     </div>
                 </form>
