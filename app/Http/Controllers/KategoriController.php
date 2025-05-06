@@ -17,68 +17,83 @@ class KategoriController extends Controller
         ]);
     }
 
-    // Show the form for creating a new resource
+    /** FORM CREATE */
     public function create()
     {
-        return Inertia::render('kategori/create'); // Render form view
+        return Inertia::render('kategori/create');
     }
 
-    // Store a newly created resource in storage
+    /** STORE */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori',
-            'kode_warna' => 'required|string|max:7', // Assuming it's a hex color
-            'ket_warna' => 'nullable|string|max:255',
+            'orde1'         => 'nullable|string|max:255',
+            'orde2'         => 'nullable|string|max:255',
+            'orde3'         => 'nullable|string|max:255',
+            'orde4'         => 'nullable|string|max:255',
+            'kode'          => 'nullable|string|max:50|unique:kategori,kode',
+            'kode_warna'    => ['required', 'string', 'size:7', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'ket_warna'     => 'nullable|string|max:255',
             'layer_order'   => 'required|integer|between:0,65535',
         ]);
 
-        // Create category
         Kategori::create($validated);
 
-        return redirect()->route('dashboard.kategori.index')->with('success', 'Kategori berhasil ditambahkan.');
+        return redirect()
+            ->route('dashboard.kategori.index')
+            ->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    // Display the specified resourc
+    /** SHOW (opsional) */
     public function show($id)
     {
         $kategori = Kategori::findOrFail($id);
+
         return Inertia::render('kategori/show', [
             'kategori' => $kategori,
         ]);
     }
 
-    // Show the form for editing the specified resource
+    /** FORM EDIT */
     public function edit($id)
     {
         $kategori = Kategori::findOrFail($id);
+
         return Inertia::render('kategori/update', [
             'kategori' => $kategori,
         ]);
     }
 
-    // Update the specified resource in storage
+    /** UPDATE */
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori,' . $id . ',id_kategori',
-            'kode_warna' => 'required|string|max:7', // Assuming it's a hex color
-            'ket_warna' => 'nullable|string|max:255',
+            'orde1'         => 'nullable|string|max:255',
+            'orde2'         => 'nullable|string|max:255',
+            'orde3'         => 'nullable|string|max:255',
+            'orde4'         => 'nullable|string|max:255',
+            'kode'          => 'nullable|string|max:50|unique:kategori,kode,' . $id . ',id_kategori',
+            'kode_warna'    => ['required', 'string', 'size:7', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'ket_warna'     => 'nullable|string|max:255',
             'layer_order'   => 'required|integer|between:0,65535',
         ]);
 
-        $kategori = Kategori::findOrFail($id);
-        $kategori->update($validated);
+        Kategori::findOrFail($id)->update($validated);
 
-        return redirect()->route('dashboard.kategori.index')->with('success', 'Kategori berhasil diperbarui.');
+        return redirect()
+            ->route('dashboard.kategori.index')
+            ->with('success', 'Kategori berhasil diperbarui.');
     }
 
-    // Remove the specified resource from storage
+    /** SOFT‑DELETE */
     public function destroy($id)
     {
-        $kategori = Kategori::findOrFail($id);
-        $kategori->delete(); // Soft delete
+        Kategori::findOrFail($id)->delete();
 
-        return redirect()->route('dashboard.kategori.index')->with('success', 'Kategori berhasil dihapus.');
+        return redirect()
+            ->route('dashboard.kategori.index')
+            ->with('success', 'Kategori berhasil dihapus.');
     }
 }
