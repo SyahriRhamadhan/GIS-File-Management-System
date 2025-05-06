@@ -6,6 +6,11 @@ import { useEffect, useMemo, useState } from 'react';
 interface Kategori {
     id_kategori: number;
     nama_kategori: string;
+    orde1?: string;
+    orde2?: string;
+    orde3?: string;
+    orde4?: string;
+    kode?: string;
     kode_warna: string;
     ket_warna?: string;
     layer_order: number;
@@ -94,6 +99,11 @@ export default function Index({ kategoris }: IndexProps) {
                             <tr>
                                 <th className="border px-4 py-2 text-left">#</th>
                                 <th className="border px-4 py-2 text-left">Nama Kategori</th>
+                                <th className="border px-4 py-2">Kode</th>
+                                <th className="border px-4 py-2">O1</th>
+                                <th className="border px-4 py-2">O2</th>
+                                <th className="border px-4 py-2">O3</th>
+                                <th className="border px-4 py-2">O4</th>
                                 <th className="border px-4 py-2 text-left">Kode Warna</th>
                                 <th className="border px-4 py-2 text-left">Urutan Layer</th>
                                 <th className="border px-4 py-2 text-left">Keterangan</th>
@@ -105,6 +115,11 @@ export default function Index({ kategoris }: IndexProps) {
                                 <tr key={k.id_kategori} className={i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'}>
                                     <td className="border px-4 py-2">{(currentPage - 1) * perPage + i + 1}</td>
                                     <td className="border px-4 py-2">{k.nama_kategori}</td>
+                                    <td className="border px-4 py-2">{k.kode || '-'}</td>
+                                    <td className="border px-4 py-2">{k.orde1 || '-'}</td>
+                                    <td className="border px-4 py-2">{k.orde2 || '-'}</td>
+                                    <td className="border px-4 py-2">{k.orde3 || '-'}</td>
+                                    <td className="border px-4 py-2">{k.orde4 || '-'}</td>
                                     <td className="border px-4 py-2">
                                         <span className="mr-2 inline-block h-4 w-4 rounded align-middle" style={{ backgroundColor: k.kode_warna }} />
                                         <span className="align-middle">{k.kode_warna}</span>
