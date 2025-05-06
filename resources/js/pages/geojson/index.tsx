@@ -96,6 +96,21 @@ export default function GeojsonIndex() {
         }
     };
 
+    const maxButtons = 5;
+    const goToPage = (p: number) => setCurrentPage(p);
+
+    const visiblePages = useMemo(() => {
+        const total = pages;
+        let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+        let end = start + maxButtons - 1;
+
+        if (end > total) {
+            end = total;
+            start = Math.max(1, end - maxButtons + 1);
+        }
+        return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    }, [currentPage, pages]);
+
     return (
         <AppLayout
             breadcrumbs={[
@@ -255,10 +270,29 @@ export default function GeojsonIndex() {
 
                 {/* pagination */}
                 <div className="my-4 flex flex-wrap items-center justify-center gap-2">
-                    {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+                    {/* First */}
+                    <button
+                        onClick={() => goToPage(1)}
+                        disabled={currentPage === 1}
+                        className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
+                    >
+                        « First
+                    </button>
+
+                    {/* Prev */}
+                    <button
+                        onClick={() => goToPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
+                    >
+                        ‹ Prev
+                    </button>
+
+                    {/* window 5 angka */}
+                    {visiblePages.map((p) => (
                         <button
                             key={p}
-                            onClick={() => setCurrentPage(p)}
+                            onClick={() => goToPage(p)}
                             className={`rounded border px-3 py-1 text-sm ${
                                 currentPage === p ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:text-gray-200 dark:hover:bg-gray-700'
                             }`}
@@ -266,6 +300,24 @@ export default function GeojsonIndex() {
                             {p}
                         </button>
                     ))}
+
+                    {/* Next */}
+                    <button
+                        onClick={() => goToPage(currentPage + 1)}
+                        disabled={currentPage === pages}
+                        className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
+                    >
+                        Next ›
+                    </button>
+
+                    {/* Last */}
+                    <button
+                        onClick={() => goToPage(pages)}
+                        disabled={currentPage === pages}
+                        className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
+                    >
+                        Last »
+                    </button>
                 </div>
             </div>
 
