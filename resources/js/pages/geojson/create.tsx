@@ -1,9 +1,10 @@
 // resources/js/Pages/Geojson/Create.tsx
 import AppLayout from '@/layouts/app-layout';
 import { router, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 
 interface GeojsonFormProps {
     user_name: string;
@@ -11,6 +12,10 @@ interface GeojsonFormProps {
     regions: { id_region: number; name: string }[];
     owner: { id_owner: number; name: string }[];
     kategoris: {
+        orde1: string;
+        orde2: string;
+        orde3: string;
+        orde4: string;
         id_kategori: number;
         nama_kategori: string;
         kode_warna: string;
@@ -42,8 +47,14 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         formState: { errors },
     } = useForm<FormValues>();
 
+    const [selectedKat, setSelectedKat] = useState<any>(null);
+
     const selectedKatId = watch('id_kategori') || '';
-    const selectedKat = kategoris.find((k) => k.id_kategori.toString() === selectedKatId);
+
+    // Handle category change
+    const handleCategoryChange = (selectedOption: any) => {
+        setSelectedKat(selectedOption); // Set selected category
+    };
 
     const onSubmit = (data: FormValues) => {
         const formData = new FormData();
@@ -67,6 +78,13 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
 
         router.post('/dashboard/geojson', formData);
     };
+
+    // Format for React Select
+    const categoryOptions = kategoris.map((k) => ({
+        value: k.id_kategori,
+        label: `${k.nama_kategori} / ${k.orde1} / ${k.orde2} / ${k.orde3} / ${k.orde4}`,
+        ...k, // Attach the whole category data to the option
+    }));
 
     return (
         <AppLayout
@@ -155,24 +173,26 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                     {/* Category with live-preview */}
                     <div>
                         <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Category</label>
-                        <select
-                            {...register('id_kategori')}
+
+                        <Select
+                            options={categoryOptions}
+                            onChange={handleCategoryChange}
+                            getOptionLabel={(e: (typeof categoryOptions)[number]) => e.label}
+                            getOptionValue={(e: { value: number }) => e.value.toString()}
+                            placeholder="— Select Category —"
                             className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        >
-                            <option value="">— Tidak Memilih —</option>
-                            {kategoris.map((k) => (
-                                <option key={k.id_kategori} value={k.id_kategori}>
-                                    {k.nama_kategori}
-                                </option>
-                            ))}
-                        </select>
+                        />
 
                         {selectedKat && (
                             <div className="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
                                 <span className="block h-6 w-6 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
                                 <div className="text-sm">
                                     <p className="font-medium text-gray-900 dark:text-gray-100">{selectedKat.nama_kategori}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{selectedKat.ket_warna}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Orde 1 ={selectedKat.orde1}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Orde 2 ={selectedKat.orde2}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Orde 3 ={selectedKat.orde3}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Orde 4 ={selectedKat.orde4}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">*Ket {selectedKat.ket_warna}</p>
                                 </div>
                             </div>
                         )}

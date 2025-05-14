@@ -4,18 +4,24 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 
 interface Kategori {
     id_kategori: number;
     nama_kategori: string;
     kode_warna: string;
     ket_warna: string;
+    orde1: string;
+    orde2: string;
+    orde3: string;
+    orde4: string;
 }
 
 interface Region {
     id_region: number;
     name: string;
 }
+
 interface Owner {
     id_owner: number;
     name: string;
@@ -43,6 +49,10 @@ interface FormValues {
     id_region: string;
     id_owner: string;
     id_kategori: string;
+    orde1?: string;
+    orde2?: string;
+    orde3?: string;
+    orde4?: string;
 }
 
 export default function GeojsonEdit() {
@@ -67,13 +77,18 @@ export default function GeojsonEdit() {
         },
     });
 
-    // for previewing the selected category
-    const [selectedKatId, setSelectedKatId] = useState(geojson.id_kategori?.toString() || '');
-    const selectedKat = kategoris.find((k) => k.id_kategori.toString() === selectedKatId);
+    // State to hold the selected category and the filtered options for the orders
+    const [selectedKat, setSelectedKat] = useState<Kategori | null>(null);
+
+    const selectedKatId = geojson.id_kategori?.toString() || '';
+    const selectedKatOption = kategoris.find((k) => k.id_kategori.toString() === selectedKatId);
 
     useEffect(() => {
-        setValue('id_kategori', selectedKatId);
-    }, [selectedKatId, setValue]);
+        if (selectedKatOption) {
+            setSelectedKat(selectedKatOption);
+            setValue('id_kategori', selectedKatOption.id_kategori.toString());
+        }
+    }, [selectedKatId, selectedKatOption, setValue]);
 
     const onSubmit = (data: FormValues) => {
         const formData = new FormData();
@@ -106,15 +121,19 @@ export default function GeojsonEdit() {
         });
     };
 
+    // Format for React Select
+    const categoryOptions = kategoris.map((k) => ({
+        value: k.id_kategori,
+        label: `${k.nama_kategori} / ${k.orde1} / ${k.orde2} / ${k.orde3} / ${k.orde4}`,
+        ...k, // Attach the whole category data to the option
+    }));
+
     return (
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
                 { title: 'Geojson', href: '/dashboard/geojson' },
-                {
-                    title: 'Edit Geojson',
-                    href: `/dashboard/geojson/${geojson.id_geojson}/edit`,
-                },
+                { title: 'Edit Geojson', href: `/dashboard/geojson/${geojson.id_geojson}/edit` },
             ]}
         >
             <Head title="Edit Geojson" />
@@ -210,20 +229,19 @@ export default function GeojsonEdit() {
                         <label htmlFor="id_kategori" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Category
                         </label>
-                        <select
-                            id="id_kategori"
-                            {...register('id_kategori')}
-                            onChange={(e) => setSelectedKatId(e.target.value)}
-                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        >
-                            <option value="">— Tidak Memilih —</option>
-                            {kategoris.map((k) => (
-                                <option key={k.id_kategori} value={k.id_kategori}>
-                                    {k.nama_kategori}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.id_kategori && <p className="mt-1 text-sm text-red-500">{errors.id_kategori.message}</p>}
+                        <Select
+                            options={categoryOptions}
+                            value={categoryOptions.find((option) => option.value.toString() === selectedKatId)} // Set default value
+                            onChange={(selectedOption: any) => {
+                                setSelectedKat(selectedOption);
+                                setValue('id_kategori', selectedOption.value.toString());
+                            }}
+                            getOptionLabel={(e: (typeof categoryOptions)[number]) => e.label}
+                            getOptionValue={(e: { value: number }) => e.value.toString()}
+                            placeholder="— Select Category —"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                        />
+
                         {selectedKat && (
                             <div className="mt-2 flex items-center gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
                                 <span className="block h-5 w-5 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
