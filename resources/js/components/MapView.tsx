@@ -59,6 +59,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
             <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100vh', width: '100%' }}>
                 {/* Scale Bar */}
                 <ScaleControl position="bottomleft" />
+                <ScaleControl position="topright" />
                 <GeomanControl  />
                 {/* Layer Switcher */}
                 <LayersControl position="topright">
