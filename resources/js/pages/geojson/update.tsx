@@ -1,4 +1,3 @@
-// resources/js/Pages/Geojson/Edit.tsx
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
@@ -80,7 +79,7 @@ export default function GeojsonEdit() {
     // State to hold the selected category and the filtered options for the orders
     const [selectedKat, setSelectedKat] = useState<Kategori | null>(null);
 
-    const selectedKatId = geojson.id_kategori?.toString() || '';
+    const [selectedKatId, setSelectedKatId] = useState<string>(geojson.id_kategori?.toString() || '');
     const selectedKatOption = kategoris.find((k) => k.id_kategori.toString() === selectedKatId);
 
     useEffect(() => {
@@ -88,7 +87,14 @@ export default function GeojsonEdit() {
             setSelectedKat(selectedKatOption);
             setValue('id_kategori', selectedKatOption.id_kategori.toString());
         }
-    }, [selectedKatId, selectedKatOption, setValue]);
+    }, [selectedKatOption, setValue]);
+
+    useEffect(() => {
+        register('id_kategori', {
+            onChange: (e: any) => setSelectedKatId(e.target.value),
+        });
+        return () => {};
+    }, [register]);
 
     const onSubmit = (data: FormValues) => {
         const formData = new FormData();
@@ -221,19 +227,12 @@ export default function GeojsonEdit() {
                                 </option>
                             ))}
                         </select>
-                        {errors.id_owner && <p className="mt-1 text-sm text-red-500">{errors.id_owner.message}</p>}
-                    </div>
-
-                    {/* Category Picker w/ Preview */}
-                    <div>
-                        <label htmlFor="id_kategori" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Category
-                        </label>
                         <Select
                             options={categoryOptions}
-                            value={categoryOptions.find((option) => option.value.toString() === selectedKatId)} // Set default value
+                            value={categoryOptions.find((option) => option.value.toString() === selectedKatId)}
                             onChange={(selectedOption: any) => {
                                 setSelectedKat(selectedOption);
+                                setSelectedKatId(selectedOption.value.toString());
                                 setValue('id_kategori', selectedOption.value.toString());
                             }}
                             getOptionLabel={(e: (typeof categoryOptions)[number]) => e.label}

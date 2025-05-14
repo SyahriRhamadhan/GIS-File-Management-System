@@ -1,4 +1,5 @@
-import Modal from '@/components/Modal';
+import CategoryFilterModal from '@/components/CategoryFilterModal'; // Import the CategoryFilterModal
+import Modal from '@/components/Modal'; // Keep the original Modal intact
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
@@ -40,7 +41,7 @@ export default function GeojsonIndex() {
     const [userFilter, setUserFilter] = useState<number | string>('');
     const [regionFilter, setRegionFilter] = useState<number | string>('');
     const [ownerFilter, setOwnerFilter] = useState<number | string>('');
-    const [categoryFilter, setCategoryFilter] = useState<number | string>(''); // ← new
+    const [categoryFilter, setCategoryFilter] = useState<number | string>('');
     const [sortBy, setSortBy] = useState<keyof Geojson>('source_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -48,6 +49,8 @@ export default function GeojsonIndex() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedGeojson, setSelectedGeojson] = useState<Geojson | null>(null);
+
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
     // Apply all filters, and search also matches user, region, owner
     const filtered = useMemo(() => {
@@ -145,6 +148,12 @@ export default function GeojsonIndex() {
                     <Link href="/dashboard/geojson/create" className="rounded bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700">
                         + Tambah GeoJSON
                     </Link>
+                    <button
+                        onClick={() => setIsCategoryModalOpen(true)}
+                        className="rounded bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
+                    >
+                        Filter Kategori
+                    </button>
                 </div>
 
                 {/* filters */}
@@ -208,23 +217,6 @@ export default function GeojsonIndex() {
                         {owners.map((o) => (
                             <option key={o.id_owner} value={o.id_owner}>
                                 {o.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    {/* ** kategori ** */}
-                    <select
-                        value={categoryFilter}
-                        onChange={(e) => {
-                            setCategoryFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="w-full max-w-xs rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                    >
-                        <option value="">Semua Kategori</option>
-                        {kategoris.map((k) => (
-                            <option key={k.id_kategori} value={k.id_kategori}>
-                                {k.nama_kategori}
                             </option>
                         ))}
                     </select>
@@ -339,6 +331,19 @@ export default function GeojsonIndex() {
                 </div>
             </div>
 
+            {/* Category filter modal */}
+            <CategoryFilterModal
+                isOpen={isCategoryModalOpen}
+                onClose={() => setIsCategoryModalOpen(false)}
+                categories={kategoris}
+                selectedCategory={categoryFilter.toString()}
+                onCategoryChange={(value: number | string) => {
+                    setCategoryFilter(value);
+                    setIsCategoryModalOpen(false); // Close modal after selection
+                }}
+            />
+
+            {/* GeoJSON Preview Modal */}
             {isModalOpen && selectedGeojson && <Modal geojson={selectedGeojson} onClose={() => setIsModalOpen(false)} />}
         </AppLayout>
     );
