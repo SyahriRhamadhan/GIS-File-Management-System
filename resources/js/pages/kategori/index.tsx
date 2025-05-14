@@ -1,6 +1,6 @@
+// resources/js/Pages/Geojson/Index.tsx
 import AppLayout from '@/layouts/app-layout';
-import { router } from '@inertiajs/core';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 
 interface Kategori {
@@ -82,6 +82,7 @@ export default function Index({ kategoris }: IndexProps) {
     );
 
     const layerOptions = useMemo(() => [...new Set(kategoris.map((k) => k.layer_order))].sort((a, b) => a - b), [kategoris]);
+
     // ──────────────────── FILTER & SORT
     const filtered = useMemo(
         () =>
@@ -90,7 +91,11 @@ export default function Index({ kategoris }: IndexProps) {
                 .sort((a, b) => a.layer_order - b.layer_order)
                 .filter(
                     (k) =>
-                        k.nama_kategori.toLowerCase().includes(search.toLowerCase()) &&
+                        (k.nama_kategori.toLowerCase().includes(search.toLowerCase()) ||
+                            k.orde1?.toLowerCase().includes(search.toLowerCase()) ||
+                            k.orde2?.toLowerCase().includes(search.toLowerCase()) ||
+                            k.orde3?.toLowerCase().includes(search.toLowerCase()) ||
+                            k.orde4?.toLowerCase().includes(search.toLowerCase())) &&
                         (!namaFilter || k.nama_kategori === namaFilter) &&
                         (!orde1Filter || k.orde1 === orde1Filter) &&
                         (!orde2Filter || k.orde2 === orde2Filter) &&
@@ -165,7 +170,7 @@ export default function Index({ kategoris }: IndexProps) {
                         }}
                         className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
                     >
-                        <option value="">Semua Nama</option>
+                        <option value="">Semua Nama</option>
                         {namaOptions.map((n) => (
                             <option key={n} value={n}>
                                 {n}
@@ -173,7 +178,7 @@ export default function Index({ kategoris }: IndexProps) {
                         ))}
                     </select>
 
-                    {/* Orde 1 */}
+                    {/* Orde1 */}
                     <select
                         value={orde1Filter}
                         onChange={(e) => {
@@ -183,7 +188,7 @@ export default function Index({ kategoris }: IndexProps) {
                         }}
                         className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
                     >
-                        <option value="">Semua O1</option>
+                        <option value="">Semua O1</option>
                         {orde1Options.map((o) => (
                             <option key={o} value={o}>
                                 {o}
@@ -191,7 +196,7 @@ export default function Index({ kategoris }: IndexProps) {
                         ))}
                     </select>
 
-                    {/* Orde 2 */}
+                    {/* Orde2 */}
                     <select
                         value={orde2Filter}
                         onChange={(e) => {
@@ -200,7 +205,7 @@ export default function Index({ kategoris }: IndexProps) {
                         }}
                         className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
                     >
-                        <option value="">Semua O2</option>
+                        <option value="">Semua O2</option>
                         {orde2Options.map((o) => (
                             <option key={o} value={o}>
                                 {o}
@@ -208,13 +213,13 @@ export default function Index({ kategoris }: IndexProps) {
                         ))}
                     </select>
 
-                    {/* Orde 3 */}
+                    {/* Orde3 */}
                     <select
                         value={orde3Filter}
                         onChange={(e) => setOrde3Filter(e.target.value)}
                         className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
                     >
-                        <option value="">Semua O3</option>
+                        <option value="">Semua O3</option>
                         {orde3Options.map((o) => (
                             <option key={o} value={o}>
                                 {o}
@@ -222,13 +227,13 @@ export default function Index({ kategoris }: IndexProps) {
                         ))}
                     </select>
 
-                    {/* Urutan Layer */}
+                    {/* Urutan Layer */}
                     <select
                         value={layerFilter}
                         onChange={(e) => setLayerFilter(e.target.value ? Number(e.target.value) : '')}
                         className="rounded border px-3 py-2 shadow-sm dark:bg-gray-800"
                     >
-                        <option value="">Semua Layer</option>
+                        <option value="">Semua Layer</option>
                         {layerOptions.map((l) => (
                             <option key={l} value={l}>
                                 {l}
@@ -250,7 +255,7 @@ export default function Index({ kategoris }: IndexProps) {
                                 <th className="border px-4 py-2">O3</th>
                                 <th className="border px-4 py-2">O4</th>
                                 <th className="border px-4 py-2 text-left">Kode Warna</th>
-                                <th className="border px-4 py-2 text-left">Urutan Layer</th>
+                                <th className="border px-4 py-2 text-left">Urutan Layer</th>
                                 <th className="border px-4 py-2 text-left">Keterangan</th>
                                 <th className="border px-4 py-2 text-center">Aksi</th>
                             </tr>
@@ -311,7 +316,7 @@ export default function Index({ kategoris }: IndexProps) {
                             disabled={currentPage === 1}
                             className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
                         >
-                            « First
+                            « First
                         </button>
 
                         {/* Prev */}
@@ -320,7 +325,7 @@ export default function Index({ kategoris }: IndexProps) {
                             disabled={currentPage === 1}
                             className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
                         >
-                            ‹ Prev
+                            ‹ Prev
                         </button>
 
                         {/* window */}
@@ -328,9 +333,7 @@ export default function Index({ kategoris }: IndexProps) {
                             <button
                                 key={p}
                                 onClick={() => goToPage(p)}
-                                className={`rounded border px-3 py-1 text-sm ${
-                                    currentPage === p ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                                }`}
+                                className={`rounded border px-3 py-1 text-sm ${currentPage === p ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                             >
                                 {p}
                             </button>
@@ -342,7 +345,7 @@ export default function Index({ kategoris }: IndexProps) {
                             disabled={currentPage === pages}
                             className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
                         >
-                            Next ›
+                            Next ›
                         </button>
 
                         {/* Last */}
@@ -351,7 +354,7 @@ export default function Index({ kategoris }: IndexProps) {
                             disabled={currentPage === pages}
                             className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
                         >
-                            Last »
+                            Last »
                         </button>
                     </div>
                 )}

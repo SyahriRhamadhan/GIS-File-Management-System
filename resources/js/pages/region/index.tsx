@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import toast from 'react-hot-toast'; // 🔥 Import toast
+import toast from 'react-hot-toast';
 
 export default function RegionIndex() {
     const { props } = usePage<{
@@ -29,7 +29,16 @@ export default function RegionIndex() {
     const filteredRegions = useMemo(() => {
         let data = [...regions];
         if (search) {
-            data = data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
+            const searchLower = search.toLowerCase();
+            data = data.filter(
+                (item) =>
+                    item.name.toLowerCase().includes(searchLower) ||
+                    item.provinsi.toLowerCase().includes(searchLower) ||
+                    item.kabupaten.toLowerCase().includes(searchLower) ||
+                    item.kecamatan.toLowerCase().includes(searchLower) ||
+                    item.desa.toLowerCase().includes(searchLower) ||
+                    item.detail.toLowerCase().includes(searchLower),
+            );
         }
         if (kecamatanFilter) {
             data = data.filter((item) => item.kecamatan === kecamatanFilter);
@@ -103,7 +112,7 @@ export default function RegionIndex() {
     useEffect(() => {
         setCurrentPage(1);
     }, [search, kecamatanFilter, desaFilter]);
-    
+
     useEffect(() => {
         setDesaFilter('');
     }, [kecamatanFilter]);

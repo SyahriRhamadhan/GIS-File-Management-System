@@ -49,17 +49,35 @@ export default function GeojsonIndex() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedGeojson, setSelectedGeojson] = useState<Geojson | null>(null);
 
-    // Apply all four filters
+    // Apply all filters, and search also matches user, region, owner
     const filtered = useMemo(() => {
         return geojsons
-            .filter(
-                (g) =>
-                    (!search || g.source_name.toLowerCase().includes(search.toLowerCase())) &&
+            .filter((g) => {
+                // Find related user, region, owner
+                const user = users.find((u) => u.id === g.id_user);
+                const region = regions.find((r) => r.id_region === g.id_region);
+                const owner = owners.find((o) => o.id_owner === g.id_owner);
+
+                // Lowercase search
+                const s = search.toLowerCase();
+
+                // Search matches source_name, nama_kategori, user, region, owner
+                const matchesSearch =
+                    !search ||
+                    g.source_name?.toLowerCase().includes(s) ||
+                    g.nama_kategori?.toLowerCase().includes(s) ||
+                    user?.name?.toLowerCase().includes(s) ||
+                    region?.name?.toLowerCase().includes(s) ||
+                    owner?.name?.toLowerCase().includes(s);
+
+                return (
+                    matchesSearch &&
                     (!userFilter || g.id_user === +userFilter) &&
                     (!regionFilter || g.id_region === +regionFilter) &&
                     (!ownerFilter || g.id_owner === +ownerFilter) &&
-                    (!categoryFilter || g.id_kategori === +categoryFilter),
-            )
+                    (!categoryFilter || g.id_kategori === +categoryFilter)
+                );
+            })
             .sort((a, b) => {
                 const aVal = (a[sortBy] ?? '').toString().toLowerCase();
                 const bVal = (b[sortBy] ?? '').toString().toLowerCase();
@@ -67,7 +85,7 @@ export default function GeojsonIndex() {
                 if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
                 return 0;
             });
-    }, [geojsons, search, userFilter, regionFilter, ownerFilter, categoryFilter, sortBy, sortDirection]);
+    }, [geojsons, users, regions, owners, search, userFilter, regionFilter, ownerFilter, categoryFilter, sortBy, sortDirection]);
 
     const pages = Math.ceil(filtered.length / perPage);
     const displayed = useMemo(() => {
