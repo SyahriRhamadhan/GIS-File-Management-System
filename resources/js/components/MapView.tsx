@@ -1,19 +1,31 @@
+// MapView.tsx
 import '@geoman-io/leaflet-geoman-free'; // side-effect: register map.pm
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import 'leaflet/dist/leaflet.css';
-
-import { GeoJSON, LayersControl, MapContainer, ScaleControl, TileLayer } from 'react-leaflet';
+import React from 'react';
+import { FaMapMarkedAlt } from 'react-icons/fa';
+import { FaFilePdf } from 'react-icons/fa6';
+import { IoAddCircleOutline } from 'react-icons/io5';
+import { GeoJSON, LayersControl, MapContainer, Popup, ScaleControl, TileLayer } from 'react-leaflet';
 import GeomanControl from './GeomanControl';
+
 const { BaseLayer, Overlay } = LayersControl;
 
 interface MapViewProps {
-    geojsonData: any[];
+    geojsonData: Array<{
+        id_geojson: number | string;
+        geojson: {
+            geometry: GeoJSON.Geometry;
+            properties: Record<string, any>;
+        };
+    }>;
 }
 
 const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
 
+    // ubah data jadi FeatureCollection
     const formattedGeojson: GeoJSON.FeatureCollection = {
         type: 'FeatureCollection',
         features: geojsonData.map((item) => ({
@@ -26,41 +38,16 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         })),
     };
 
-    const onEachFeature = (feature: any, layer: any) => {
-        if (!feature.properties) return;
-
-        let html = '<div>';
-        Object.entries(feature.properties).forEach(([k, v]) => {
-            if (k === 'id_geojson') return; // skip showing the id itself
-            html += `<p><strong>${k}:</strong> ${v}</p>`;
-        });
-        html += `
-          <div style="text-align:right; margin-top:8px;">
-          <hr/>
-            <a 
-              href="/dashboard/geojson/${feature.properties.id_geojson}/edit"
-             class="inline-block rounded bg-white-600 px-2 py-1 text-white hover:bg-white-700"
-
-              target="_blank"
-            >
-              Edit
-            </a>
-          </div>
-        `;
-        html += '</div>';
-
-        layer.bindPopup(html, {
-            maxWidth: 240,
-        });
-    };
-
     return (
-        <div className="relative z-0 h-[500px] w-full" style={{ height: '500px', width: '100%' }}>
-            <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100vh', width: '100%' }}>
-                {/* Scale Bar */}
+        <div className="h-screen w-full">
+            <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                {/* Scale Controls */}
                 <ScaleControl position="bottomleft" />
                 <ScaleControl position="topright" />
-                <GeomanControl  />
+
+                {/* Geoman Draw Controls */}
+                <GeomanControl />
+
                 {/* Layer Switcher */}
                 <LayersControl position="topright">
                     {/* Base Layers */}
@@ -130,9 +117,49 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                         />
                     </BaseLayer>
 
-                    {/* GeoJSON Overlay */}
+                    {/* GeoJSON Overlay dengan Popup React-style */}
                     <Overlay checked name="GeoJSON Data">
-                        <GeoJSON data={formattedGeojson} onEachFeature={onEachFeature} />
+                        {formattedGeojson.features.map((feat, idx) => (
+                            <GeoJSON key={idx} data={feat}>
+                                <Popup>
+                                    <div className="font-sans text-sm">
+                                        {Object.entries(feat.properties || {})
+                                            .filter(([k]) => k !== 'id_geojson')
+                                            .map(([k, v]) => (
+                                                <p key={k}>
+                                                    <strong>{k}:</strong> {v}
+                                                </p>
+                                            ))}
+                                        <div className="mt-2 space-x-2 text-right">
+                                            <a
+                                                href={`/dashboard/geojson/${feat.properties?.id_geojson}/view`}
+                                                className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                                                target="_blank"
+                                            >
+                                                <IoAddCircleOutline className="mr-1" />
+                                                Add
+                                            </a>
+                                            <a
+                                                href={`/dashboard/geojson/${feat.properties?.id_geojson}/view`}
+                                                className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                                                target="_blank"
+                                            >
+                                                <FaFilePdf className="mr-1" />
+                                                View
+                                            </a>
+                                            <a
+                                                href={`/dashboard/geojson/${feat.properties?.id_geojson}/edit`}
+                                                className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                                                target="_blank"
+                                            >
+                                                <FaMapMarkedAlt className="mr-1" />
+                                                Edit
+                                            </a>
+                                        </div>
+                                    </div>
+                                </Popup>
+                            </GeoJSON>
+                        ))}
                     </Overlay>
                 </LayersControl>
             </MapContainer>
