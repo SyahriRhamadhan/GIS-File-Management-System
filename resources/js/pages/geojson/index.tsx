@@ -16,12 +16,25 @@ interface Geojson {
     kode_warna?: string;
     nama_kategori?: string;
     ket_warna?: string;
+    orde1?: string;
+    orde2?: string;
+    orde3?: string;
+    orde4?: string;
+    kode?: string;
+    layer_order?: number;
 }
 
 interface Kategori {
     id_kategori: number;
     nama_kategori: string;
     kode_warna: string;
+    orde1?: string;
+    orde2?: string;
+    orde3?: string;
+    orde4?: string;
+    kode?: string;
+    ket_warna?: string;
+    layer_order?: number;
 }
 
 interface PageProps {
@@ -51,6 +64,9 @@ export default function GeojsonIndex() {
     const [selectedGeojson, setSelectedGeojson] = useState<Geojson | null>(null);
 
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+    // State for showing detail kategori popup
+    const [detailKategoriId, setDetailKategoriId] = useState<number | null>(null);
 
     // Apply all filters, and search also matches user, region, owner
     const filtered = useMemo(() => {
@@ -239,44 +255,112 @@ export default function GeojsonIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {displayed.map((g, i) => (
-                                <tr key={g.id_geojson} className="bg-white even:bg-gray-50 dark:bg-gray-800 dark:even:bg-gray-700">
-                                    <td className="border px-4 py-2">{(currentPage - 1) * perPage + i + 1}</td>
-                                    <td className="border px-4 py-2">{g.source_name}</td>
-                                    <td className="border px-4 py-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="h-4 w-4 flex-shrink-0 rounded" style={{ backgroundColor: g.kode_warna ?? '#000' }} />
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{g.nama_kategori}</span>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400">{g.kode_warna}</span>
+                            {displayed.map((g, i) => {
+                                // Find kategori detail from the categories array
+                                const kategori = kategoris.find((k) => k.id_kategori === g.id_kategori);
+
+                                return (
+                                    <tr key={g.id_geojson} className="bg-white even:bg-gray-50 dark:bg-gray-800 dark:even:bg-gray-700">
+                                        <td className="border px-4 py-2">{(currentPage - 1) * perPage + i + 1}</td>
+                                        <td className="border px-4 py-2">{g.source_name}</td>
+                                        <td className="border px-4 py-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className="h-4 w-4 flex-shrink-0 rounded" style={{ backgroundColor: g.kode_warna ?? '#000' }} />
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{g.nama_kategori}</span>
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400">{g.kode_warna}</span>
+                                                    <button
+                                                        className="mt-1 w-fit rounded bg-blue-500 px-2 py-0.5 text-xs text-white hover:bg-blue-600"
+                                                        onClick={() => setDetailKategoriId(g.id_geojson)}
+                                                        type="button"
+                                                    >
+                                                        Detail
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="border px-4 py-2">{users.find((u) => u.id === g.id_user)?.name}</td>
-                                    <td className="border px-4 py-2">{regions.find((r) => r.id_region === g.id_region)?.name ?? '-'}</td>
-                                    <td className="border px-4 py-2">{owners.find((o) => o.id_owner === g.id_owner)?.name ?? '-'}</td>
-                                    <td className="flex justify-center gap-1 border px-4 py-2">
-                                        <button onClick={() => handleView(g)} className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600">
-                                            View
-                                        </button>
-                                        <Link
-                                            href={`/dashboard/geojson/${g.id_geojson}/edit`}
-                                            className="rounded bg-yellow-500 px-2 py-1 text-white hover:bg-yellow-600"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDelete(g.id_geojson)}
-                                            className="rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="border px-4 py-2">{users.find((u) => u.id === g.id_user)?.name}</td>
+                                        <td className="border px-4 py-2">{regions.find((r) => r.id_region === g.id_region)?.name ?? '-'}</td>
+                                        <td className="border px-4 py-2">{owners.find((o) => o.id_owner === g.id_owner)?.name ?? '-'}</td>
+                                        <td className="flex justify-center gap-1 border px-4 py-2">
+                                            <button
+                                                onClick={() => handleView(g)}
+                                                className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
+                                            >
+                                                View
+                                            </button>
+                                            <Link
+                                                href={`/dashboard/geojson/${g.id_geojson}/edit`}
+                                                className="rounded bg-yellow-500 px-2 py-1 text-white hover:bg-yellow-600"
+                                            >
+                                                Edit
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDelete(g.id_geojson)}
+                                                className="rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600"
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
+                {/* Popup for detail */}
+                {detailKategoriId !== null && (() => {
+                    const g = displayed.find((item) => item.id_geojson === detailKategoriId);
+                    const kategori = kategoris.find((k) => k.id_kategori === g?.id_kategori);
+                    return (
+                        <div
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+                            onClick={() => setDetailKategoriId(null)}
+                        >
+                            <div
+                                className="rounded bg-white p-6 shadow-lg dark:bg-gray-800"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <h2 className="mb-2 text-lg font-bold">Detail Kategori</h2>
+                                <div className="p-4">
+                                    <div>
+                                        <b>Nama Kategori:</b> {kategori?.nama_kategori ?? '-'}
+                                    </div>
+                                    <div>
+                                        <b>Orde 1:</b> {kategori?.orde1 ?? '-'}
+                                    </div>
+                                    <div>
+                                        <b>Orde 2:</b> {kategori?.orde2 ?? '-'}
+                                    </div>
+                                    <div>
+                                        <b>Orde 3:</b> {kategori?.orde3 ?? '-'}
+                                    </div>
+                                    <div>
+                                        <b>Orde 4:</b> {kategori?.orde4 ?? '-'}
+                                    </div>
+                                    <div>
+                                        <b>Kode:</b> {kategori?.kode ?? '-'}
+                                    </div>
+                                    <div>
+                                        <b>Kode Warna:</b> {kategori?.kode_warna ?? '-'}
+                                    </div>
+                                    <div>
+                                        <b>Keterangan Warna:</b> {kategori?.ket_warna ?? '-'}
+                                    </div>
+                                    <div>
+                                        <b>Layer Order:</b> {kategori?.layer_order ?? '-'}
+                                    </div>
+                                </div>
+                                <button
+                                    className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                                    onClick={() => setDetailKategoriId(null)}
+                                >
+                                    Tutup
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* pagination */}
                 <div className="my-4 flex flex-wrap items-center justify-center gap-2">
