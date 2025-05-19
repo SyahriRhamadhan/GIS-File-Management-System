@@ -19,25 +19,21 @@ interface MapViewProps {
             properties: Record<string, any>;
         };
         kode_warna: string;
+        kategori: {
+            layer_order: number;
+        };
     }>;
 }
 
 const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
-    // Debug kode_warna
-    React.useEffect(() => {
-        console.log(
-            'Daftar kode_warna:',
-            geojsonData.map((item) => item.kode_warna),
-        );
-    }, [geojsonData]);
-
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
+    const sortedData = React.useMemo(() => [...geojsonData].sort((a, b) => a.kategori.layer_order - b.kategori.layer_order), [geojsonData]);
 
     // buat FeatureCollection dan sertakan kode_warna ke properties
     const formattedGeojson: GeoJSON.FeatureCollection = {
         type: 'FeatureCollection',
-        features: geojsonData.map((item) => ({
+        features: sortedData.map((item) => ({
             type: 'Feature',
             geometry: item.geojson.geometry,
             properties: {
@@ -52,14 +48,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const geojsonStyle = (feature: any) => ({
         color: feature.properties.kode_warna,
         fillColor: feature.properties.kode_warna,
-        weight: 2,
+        weight: 4,
         opacity: 1,
         fillOpacity: 0.5,
     });
 
     return (
         <div className="h-screen w-full">
-            <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={center} zoom={zoom} touchZoom={true} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
                 {/* Scale Controls */}
                 <ScaleControl position="bottomleft" />
                 <ScaleControl position="topright" />
