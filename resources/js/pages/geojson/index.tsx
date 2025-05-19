@@ -58,7 +58,7 @@ export default function GeojsonIndex() {
     const [sortBy, setSortBy] = useState<keyof Geojson>('source_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
-    const perPage = 10;
+    const [pageSize, setPageSize] = useState<number | 'all'>(10);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedGeojson, setSelectedGeojson] = useState<Geojson | null>(null);
@@ -130,11 +130,13 @@ export default function GeojsonIndex() {
         sortDirection,
     ]);
 
-    const pages = Math.ceil(filtered.length / perPage);
+    const pages = pageSize === 'all' ? 1 : Math.ceil(filtered.length / pageSize);
+
     const displayed = useMemo(() => {
-        const start = (currentPage - 1) * perPage;
-        return filtered.slice(start, start + perPage);
-    }, [filtered, currentPage]);
+        if (pageSize === 'all') return filtered;
+        const start = (currentPage - 1) * pageSize;
+        return filtered.slice(start, start + pageSize);
+    }, [filtered, currentPage, pageSize]);
 
     const handleView = (g: Geojson) => {
         setSelectedGeojson(g);
@@ -276,7 +278,25 @@ export default function GeojsonIndex() {
                     <table className="w-full min-w-[800px] border text-sm">
                         <thead className="bg-gray-100">
                             <tr className="dark:bg-gray-700">
-                                <th className="border px-4 py-2">#</th>
+                                <th className="border px-4 py-2">
+                                    {/* Rows per page */}
+                                    <select
+                                        value={pageSize}
+                                        onChange={(e) => {
+                                            const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
+                                            setPageSize(val);
+                                            setCurrentPage(1);
+                                        }}
+                                        className="w-full max-w-xs rounded border bg-white px-3 py-2 text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100"
+                                    >
+                                        {[10, 20, 50, 100].map((n) => (
+                                            <option key={n} value={n}>
+                                                {n}
+                                            </option>
+                                        ))}
+                                        <option value="all">All</option>
+                                    </select>
+                                </th>
                                 <th className="cursor-pointer border px-4 py-2" onClick={() => toggleSort('source_name')}>
                                     Source {sortBy === 'source_name' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
                                 </th>
@@ -294,7 +314,9 @@ export default function GeojsonIndex() {
 
                                 return (
                                     <tr key={g.id_geojson} className="bg-white even:bg-gray-50 dark:bg-gray-800 dark:even:bg-gray-700">
-                                        <td className="border px-4 py-2">{(currentPage - 1) * perPage + i + 1}</td>
+                                        <td className="border px-4 py-2">
+                                            {(currentPage - 1) * (pageSize === 'all' ? filtered.length : pageSize) + i + 1}
+                                        </td>
                                         <td className="border px-4 py-2">{g.source_name}</td>
                                         <td className="border px-4 py-2">
                                             <div className="flex items-center gap-2">
