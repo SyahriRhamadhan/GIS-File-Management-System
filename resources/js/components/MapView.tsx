@@ -28,9 +28,15 @@ interface MapViewProps {
 const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
-    const sortedData = React.useMemo(() => [...geojsonData].sort((a, b) => a.kategori.layer_order - b.kategori.layer_order), [geojsonData]);
 
-    // buat FeatureCollection dan sertakan kode_warna ke properties
+    const sortedData = React.useMemo(() => {
+        return [...geojsonData].sort((a, b) => {
+            const aOrder = a.kategori?.layer_order ?? 0;
+            const bOrder = b.kategori?.layer_order ?? 0;
+            return aOrder - bOrder;
+        });
+    }, [geojsonData]);
+
     const formattedGeojson: GeoJSON.FeatureCollection = {
         type: 'FeatureCollection',
         features: sortedData.map((item) => ({
