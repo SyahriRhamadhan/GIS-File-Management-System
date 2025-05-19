@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Kategori extends Model
 {
     use HasFactory, SoftDeletes;
@@ -14,7 +15,7 @@ class Kategori extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'nama_kategori',
+        'orde0',
         'kode_warna',
         'ket_warna',
         'layer_order',

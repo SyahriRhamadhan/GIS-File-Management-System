@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 interface Kategori {
     id_kategori: number;
-    nama_kategori: string;
+    orde0: string;
     orde1?: string;
     orde2?: string;
     orde3?: string;
@@ -35,14 +35,14 @@ export default function Index({ kategoris }: IndexProps) {
     const [layerFilter, setLayerFilter] = useState<number | ''>('');
 
     /* ── OPTION SET ── (unik, diurutkan) */
-    const namaOptions = useMemo(() => [...new Set(kategoris.map((k) => k.nama_kategori).filter(Boolean))].sort(), [kategoris]);
+    const namaOptions = useMemo(() => [...new Set(kategoris.map((k) => k.orde0).filter(Boolean))].sort(), [kategoris]);
 
     const orde1Options = useMemo(
         () =>
             [
                 ...new Set(
                     kategoris
-                        .filter((k) => !namaFilter || k.nama_kategori === namaFilter)
+                        .filter((k) => !namaFilter || k.orde0 === namaFilter)
                         .map((k) => k.orde1)
                         .filter(Boolean),
                 ),
@@ -55,7 +55,7 @@ export default function Index({ kategoris }: IndexProps) {
             [
                 ...new Set(
                     kategoris
-                        .filter((k) => (!namaFilter || k.nama_kategori === namaFilter) && (!orde1Filter || k.orde1 === orde1Filter))
+                        .filter((k) => (!namaFilter || k.orde0 === namaFilter) && (!orde1Filter || k.orde1 === orde1Filter))
                         .map((k) => k.orde2)
                         .filter(Boolean),
                 ),
@@ -70,7 +70,7 @@ export default function Index({ kategoris }: IndexProps) {
                     kategoris
                         .filter(
                             (k) =>
-                                (!namaFilter || k.nama_kategori === namaFilter) &&
+                                (!namaFilter || k.orde0 === namaFilter) &&
                                 (!orde1Filter || k.orde1 === orde1Filter) &&
                                 (!orde2Filter || k.orde2 === orde2Filter),
                         )
@@ -91,12 +91,12 @@ export default function Index({ kategoris }: IndexProps) {
                 .sort((a, b) => a.layer_order - b.layer_order)
                 .filter(
                     (k) =>
-                        (k.nama_kategori.toLowerCase().includes(search.toLowerCase()) ||
+                        (k.orde0.toLowerCase().includes(search.toLowerCase()) ||
                             k.orde1?.toLowerCase().includes(search.toLowerCase()) ||
                             k.orde2?.toLowerCase().includes(search.toLowerCase()) ||
                             k.orde3?.toLowerCase().includes(search.toLowerCase()) ||
                             k.orde4?.toLowerCase().includes(search.toLowerCase())) &&
-                        (!namaFilter || k.nama_kategori === namaFilter) &&
+                        (!namaFilter || k.orde0 === namaFilter) &&
                         (!orde1Filter || k.orde1 === orde1Filter) &&
                         (!orde2Filter || k.orde2 === orde2Filter) &&
                         (!orde3Filter || k.orde3 === orde3Filter) &&
@@ -264,7 +264,7 @@ export default function Index({ kategoris }: IndexProps) {
                             {displayed.map((k, i) => (
                                 <tr key={k.id_kategori} className={i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'}>
                                     <td className="border px-4 py-2">{(currentPage - 1) * perPage + i + 1}</td>
-                                    <td className="border px-4 py-2">{k.nama_kategori}</td>
+                                    <td className="border px-4 py-2">{k.orde0}</td>
                                     <td className="border px-4 py-2">{k.kode || '-'}</td>
                                     <td className="border px-4 py-2">{k.orde1 || '-'}</td>
                                     <td className="border px-4 py-2">{k.orde2 || '-'}</td>

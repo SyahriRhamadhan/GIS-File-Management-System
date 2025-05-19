@@ -1,4 +1,3 @@
-import CategoryFilterModal from '@/components/CategoryFilterModal'; // Import the CategoryFilterModal
 import Modal from '@/components/Modal'; // Keep the original Modal intact
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -14,7 +13,7 @@ interface Geojson {
     id_owner?: number;
     id_kategori?: number;
     kode_warna?: string;
-    nama_kategori?: string;
+    orde0?: string;
     ket_warna?: string;
     orde1?: string;
     orde2?: string;
@@ -26,7 +25,7 @@ interface Geojson {
 
 interface Kategori {
     id_kategori: number;
-    nama_kategori: string;
+    orde0: string;
     kode_warna: string;
     orde1?: string;
     orde2?: string;
@@ -55,6 +54,7 @@ export default function GeojsonIndex() {
     const [regionFilter, setRegionFilter] = useState<number | string>('');
     const [ownerFilter, setOwnerFilter] = useState<number | string>('');
     const [categoryFilter, setCategoryFilter] = useState<number | string>('');
+    const [sourceFilter, setSourceFilter] = useState<string>('');
     const [sortBy, setSortBy] = useState<keyof Geojson>('source_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -63,8 +63,6 @@ export default function GeojsonIndex() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedGeojson, setSelectedGeojson] = useState<Geojson | null>(null);
 
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-
     // State for showing detail kategori popup
     const [detailKategoriId, setDetailKategoriId] = useState<number | null>(null);
 
@@ -72,23 +70,35 @@ export default function GeojsonIndex() {
     const filtered = useMemo(() => {
         return geojsons
             .filter((g) => {
-                // Find related user, region, owner
+                // 1. Filter by source_name dropdown
+                if (sourceFilter && g.source_name !== sourceFilter) {
+                    return false;
+                }
+
+                // 2. Cari relasi lain
                 const user = users.find((u) => u.id === g.id_user);
                 const region = regions.find((r) => r.id_region === g.id_region);
                 const owner = owners.find((o) => o.id_owner === g.id_owner);
+                const kategoriObj = kategoris.find((k) => k.id_kategori === g.id_kategori);
 
-                // Lowercase search
+                // 3. Gabungkan orde kategori
+                const kategoriString = [kategoriObj?.orde0, kategoriObj?.orde1, kategoriObj?.orde2, kategoriObj?.orde3, kategoriObj?.orde4]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase();
+
+                // 4. Pencarian text
                 const s = search.toLowerCase();
-
-                // Search matches source_name, nama_kategori, user, region, owner
                 const matchesSearch =
                     !search ||
-                    g.source_name?.toLowerCase().includes(s) ||
-                    g.nama_kategori?.toLowerCase().includes(s) ||
-                    user?.name?.toLowerCase().includes(s) ||
-                    region?.name?.toLowerCase().includes(s) ||
-                    owner?.name?.toLowerCase().includes(s);
+                    g.source_name.toLowerCase().includes(s) ||
+                    g.orde0?.toLowerCase().includes(s) ||
+                    user?.name.toLowerCase().includes(s) ||
+                    region?.name.toLowerCase().includes(s) ||
+                    owner?.name.toLowerCase().includes(s) ||
+                    kategoriString.includes(s);
 
+                // 5. Gabungkan semua filter
                 return (
                     matchesSearch &&
                     (!userFilter || g.id_user === +userFilter) &&
@@ -104,7 +114,21 @@ export default function GeojsonIndex() {
                 if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
                 return 0;
             });
-    }, [geojsons, users, regions, owners, search, userFilter, regionFilter, ownerFilter, categoryFilter, sortBy, sortDirection]);
+    }, [
+        geojsons,
+        sourceFilter, // ← tambahkan di deps
+        users,
+        regions,
+        owners,
+        kategoris,
+        search,
+        userFilter,
+        regionFilter,
+        ownerFilter,
+        categoryFilter,
+        sortBy,
+        sortDirection,
+    ]);
 
     const pages = Math.ceil(filtered.length / perPage);
     const displayed = useMemo(() => {
@@ -164,12 +188,6 @@ export default function GeojsonIndex() {
                     <Link href="/dashboard/geojson/create" className="rounded bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700">
                         + Tambah GeoJSON
                     </Link>
-                    <button
-                        onClick={() => setIsCategoryModalOpen(true)}
-                        className="rounded bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
-                    >
-                        Filter Kategori
-                    </button>
                 </div>
 
                 {/* filters */}
@@ -177,7 +195,7 @@ export default function GeojsonIndex() {
                     {/* search */}
                     <input
                         type="text"
-                        placeholder="Cari source name..."
+                        placeholder="Cari..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
@@ -185,6 +203,21 @@ export default function GeojsonIndex() {
                         }}
                         className="w-full max-w-md rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                     />
+                    <select
+                        value={sourceFilter}
+                        onChange={(e) => {
+                            setSourceFilter(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                        className="w-full max-w-xs rounded border bg-white px-3 py-2 text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100"
+                    >
+                        <option value="">Semua Source</option>
+                        {Array.from(new Set(geojsons.map((g) => g.source_name))).map((src) => (
+                            <option key={src} value={src}>
+                                {src}
+                            </option>
+                        ))}
+                    </select>
 
                     {/* user */}
                     <select
@@ -267,7 +300,19 @@ export default function GeojsonIndex() {
                                             <div className="flex items-center gap-2">
                                                 <span className="h-4 w-4 flex-shrink-0 rounded" style={{ backgroundColor: g.kode_warna ?? '#000' }} />
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{g.nama_kategori}</span>
+                                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                                                        {kategori ? (
+                                                            <ul className="list-disc pl-4">
+                                                                {[kategori.orde0, kategori.orde1, kategori.orde2, kategori.orde3, kategori.orde4]
+                                                                    .filter(Boolean)
+                                                                    .map((orde, idx) => (
+                                                                        <li key={idx}>{orde}</li>
+                                                                    ))}
+                                                            </ul>
+                                                        ) : (
+                                                            g.orde0
+                                                        )}
+                                                    </span>
                                                     <span className="text-xs text-gray-500 dark:text-gray-400">{g.kode_warna}</span>
                                                     <button
                                                         className="mt-1 w-fit rounded bg-blue-500 px-2 py-0.5 text-xs text-white hover:bg-blue-600"
@@ -309,58 +354,56 @@ export default function GeojsonIndex() {
                     </table>
                 </div>
                 {/* Popup for detail */}
-                {detailKategoriId !== null && (() => {
-                    const g = displayed.find((item) => item.id_geojson === detailKategoriId);
-                    const kategori = kategoris.find((k) => k.id_kategori === g?.id_kategori);
-                    return (
-                        <div
-                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-                            onClick={() => setDetailKategoriId(null)}
-                        >
+                {detailKategoriId !== null &&
+                    (() => {
+                        const g = displayed.find((item) => item.id_geojson === detailKategoriId);
+                        const kategori = kategoris.find((k) => k.id_kategori === g?.id_kategori);
+                        return (
                             <div
-                                className="rounded bg-white p-6 shadow-lg dark:bg-gray-800"
-                                onClick={(e) => e.stopPropagation()}
+                                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+                                onClick={() => setDetailKategoriId(null)}
                             >
-                                <h2 className="mb-2 text-lg font-bold">Detail Kategori</h2>
-                                <div className="p-4">
-                                    <div>
-                                        <b>Nama Kategori:</b> {kategori?.nama_kategori ?? '-'}
+                                <div className="rounded bg-white p-6 shadow-lg dark:bg-gray-800" onClick={(e) => e.stopPropagation()}>
+                                    <h2 className="mb-2 text-lg font-bold">Detail Kategori</h2>
+                                    <div className="p-4">
+                                        <div>
+                                            <b>Nama Kategori:</b> {kategori?.orde0 ?? '-'}
+                                        </div>
+                                        <div>
+                                            <b>Orde 1:</b> {kategori?.orde1 ?? '-'}
+                                        </div>
+                                        <div>
+                                            <b>Orde 2:</b> {kategori?.orde2 ?? '-'}
+                                        </div>
+                                        <div>
+                                            <b>Orde 3:</b> {kategori?.orde3 ?? '-'}
+                                        </div>
+                                        <div>
+                                            <b>Orde 4:</b> {kategori?.orde4 ?? '-'}
+                                        </div>
+                                        <div>
+                                            <b>Kode:</b> {kategori?.kode ?? '-'}
+                                        </div>
+                                        <div>
+                                            <b>Kode Warna:</b> {kategori?.kode_warna ?? '-'}
+                                        </div>
+                                        <div>
+                                            <b>Keterangan Warna:</b> {kategori?.ket_warna ?? '-'}
+                                        </div>
+                                        <div>
+                                            <b>Layer Order:</b> {kategori?.layer_order ?? '-'}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <b>Orde 1:</b> {kategori?.orde1 ?? '-'}
-                                    </div>
-                                    <div>
-                                        <b>Orde 2:</b> {kategori?.orde2 ?? '-'}
-                                    </div>
-                                    <div>
-                                        <b>Orde 3:</b> {kategori?.orde3 ?? '-'}
-                                    </div>
-                                    <div>
-                                        <b>Orde 4:</b> {kategori?.orde4 ?? '-'}
-                                    </div>
-                                    <div>
-                                        <b>Kode:</b> {kategori?.kode ?? '-'}
-                                    </div>
-                                    <div>
-                                        <b>Kode Warna:</b> {kategori?.kode_warna ?? '-'}
-                                    </div>
-                                    <div>
-                                        <b>Keterangan Warna:</b> {kategori?.ket_warna ?? '-'}
-                                    </div>
-                                    <div>
-                                        <b>Layer Order:</b> {kategori?.layer_order ?? '-'}
-                                    </div>
+                                    <button
+                                        className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                                        onClick={() => setDetailKategoriId(null)}
+                                    >
+                                        Tutup
+                                    </button>
                                 </div>
-                                <button
-                                    className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                                    onClick={() => setDetailKategoriId(null)}
-                                >
-                                    Tutup
-                                </button>
                             </div>
-                        </div>
-                    );
-                })()}
+                        );
+                    })()}
 
                 {/* pagination */}
                 <div className="my-4 flex flex-wrap items-center justify-center gap-2">
@@ -414,18 +457,6 @@ export default function GeojsonIndex() {
                     </button>
                 </div>
             </div>
-
-            {/* Category filter modal */}
-            <CategoryFilterModal
-                isOpen={isCategoryModalOpen}
-                onClose={() => setIsCategoryModalOpen(false)}
-                categories={kategoris}
-                selectedCategory={categoryFilter.toString()}
-                onCategoryChange={(value: number | string) => {
-                    setCategoryFilter(value);
-                    setIsCategoryModalOpen(false); // Close modal after selection
-                }}
-            />
 
             {/* GeoJSON Preview Modal */}
             {isModalOpen && selectedGeojson && <Modal geojson={selectedGeojson} onClose={() => setIsModalOpen(false)} />}

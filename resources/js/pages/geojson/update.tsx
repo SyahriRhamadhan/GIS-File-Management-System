@@ -1,13 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 
 interface Kategori {
     id_kategori: number;
-    nama_kategori: string;
+    orde0: string;
     kode_warna: string;
     ket_warna: string;
     orde1: string;
@@ -66,6 +66,7 @@ export default function GeojsonEdit() {
         register,
         handleSubmit,
         setValue,
+        control,
         formState: { errors, isSubmitting },
     } = useForm<FormValues>({
         defaultValues: {
@@ -130,7 +131,7 @@ export default function GeojsonEdit() {
     // Format for React Select
     const categoryOptions = kategoris.map((k) => ({
         value: k.id_kategori,
-        label: `${k.nama_kategori} / ${k.orde1} / ${k.orde2} / ${k.orde3} / ${k.orde4}`,
+        label: `${k.orde0} / ${k.orde1} / ${k.orde2} / ${k.orde3} / ${k.orde4}`,
         ...k, // Attach the whole category data to the option
     }));
 
@@ -227,31 +228,45 @@ export default function GeojsonEdit() {
                                 </option>
                             ))}
                         </select>
-                        <Select
-                            options={categoryOptions}
-                            value={categoryOptions.find((option) => option.value.toString() === selectedKatId)}
-                            onChange={(selectedOption: any) => {
-                                setSelectedKat(selectedOption);
-                                setSelectedKatId(selectedOption.value.toString());
-                                setValue('id_kategori', selectedOption.value.toString());
-                            }}
-                            getOptionLabel={(e: (typeof categoryOptions)[number]) => e.label}
-                            getOptionValue={(e: { value: number }) => e.value.toString()}
-                            placeholder="— Select Category —"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        />
+                        {/* Category with live-preview (pakai Controller) */}
+                        <div>
+                            <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Category</label>
+                            <Controller
+                                name="id_kategori"
+                                control={control}
+                                defaultValue={selectedKatId}
+                                render={({ field }) => (
+                                    <Select
+                                        {...field}
+                                        options={categoryOptions}
+                                        value={categoryOptions.find((opt) => opt.value.toString() === field.value)}
+                                        onChange={(opt) => {
+                                            field.onChange(opt?.value.toString() ?? '');
+                                            setSelectedKat(opt ?? null);
+                                        }}
+                                        getOptionLabel={(e) => e.label}
+                                        getOptionValue={(e) => e.value.toString()}
+                                        placeholder="— Select Category —"
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    />
+                                )}
+                            />
+                            {errors.id_kategori && <p className="mt-1 text-sm text-red-500">{errors.id_kategori.message}</p>}
 
-                        {selectedKat && (
-                            <div className="mt-2 flex items-center gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
-                                <span className="block h-5 w-5 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
-                                <div className="text-sm">
-                                    <p className="font-medium">{selectedKat.nama_kategori}</p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                                        {selectedKat.ket_warna} ({selectedKat.kode_warna})
-                                    </p>
+                            {selectedKat && (
+                                <div className="mt-2 flex items-center gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                                    <span className="block h-6 w-6 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
+                                    <div className="text-sm">
+                                        <p className="font-medium text-gray-900 dark:text-gray-100">{selectedKat.orde0}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Orde 1 = {selectedKat.orde1}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Orde 2 = {selectedKat.orde2}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Orde 3 = {selectedKat.orde3}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Orde 4 = {selectedKat.orde4}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">*Ket {selectedKat.ket_warna}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
 
                     {/* Actions */}

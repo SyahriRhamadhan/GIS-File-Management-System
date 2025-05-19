@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
 interface Kategori {
     id_kategori: number;
-    nama_kategori: string;
+    orde0: string;
     kode_warna: string;
     ket_warna?: string;
     layer_order: number; // ⬅️ tambah tipe
@@ -18,7 +18,7 @@ interface PageProps {
 export default function Edit() {
     const { kategori } = usePage<PageProps>().props;
     const { data, setData, put, processing, errors } = useForm({
-        nama_kategori: kategori.nama_kategori,
+        orde0: kategori.orde0,
         kode_warna: kategori.kode_warna,
         ket_warna: kategori.ket_warna || '',
         layer_order: kategori.layer_order,
@@ -56,13 +56,8 @@ export default function Edit() {
                     {/* Nama Kategori */}
                     <div>
                         <label className="block font-medium">Nama Kategori</label>
-                        <input
-                            type="text"
-                            value={data.nama_kategori}
-                            onChange={(e) => setData('nama_kategori', e.target.value)}
-                            className={inputClasses}
-                        />
-                        {errors.nama_kategori && <div className="mt-1 text-red-600">{errors.nama_kategori}</div>}
+                        <input type="text" value={data.orde0} onChange={(e) => setData('orde0', e.target.value)} className={inputClasses} />
+                        {errors.orde0 && <div className="mt-1 text-red-600">{errors.orde0}</div>}
                     </div>
 
                     {/* Kode Warna */}

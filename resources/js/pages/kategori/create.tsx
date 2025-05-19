@@ -3,7 +3,7 @@ import { Head, useForm } from '@inertiajs/react';
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
-        nama_kategori: '',
+        orde0: '',
         kode: '',
         orde1: '',
         orde2: '',
@@ -44,13 +44,8 @@ export default function Create() {
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label className="block font-medium">Nama Kategori</label>
-                            <input
-                                type="text"
-                                value={data.nama_kategori}
-                                onChange={(e) => setData('nama_kategori', e.target.value)}
-                                className={inputClasses}
-                            />
-                            {errors.nama_kategori && <div className="mt-1 text-red-600">{errors.nama_kategori}</div>}
+                            <input type="text" value={data.orde0} onChange={(e) => setData('orde0', e.target.value)} className={inputClasses} />
+                            {errors.orde0 && <div className="mt-1 text-red-600">{errors.orde0}</div>}
                         </div>
 
                         <div>

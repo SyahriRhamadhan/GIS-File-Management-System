@@ -106,7 +106,7 @@ class KategoriSeeder extends Seeder
             Kategori::updateOrCreate(
                 ['kode' => $r['kode']],
                 [
-                    'nama_kategori' => $r['nama'],
+                    'orde0' => $r['nama'],
                     'orde1'         => $r['orde1']        ?? null,
                     'orde2'         => $r['orde2']        ?? null,
                     'orde3'         => $r['orde3']        ?? null,
