@@ -535,10 +535,13 @@ export default function GeojsonIndex() {
                     </button>
                 </div>
                 {showBulkModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                        <div className="mx-4 flex max-h-[100vh] w-full flex-col rounded bg-white p-3 shadow-lg sm:mx-auto sm:max-w-3xl lg:max-w-5xl">
-                            <h2 className="mb-4 text-xl font-semibold">Konfirmasi Hapus</h2>
-                            <div className="mb-2 text-sm text-gray-700">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowBulkModal(false)}>
+                        <div
+                            className="mx-4 flex max-h-[100vh] w-full flex-col rounded bg-white p-3 shadow-lg sm:mx-auto sm:max-w-3xl lg:max-w-5xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <h2 className="mb-1 text-xl font-semibold">Konfirmasi Hapus</h2>
+                            <div className="mb-2 text-lg text-gray-700">
                                 Total dipilih: <b>{selectedIds.length}</b> item
                             </div>
                             <div className="mb-4 flex-1 overflow-y-auto">
@@ -551,6 +554,7 @@ export default function GeojsonIndex() {
                                             <th className="border px-2 py-1">User</th>
                                             <th className="border px-2 py-1">Region</th>
                                             <th className="border px-2 py-1">Owner</th>
+                                            <th className="border px-2 py-1">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -606,6 +610,16 @@ export default function GeojsonIndex() {
                                                         </td>
                                                         <td className="border px-2 py-1">
                                                             {owners.find((o) => o.id_owner === g.id_owner)?.name ?? '-'}
+                                                        </td>
+                                                        <td className="border px-2 py-1">
+                                                            <div className="flex h-full flex-col items-center justify-center">
+                                                                <button
+                                                                    onClick={() => handleView(g)}
+                                                                    className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
+                                                                >
+                                                                    View
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 );
