@@ -174,6 +174,31 @@ export default function GeojsonIndex() {
         return Array.from({ length: end - start + 1 }, (_, i) => start + i);
     }, [currentPage, pages]);
 
+    // State untuk menyimpan ID geojson yang dipilih
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+    // Toggle single checkbox
+    const toggleSelect = (id: number) => {
+        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    };
+
+    // Toggle “select all” pada current page
+    const toggleSelectAll = (checked: boolean, ids: number[]) => {
+        if (checked) setSelectedIds(ids);
+        else setSelectedIds([]);
+    };
+
+    // Bulk delete handler
+    const handleBulkDelete = () => {
+        if (!selectedIds.length) return;
+        if (!confirm(`Hapus ${selectedIds.length} item terpilih?`)) return;
+        Promise.all(selectedIds.map((id) => router.delete(`/dashboard/geojson/${id}`, { preserveScroll: true }))).then(() => {
+            toast.success('Items terhapus');
+            setSelectedIds([]);
+            setCurrentPage(1);
+        });
+    };
+
     return (
         <AppLayout
             breadcrumbs={[
@@ -190,6 +215,13 @@ export default function GeojsonIndex() {
                     <Link href="/dashboard/geojson/create" className="rounded bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700">
                         + Tambah GeoJSON
                     </Link>
+                    <button
+                        onClick={handleBulkDelete}
+                        disabled={!selectedIds.length}
+                        className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
+                    >
+                        Delete Selected
+                    </button>
                 </div>
 
                 {/* filters */}
@@ -280,6 +312,19 @@ export default function GeojsonIndex() {
                             <tr className="dark:bg-gray-700">
                                 <th className="border px-4 py-2">
                                     {/* Rows per page */}
+                                    <label className="flex items-center gap-1">
+                                        <input
+                                            type="checkbox"
+                                            checked={displayed.length > 0 && displayed.every((g) => selectedIds.includes(g.id_geojson))}
+                                            onChange={(e) =>
+                                                toggleSelectAll(
+                                                    e.target.checked,
+                                                    displayed.map((g) => g.id_geojson),
+                                                )
+                                            }
+                                        />
+                                        <span className="text-1xl my-1 text-gray-500">Select All</span>
+                                    </label>
                                     <select
                                         value={pageSize}
                                         onChange={(e) => {
@@ -315,7 +360,16 @@ export default function GeojsonIndex() {
                                 return (
                                     <tr key={g.id_geojson} className="bg-white even:bg-gray-50 dark:bg-gray-800 dark:even:bg-gray-700">
                                         <td className="border px-4 py-2">
-                                            {(currentPage - 1) * (pageSize === 'all' ? filtered.length : pageSize) + i + 1}
+                                            <div className="flex items-center justify-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.includes(g.id_geojson)}
+                                                    onChange={() => toggleSelect(g.id_geojson)}
+                                                />
+                                                <span className="mx-auto">
+                                                    {(currentPage - 1) * (pageSize === 'all' ? filtered.length : pageSize) + i + 1}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td className="border px-4 py-2">{g.source_name}</td>
                                         <td className="border px-4 py-2">
