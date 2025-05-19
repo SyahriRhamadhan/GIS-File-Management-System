@@ -48,7 +48,7 @@ interface PageProps {
 
 export default function GeojsonIndex() {
     const { geojsons, users, regions, owners, kategoris, flash } = usePage<PageProps>().props;
-
+    const [showBulkModal, setShowBulkModal] = useState(false);
     const [search, setSearch] = useState('');
     const [userFilter, setUserFilter] = useState<number | string>('');
     const [regionFilter, setRegionFilter] = useState<number | string>('');
@@ -188,14 +188,16 @@ export default function GeojsonIndex() {
         else setSelectedIds([]);
     };
 
-    // Bulk delete handler
     const handleBulkDelete = () => {
         if (!selectedIds.length) return;
-        if (!confirm(`Hapus ${selectedIds.length} item terpilih?`)) return;
+        setShowBulkModal(true);
+    };
+    const confirmBulkDelete = () => {
         Promise.all(selectedIds.map((id) => router.delete(`/dashboard/geojson/${id}`, { preserveScroll: true }))).then(() => {
             toast.success('Items terhapus');
             setSelectedIds([]);
             setCurrentPage(1);
+            setShowBulkModal(false);
         });
     };
 
@@ -532,6 +534,96 @@ export default function GeojsonIndex() {
                         Last »
                     </button>
                 </div>
+                {showBulkModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                        <div className="mx-4 flex max-h-[100vh] w-full flex-col rounded bg-white p-3 shadow-lg sm:mx-auto sm:max-w-3xl lg:max-w-5xl">
+                            <h2 className="mb-4 text-xl font-semibold">Konfirmasi Hapus</h2>
+                            <div className="mb-2 text-sm text-gray-700">
+                                Total dipilih: <b>{selectedIds.length}</b> item
+                            </div>
+                            <div className="mb-4 flex-1 overflow-y-auto">
+                                <table className="min-w-full border text-sm">
+                                    <thead className="sticky top-0 bg-gray-100">
+                                        <tr>
+                                            <th className="border px-2 py-1">#</th>
+                                            <th className="border px-2 py-1">Source</th>
+                                            <th className="border px-2 py-1">Kategori</th>
+                                            <th className="border px-2 py-1">User</th>
+                                            <th className="border px-2 py-1">Region</th>
+                                            <th className="border px-2 py-1">Owner</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filtered
+                                            .filter((g) => selectedIds.includes(g.id_geojson))
+                                            .map((g: Geojson) => {
+                                                const nomor = filtered.findIndex((item) => item.id_geojson === g.id_geojson) + 1;
+                                                const kategori = kategoris.find((k) => k.id_kategori === g.id_kategori);
+                                                return (
+                                                    <tr key={g.id_geojson}>
+                                                        <td className="border px-2 py-1">{nomor}</td>
+                                                        <td className="border px-2 py-1">{g.source_name}</td>
+                                                        <td className="border px-4 py-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span
+                                                                    className="h-4 w-4 flex-shrink-0 rounded"
+                                                                    style={{ backgroundColor: g.kode_warna ?? '#000' }}
+                                                                />
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                                                                        {kategori ? (
+                                                                            <ul className="list-disc pl-4">
+                                                                                {[
+                                                                                    kategori.orde0,
+                                                                                    kategori.orde1,
+                                                                                    kategori.orde2,
+                                                                                    kategori.orde3,
+                                                                                    kategori.orde4,
+                                                                                ]
+                                                                                    .filter(Boolean)
+                                                                                    .map((orde, idx) => (
+                                                                                        <li key={idx}>{orde}</li>
+                                                                                    ))}
+                                                                            </ul>
+                                                                        ) : (
+                                                                            g.orde0
+                                                                        )}
+                                                                    </span>
+                                                                    <span className="text-xs text-gray-500 dark:text-gray-400">{g.kode_warna}</span>
+                                                                    <button
+                                                                        className="mt-1 w-fit rounded bg-blue-500 px-2 py-0.5 text-xs text-white hover:bg-blue-600"
+                                                                        onClick={() => setDetailKategoriId(g.id_geojson)}
+                                                                        type="button"
+                                                                    >
+                                                                        Detail
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="border px-2 py-1">{users.find((u) => u.id === g.id_user)?.name}</td>
+                                                        <td className="border px-2 py-1">
+                                                            {regions.find((r) => r.id_region === g.id_region)?.name ?? '-'}
+                                                        </td>
+                                                        <td className="border px-2 py-1">
+                                                            {owners.find((o) => o.id_owner === g.id_owner)?.name ?? '-'}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="mt-4 flex justify-end space-x-2">
+                                <button onClick={() => setShowBulkModal(false)} className="rounded bg-gray-200 px-4 py-2 hover:bg-gray-300">
+                                    Batal
+                                </button>
+                                <button onClick={confirmBulkDelete} className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* GeoJSON Preview Modal */}
