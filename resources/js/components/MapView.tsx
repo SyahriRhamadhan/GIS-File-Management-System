@@ -18,14 +18,23 @@ interface MapViewProps {
             geometry: GeoJSON.Geometry;
             properties: Record<string, any>;
         };
+        kode_warna: string;
     }>;
 }
 
 const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
+    // Debug kode_warna
+    React.useEffect(() => {
+        console.log(
+            'Daftar kode_warna:',
+            geojsonData.map((item) => item.kode_warna),
+        );
+    }, [geojsonData]);
+
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
 
-    // ubah data jadi FeatureCollection
+    // buat FeatureCollection dan sertakan kode_warna ke properties
     const formattedGeojson: GeoJSON.FeatureCollection = {
         type: 'FeatureCollection',
         features: geojsonData.map((item) => ({
@@ -34,9 +43,19 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
             properties: {
                 ...item.geojson.properties,
                 id_geojson: item.id_geojson,
+                kode_warna: item.kode_warna || '#3388ff',
             },
         })),
     };
+
+    // style function menggunakan kode_warna
+    const geojsonStyle = (feature: any) => ({
+        color: feature.properties.kode_warna,
+        fillColor: feature.properties.kode_warna,
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.5,
+    });
 
     return (
         <div className="h-screen w-full">
@@ -120,7 +139,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                     {/* GeoJSON Overlay dengan Popup React-style */}
                     <Overlay checked name="GeoJSON Data">
                         {formattedGeojson.features.map((feat, idx) => (
-                            <GeoJSON key={idx} data={feat}>
+                            <GeoJSON key={idx} data={feat} style={geojsonStyle}>
                                 <Popup>
                                     <div className="font-sans text-sm">
                                         {Object.entries(feat.properties || {})
