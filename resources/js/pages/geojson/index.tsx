@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import Select from 'react-select';
 
 interface Geojson {
     id_geojson: number;
@@ -201,6 +202,11 @@ export default function GeojsonIndex() {
         });
     };
 
+    const sourceOptions = Array.from(new Set(geojsons.map((g) => g.source_name))).map((src) => ({
+        value: src,
+        label: src,
+    }));
+
     return (
         <AppLayout
             breadcrumbs={[
@@ -239,21 +245,17 @@ export default function GeojsonIndex() {
                         }}
                         className="w-full max-w-md rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                     />
-                    <select
-                        value={sourceFilter}
-                        onChange={(e) => {
-                            setSourceFilter(e.target.value);
+                    <Select
+                        options={sourceOptions}
+                        className="w-full max-w-xs rounded border bg-white px-3 py-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100"
+                        value={sourceOptions.find((option) => option.value === sourceFilter) || null}
+                        onChange={(selectedOption) => {
+                            setSourceFilter(selectedOption ? selectedOption.value : '');
                             setCurrentPage(1);
                         }}
-                        className="w-full max-w-xs rounded border bg-white px-3 py-2 text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100"
-                    >
-                        <option value="">Semua Source</option>
-                        {Array.from(new Set(geojsons.map((g) => g.source_name))).map((src) => (
-                            <option key={src} value={src}>
-                                {src}
-                            </option>
-                        ))}
-                    </select>
+                        isClearable
+                        placeholder="Pilih source..."
+                    />
 
                     {/* user */}
                     <select
