@@ -1,3 +1,4 @@
+import BaseLayers from '@/components/BaseLayer';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { Feature } from 'geojson';
@@ -6,9 +7,8 @@ import React, { useMemo, useState } from 'react';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { FaFilePdf } from 'react-icons/fa6';
 import { IoAddCircleOutline } from 'react-icons/io5';
-import { GeoJSON, LayersControl, MapContainer, Popup, ScaleControl, TileLayer } from 'react-leaflet';
+import { GeoJSON, LayersControl, MapContainer, Popup, ScaleControl } from 'react-leaflet';
 import GeomanControl from './GeomanControl';
-import BaseLayers from '@/components/BaseLayer'; 
 
 const { BaseLayer, Overlay } = LayersControl;
 
@@ -162,7 +162,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     return (
         <div className="flex h-screen">
             {/* Konten Peta */}
-            <div className={`relative flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-72' : ''}`}>
+            <div className={`relative flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-67' : 'mr-10'}`}>
                 <MapContainer center={center} zoom={zoom} touchZoom scrollWheelZoom style={{ height: '100%', width: '100%' }}>
                     <ScaleControl position="bottomleft" />
                     <ScaleControl position="topright" />
@@ -217,8 +217,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
 
             {/* Sidebar filter kanan */}
             <div
-                className={`fixed top-0 right-0 flex h-full flex-col border-l border-gray-300 bg-white shadow-lg transition-all duration-300 ${
-                    sidebarOpen ? 'w-72 p-4' : 'w-10 p-2'
+                className={`fixed top-0 right-0 z-[9999] flex h-full flex-col border-l border-gray-300 bg-white shadow-lg transition-all duration-300 ${
+                    sidebarOpen ? 'w-72 p-4' : 'w-18 p-4'
                 } overflow-auto`}
             >
                 {/* Tombol toggle sidebar */}
