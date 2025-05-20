@@ -1,5 +1,5 @@
 // MapView.tsx
-import '@geoman-io/leaflet-geoman-free'; // side-effect: register map.pm
+import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { Feature } from 'geojson';
 import 'leaflet/dist/leaflet.css';
@@ -40,7 +40,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         });
     }, [geojsonData]);
 
-    // Kelompokkan data berdasarkan source_name
+    // Unik source_name
+    const uniqueSourceNames = React.useMemo(() => {
+        const set = new Set<string>();
+        geojsonData.forEach((item) => set.add(item.source_name));
+        return Array.from(set);
+    }, [geojsonData]);
+
+    // Group per source_name
     const groupedBySourceName = React.useMemo(() => {
         const groups: Record<string, typeof geojsonData> = {};
         sortedData.forEach((item) => {
@@ -51,7 +58,60 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         return groups;
     }, [sortedData]);
 
-    // Style GeoJSON berdasarkan kode_warna
+    // Ambil sub-group unik per source_name (asumsi property 'sub_group')
+    const subGroupsBySourceName = React.useMemo(() => {
+        const result: Record<string, string[]> = {};
+        for (const sourceName of uniqueSourceNames) {
+            const items = groupedBySourceName[sourceName] || [];
+            const subSet = new Set<string>();
+            items.forEach((item) => {
+                const sub = item.geojson.properties?.sub_group || 'Undefined';
+                subSet.add(sub);
+            });
+            result[sourceName] = Array.from(subSet);
+        }
+        return result;
+    }, [uniqueSourceNames, groupedBySourceName]);
+
+    // State filter checkbox source_name
+    const [activeSourceFilters, setActiveSourceFilters] = React.useState<Record<string, boolean>>(() =>
+        uniqueSourceNames.reduce(
+            (acc, name) => {
+                acc[name] = true; // default semua true
+                return acc;
+            },
+            {} as Record<string, boolean>,
+        ),
+    );
+
+    // State filter dropdown sub_group per source_name
+    const [activeSubGroupFilters, setActiveSubGroupFilters] = React.useState<Record<string, string | 'all'>>(() =>
+        uniqueSourceNames.reduce(
+            (acc, name) => {
+                acc[name] = 'all';
+                return acc;
+            },
+            {} as Record<string, string | 'all'>,
+        ),
+    );
+
+    // Toggle source_name checkbox
+    const toggleSourceFilter = (name: string) => {
+        setActiveSourceFilters((prev) => ({
+            ...prev,
+            [name]: !prev[name],
+        }));
+    };
+
+    // Set dropdown sub-group
+    const setSubGroupFilter = (sourceName: string, subGroup: string | 'all') => {
+        setActiveSubGroupFilters((prev) => ({
+            ...prev,
+            [sourceName]: subGroup,
+        }));
+    };
+
+    // GeoJSON style
     const geojsonStyle = (feature: any): L.PathOptions => ({
         color: feature.properties.kode_warna,
         fillColor: feature.properties.kode_warna,
@@ -60,7 +120,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         fillOpacity: 0.5,
     });
 
-    // Helper render popup content
+    // Popup content render
     const renderPopupContent = (item: (typeof geojsonData)[0]) => (
         <div className="font-sans text-sm">
             {Object.entries(item.geojson.properties || {})
@@ -106,14 +166,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     );
 
     return (
-        <div className="h-screen w-full">
-            <MapContainer center={center} zoom={zoom} touchZoom scrollWheelZoom style={{ height: '100%', width: '100%' }}>
-                {/* Scale Controls */}
-                <ScaleControl position="bottomleft" />
-                <ScaleControl position="topright" />
+        <div className="flex h-screen">
+            {/* Konten peta kiri */}
+            <div className="relative flex-1">
+                <MapContainer center={center} zoom={zoom} touchZoom scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+                    <ScaleControl position="bottomleft" />
+                    <ScaleControl position="topright" />
 
-                {/* Geoman Draw Controls */}
-                <GeomanControl />
+                    <GeomanControl />
 
                 {/* Layer Switcher */}
                 <LayersControl position="topright">
@@ -184,32 +244,80 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                         />
                     </BaseLayer>
 
-                    {/* Overlays berdasarkan source_name */}
-                    {Object.entries(groupedBySourceName).map(([sourceName, items]) => (
-                        <Overlay key={sourceName} name={sourceName}>
-                            {items.map((item) => (
-                                <GeoJSON
-                                    key={item.id_geojson}
-                                    data={
-                                        {
-                                            type: 'Feature',
-                                            geometry: item.geojson.geometry,
-                                            properties: {
-                                                ...item.geojson.properties,
-                                                id_geojson: item.id_geojson,
-                                                kode_warna: item.kode_warna || '#3388ff',
-                                            },
-                                        } as Feature
-                                    }
-                                    style={geojsonStyle}
-                                >
-                                    <Popup>{renderPopupContent(item)}</Popup>
-                                </GeoJSON>
-                            ))}
-                        </Overlay>
-                    ))}
-                </LayersControl>
-            </MapContainer>
+
+                        {/* Overlay sesuai filter */}
+                        {uniqueSourceNames.map((sourceName) => {
+                            if (!activeSourceFilters[sourceName]) return null;
+
+                            const items = groupedBySourceName[sourceName] || [];
+
+                            const filteredItems =
+                                activeSubGroupFilters[sourceName] && activeSubGroupFilters[sourceName] !== 'all'
+                                    ? items.filter(
+                                          (item) => (item.geojson.properties?.sub_group || 'Undefined') === activeSubGroupFilters[sourceName],
+                                      )
+                                    : items;
+
+                            if (filteredItems.length === 0) return null;
+
+                            return (
+                                <Overlay key={sourceName} name={sourceName} checked>
+                                    {filteredItems.map((item) => (
+                                        <GeoJSON
+                                            key={item.id_geojson}
+                                            data={
+                                                {
+                                                    type: 'Feature',
+                                                    geometry: item.geojson.geometry,
+                                                    properties: {
+                                                        ...item.geojson.properties,
+                                                        id_geojson: item.id_geojson,
+                                                        kode_warna: item.kode_warna || '#3388ff',
+                                                    },
+                                                } as Feature
+                                            }
+                                            style={geojsonStyle}
+                                        >
+                                            <Popup>{renderPopupContent(item)}</Popup>
+                                        </GeoJSON>
+                                    ))}
+                                </Overlay>
+                            );
+                        })}
+                    </LayersControl>
+                </MapContainer>
+            </div>
+
+            {/* Sidebar filter kanan */}
+            <div className="w-72 overflow-auto border-l border-gray-300 bg-white p-4">
+                <h2 className="mb-3 font-semibold">Filter Layers</h2>
+                {uniqueSourceNames.map((sourceName) => (
+                    <div key={sourceName} className="mb-4">
+                        <label className="inline-flex cursor-pointer items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                checked={activeSourceFilters[sourceName] || false}
+                                onChange={() => toggleSourceFilter(sourceName)}
+                            />
+                            <span>{sourceName}</span>
+                        </label>
+                        {activeSourceFilters[sourceName] && subGroupsBySourceName[sourceName]?.length > 1 && (
+                            <select
+                                className="mt-1 w-full rounded border px-2 py-1"
+                                value={activeSubGroupFilters[sourceName]}
+                                onChange={(e) => setSubGroupFilter(sourceName, e.target.value)}
+                            >
+                                <option value="all">All</option>
+                                {subGroupsBySourceName[sourceName].map((subGroup) => (
+                                    <option key={subGroup} value={subGroup}>
+                                        {subGroup}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
