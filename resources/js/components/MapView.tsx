@@ -7,6 +7,7 @@ import React, { useMemo, useState } from 'react';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { FaFilePdf } from 'react-icons/fa6';
 import { IoAddCircleOutline } from 'react-icons/io5';
+import { MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
 import { GeoJSON, LayersControl, MapContainer, Popup, ScaleControl } from 'react-leaflet';
 import GeomanControl from './GeomanControl';
 
@@ -228,7 +229,15 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                     aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
                     title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
                 >
-                    {sidebarOpen ? 'Hide ◀' : '▶'}
+                    {sidebarOpen ? (
+                        <p className="text-2xl">
+                            <MdOutlineFilterAltOff className="inline-block" />
+                        </p>
+                    ) : (
+                        <p className="text-2xl">
+                            <MdOutlineFilterAlt className="inline-block" />
+                        </p>
+                    )}
                 </button>
 
                 {/* Konten filter muncul hanya jika sidebar terbuka */}
