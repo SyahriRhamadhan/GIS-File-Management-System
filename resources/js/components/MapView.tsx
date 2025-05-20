@@ -1,9 +1,8 @@
-// MapView.tsx
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { Feature } from 'geojson';
 import 'leaflet/dist/leaflet.css';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { FaFilePdf } from 'react-icons/fa6';
 import { IoAddCircleOutline } from 'react-icons/io5';
@@ -31,8 +30,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
 
-    // Urutkan data berdasarkan kategori.layer_order
-    const sortedData = React.useMemo(() => {
+    const sortedData = useMemo(() => {
         return [...geojsonData].sort((a, b) => {
             const aOrder = a.kategori?.layer_order ?? 0;
             const bOrder = b.kategori?.layer_order ?? 0;
@@ -40,15 +38,13 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         });
     }, [geojsonData]);
 
-    // Unik source_name
-    const uniqueSourceNames = React.useMemo(() => {
+    const uniqueSourceNames = useMemo(() => {
         const set = new Set<string>();
         geojsonData.forEach((item) => set.add(item.source_name));
         return Array.from(set);
     }, [geojsonData]);
 
-    // Group per source_name
-    const groupedBySourceName = React.useMemo(() => {
+    const groupedBySourceName = useMemo(() => {
         const groups: Record<string, typeof geojsonData> = {};
         sortedData.forEach((item) => {
             const key = item.source_name || 'Unknown';
@@ -58,8 +54,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         return groups;
     }, [sortedData]);
 
-    // Ambil sub-group unik per source_name (asumsi property 'sub_group')
-    const subGroupsBySourceName = React.useMemo(() => {
+    const subGroupsBySourceName = useMemo(() => {
         const result: Record<string, string[]> = {};
         for (const sourceName of uniqueSourceNames) {
             const items = groupedBySourceName[sourceName] || [];
@@ -73,19 +68,17 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         return result;
     }, [uniqueSourceNames, groupedBySourceName]);
 
-    // State filter checkbox source_name
-    const [activeSourceFilters, setActiveSourceFilters] = React.useState<Record<string, boolean>>(() =>
+    const [activeSourceFilters, setActiveSourceFilters] = useState<Record<string, boolean>>(() =>
         uniqueSourceNames.reduce(
             (acc, name) => {
-                acc[name] = true; // default semua true
+                acc[name] = true;
                 return acc;
             },
             {} as Record<string, boolean>,
         ),
     );
 
-    // State filter dropdown sub_group per source_name
-    const [activeSubGroupFilters, setActiveSubGroupFilters] = React.useState<Record<string, string | 'all'>>(() =>
+    const [activeSubGroupFilters, setActiveSubGroupFilters] = useState<Record<string, string | 'all'>>(() =>
         uniqueSourceNames.reduce(
             (acc, name) => {
                 acc[name] = 'all';
@@ -95,7 +88,10 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         ),
     );
 
-    // Toggle source_name checkbox
+    // State toggle sidebar show/hide
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const toggleSidebar = () => setSidebarOpen((open) => !open);
+
     const toggleSourceFilter = (name: string) => {
         setActiveSourceFilters((prev) => ({
             ...prev,
@@ -103,7 +99,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         }));
     };
 
-    // Set dropdown sub-group
     const setSubGroupFilter = (sourceName: string, subGroup: string | 'all') => {
         setActiveSubGroupFilters((prev) => ({
             ...prev,
@@ -111,7 +106,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         }));
     };
 
-    // GeoJSON style
     const geojsonStyle = (feature: any): L.PathOptions => ({
         color: feature.properties.kode_warna,
         fillColor: feature.properties.kode_warna,
@@ -120,7 +114,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         fillOpacity: 0.5,
     });
 
-    // Popup content render
     const renderPopupContent = (item: (typeof geojsonData)[0]) => (
         <div className="font-sans text-sm">
             {Object.entries(item.geojson.properties || {})
@@ -167,85 +160,75 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
 
     return (
         <div className="flex h-screen">
-            {/* Konten peta kiri */}
-            <div className="relative flex-1">
+            {/* Konten Peta */}
+            <div className={`relative flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-72' : ''}`}>
                 <MapContainer center={center} zoom={zoom} touchZoom scrollWheelZoom style={{ height: '100%', width: '100%' }}>
                     <ScaleControl position="bottomleft" />
                     <ScaleControl position="topright" />
 
                     <GeomanControl />
 
-                {/* Layer Switcher */}
-                <LayersControl position="topright">
-                    {/* Base Layers */}
-                    <BaseLayer checked name="Esri Satellite">
-                        <TileLayer
-                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                            attribution="Tiles &copy; Esri — Source: Esri, USDA, USGS"
-                        />
-                    </BaseLayer>
-
-                    <BaseLayer name="OSM Standard">
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-                    </BaseLayer>
-
-                    <BaseLayer name="Stamen Toner">
-                        <TileLayer
-                            url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png"
-                            attribution={`
+                    <LayersControl position="topright">
+                        <BaseLayer checked name="Esri Satellite">
+                            <TileLayer
+                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                attribution="Tiles &copy; Esri — Source: Esri, USDA, USGS"
+                            />
+                        </BaseLayer>
+                        <BaseLayer name="OSM Standard">
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+                        </BaseLayer>
+                        <BaseLayer name="Stamen Toner">
+                            <TileLayer
+                                url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png"
+                                attribution={`
     &copy; <a href="https://stadiamaps.com/" target="_blank" rel="noreferrer">Stadia Maps</a> 
     &copy; <a href="https://stamen.com/" target="_blank" rel="noreferrer">Stamen Design</a> 
     &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> 
     &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>
     `}
-                        />
-                    </BaseLayer>
-
-                    <BaseLayer name="Stamen Terrain">
-                        <TileLayer
-                            url="https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png"
-                            maxZoom={20}
-                            attribution={`
+                            />
+                        </BaseLayer>
+                        <BaseLayer name="Stamen Terrain">
+                            <TileLayer
+                                url="https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png"
+                                maxZoom={20}
+                                attribution={`
     &copy; <a href="https://stadiamaps.com/" target="_blank" rel="noreferrer">Stadia Maps</a>
     &copy; <a href="https://stamen.com/" target="_blank" rel="noreferrer">Stamen Design</a>
     &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a>
     &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>
   `}
-                        />
-                    </BaseLayer>
+                            />
+                        </BaseLayer>
+                        <BaseLayer name="Carto Positron">
+                            <TileLayer
+                                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                                attribution="&copy; CARTO &copy; OpenStreetMap"
+                            />
+                        </BaseLayer>
+                        <BaseLayer name="Carto Dark">
+                            <TileLayer
+                                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                attribution="&copy; CARTO &copy; OpenStreetMap"
+                            />
+                        </BaseLayer>
+                        <BaseLayer name="OpenTopoMap">
+                            <TileLayer
+                                url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                                attribution="Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap"
+                            />
+                        </BaseLayer>
+                        <BaseLayer name="NASA City Lights">
+                            <TileLayer
+                                url="https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_CityLights_2012/default/2012-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpg"
+                                attribution="Imagery courtesy NASA EOSDIS GIBS"
+                                maxNativeZoom={8}
+                                maxZoom={18}
+                            />
+                        </BaseLayer>
 
-                    <BaseLayer name="Carto Positron">
-                        <TileLayer
-                            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                            attribution="&copy; CARTO &copy; OpenStreetMap"
-                        />
-                    </BaseLayer>
-
-                    <BaseLayer name="Carto Dark">
-                        <TileLayer
-                            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                            attribution="&copy; CARTO &copy; OpenStreetMap"
-                        />
-                    </BaseLayer>
-
-                    <BaseLayer name="OpenTopoMap">
-                        <TileLayer
-                            url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                            attribution="Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap"
-                        />
-                    </BaseLayer>
-
-                    <BaseLayer name="NASA City Lights">
-                        <TileLayer
-                            url="https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_CityLights_2012/default/2012-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpg"
-                            attribution="Imagery courtesy NASA EOSDIS GIBS"
-                            maxNativeZoom={8}
-                            maxZoom={18}
-                        />
-                    </BaseLayer>
-
-
-                        {/* Overlay sesuai filter */}
+                        {/* Overlay filtered */}
                         {uniqueSourceNames.map((sourceName) => {
                             if (!activeSourceFilters[sourceName]) return null;
 
@@ -289,34 +272,53 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
             </div>
 
             {/* Sidebar filter kanan */}
-            <div className="w-72 overflow-auto border-l border-gray-300 bg-white p-4">
-                <h2 className="mb-3 font-semibold">Filter Layers</h2>
-                {uniqueSourceNames.map((sourceName) => (
-                    <div key={sourceName} className="mb-4">
-                        <label className="inline-flex cursor-pointer items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                checked={activeSourceFilters[sourceName] || false}
-                                onChange={() => toggleSourceFilter(sourceName)}
-                            />
-                            <span>{sourceName}</span>
-                        </label>
-                        {activeSourceFilters[sourceName] && subGroupsBySourceName[sourceName]?.length > 1 && (
-                            <select
-                                className="mt-1 w-full rounded border px-2 py-1"
-                                value={activeSubGroupFilters[sourceName]}
-                                onChange={(e) => setSubGroupFilter(sourceName, e.target.value)}
-                            >
-                                <option value="all">All</option>
-                                {subGroupsBySourceName[sourceName].map((subGroup) => (
-                                    <option key={subGroup} value={subGroup}>
-                                        {subGroup}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
-                ))}
+            <div
+                className={`fixed top-0 right-0 flex h-full flex-col border-l border-gray-300 bg-white shadow-lg transition-all duration-300 ${
+                    sidebarOpen ? 'w-72 p-4' : 'w-10 p-2'
+                } overflow-auto`}
+            >
+                {/* Tombol toggle sidebar */}
+                <button
+                    onClick={toggleSidebar}
+                    className="mb-4 self-end rounded bg-gray-200 px-2 py-1 text-sm select-none hover:bg-gray-300"
+                    aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+                    title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+                >
+                    {sidebarOpen ? 'Hide ◀' : '▶'}
+                </button>
+
+                {/* Konten filter muncul hanya jika sidebar terbuka */}
+                {sidebarOpen && (
+                    <>
+                        <h2 className="mb-3 font-semibold">Filter Layers</h2>
+                        {uniqueSourceNames.map((sourceName) => (
+                            <div key={sourceName} className="mb-4">
+                                <label className="inline-flex cursor-pointer items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={activeSourceFilters[sourceName] || false}
+                                        onChange={() => toggleSourceFilter(sourceName)}
+                                    />
+                                    <span>{sourceName}</span>
+                                </label>
+                                {activeSourceFilters[sourceName] && subGroupsBySourceName[sourceName]?.length > 1 && (
+                                    <select
+                                        className="mt-1 w-full rounded border px-2 py-1"
+                                        value={activeSubGroupFilters[sourceName]}
+                                        onChange={(e) => setSubGroupFilter(sourceName, e.target.value)}
+                                    >
+                                        <option value="all">All</option>
+                                        {subGroupsBySourceName[sourceName].map((subGroup) => (
+                                            <option key={subGroup} value={subGroup}>
+                                                {subGroup}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+                        ))}
+                    </>
+                )}
             </div>
         </div>
     );
