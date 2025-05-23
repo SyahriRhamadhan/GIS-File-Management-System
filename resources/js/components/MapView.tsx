@@ -246,9 +246,11 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                         <h2 className="mb-3 font-semibold">Filter Layers</h2>
                         {uniqueSourceNames.map((sourceName) => (
                             <div key={sourceName} className="mb-4">
-                                <label className="inline-flex cursor-pointer items-center space-x-2">
+                                <label htmlFor={`filter-source-${sourceName}`} className="inline-flex cursor-pointer items-center space-x-2">
                                     <input
                                         type="checkbox"
+                                        id={`filter-source-${sourceName}`}
+                                        name={`filter-source-${sourceName}`}
                                         checked={activeSourceFilters[sourceName] || false}
                                         onChange={() => toggleSourceFilter(sourceName)}
                                     />
@@ -256,6 +258,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                                 </label>
                                 {activeSourceFilters[sourceName] && subGroupsBySourceName[sourceName]?.length > 1 && (
                                     <select
+                                        id={`subgroup-filter-${sourceName}`}
+                                        name={`subgroup-filter-${sourceName}`}
                                         className="mt-1 w-full rounded border px-2 py-1"
                                         value={activeSubGroupFilters[sourceName]}
                                         onChange={(e) => setSubGroupFilter(sourceName, e.target.value)}
