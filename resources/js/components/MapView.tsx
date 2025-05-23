@@ -63,12 +63,21 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         const groups: Record<string, Array<{ id: string; label: string }>> = {};
         geojsonData.forEach((item) => {
             const parent = item.source_name;
-            // Buat label string dari seluruh properties (bisa disesuaikan jika ingin spesifik key)
-            const propEntries = Object.entries(item.geojson.properties || {})
+            const properties = item.geojson?.properties || {};
+            const propEntries = Object.entries(properties)
                 .filter(([k]) => k !== 'id_geojson')
                 .map(([k, v]) => `${k}: ${v}`);
-            const label = propEntries.length > 0 ? propEntries.join(', ') : String(item.id_geojson);
-            const id = String(item.id_geojson);
+            let label: string;
+
+            if (propEntries.length > 0) {
+                label = propEntries.join(', ');
+            } else if (item.id_geojson) {
+                label = String(item.id_geojson);
+            } else {
+                label = 'Unknown';
+            }
+
+            const id = item.id_geojson ? String(item.id_geojson) : 'unknown';
 
             if (!groups[parent]) groups[parent] = [];
             // Pastikan tidak duplikat (berdasarkan id)
