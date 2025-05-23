@@ -1,4 +1,5 @@
 import BaseLayers from '@/components/BaseLayer';
+import SidebarFilter from '@/components/SidebarFilter';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { Feature } from 'geojson';
@@ -7,7 +8,6 @@ import React, { useMemo, useState } from 'react';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { FaFilePdf } from 'react-icons/fa6';
 import { IoAddCircleOutline } from 'react-icons/io5';
-import { MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
 import { GeoJSON, LayersControl, MapContainer, Popup, ScaleControl } from 'react-leaflet';
 import GeomanControl from './GeomanControl';
 
@@ -163,7 +163,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     return (
         <div className="flex h-screen">
             {/* Konten Peta */}
-            <div className={`relative flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-67' : 'mr-10'}`}>
+            <div className={`relative flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-67' : 'mr-0'}`}>
                 <MapContainer center={center} zoom={zoom} touchZoom scrollWheelZoom style={{ height: '100%', width: '100%' }}>
                     <ScaleControl position="bottomleft" />
                     <ScaleControl position="topright" />
@@ -216,67 +216,16 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                 </MapContainer>
             </div>
 
-            {/* Sidebar filter kanan */}
-            <div
-                className={`fixed top-0 right-0 z-[9999] flex h-full flex-col border-l border-gray-300 bg-white shadow-lg transition-all duration-300 ${
-                    sidebarOpen ? 'w-72 p-4' : 'w-18 p-4'
-                } overflow-auto`}
-            >
-                {/* Tombol toggle sidebar */}
-                <button
-                    onClick={toggleSidebar}
-                    className="mb-4 self-end rounded bg-gray-200 px-2 py-1 text-sm select-none hover:bg-gray-300"
-                    aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-                    title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-                >
-                    {sidebarOpen ? (
-                        <p className="text-2xl">
-                            <MdOutlineFilterAltOff className="inline-block" />
-                        </p>
-                    ) : (
-                        <p className="text-2xl">
-                            <MdOutlineFilterAlt className="inline-block" />
-                        </p>
-                    )}
-                </button>
-
-                {/* Konten filter muncul hanya jika sidebar terbuka */}
-                {sidebarOpen && (
-                    <>
-                        <h2 className="mb-3 font-semibold">Filter Layers</h2>
-                        {uniqueSourceNames.map((sourceName) => (
-                            <div key={sourceName} className="mb-4">
-                                <label htmlFor={`filter-source-${sourceName}`} className="inline-flex cursor-pointer items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        id={`filter-source-${sourceName}`}
-                                        name={`filter-source-${sourceName}`}
-                                        checked={activeSourceFilters[sourceName] || false}
-                                        onChange={() => toggleSourceFilter(sourceName)}
-                                    />
-                                    <span>{sourceName}</span>
-                                </label>
-                                {activeSourceFilters[sourceName] && subGroupsBySourceName[sourceName]?.length > 1 && (
-                                    <select
-                                        id={`subgroup-filter-${sourceName}`}
-                                        name={`subgroup-filter-${sourceName}`}
-                                        className="mt-1 w-full rounded border px-2 py-1"
-                                        value={activeSubGroupFilters[sourceName]}
-                                        onChange={(e) => setSubGroupFilter(sourceName, e.target.value)}
-                                    >
-                                        <option value="all">All</option>
-                                        {subGroupsBySourceName[sourceName].map((subGroup) => (
-                                            <option key={subGroup} value={subGroup}>
-                                                {subGroup}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
-                            </div>
-                        ))}
-                    </>
-                )}
-            </div>
+            <SidebarFilter
+                sidebarOpen={sidebarOpen}
+                toggleSidebar={toggleSidebar}
+                uniqueSourceNames={uniqueSourceNames}
+                activeSourceFilters={activeSourceFilters}
+                toggleSourceFilter={toggleSourceFilter}
+                subGroupsBySourceName={subGroupsBySourceName}
+                activeSubGroupFilters={activeSubGroupFilters}
+                setSubGroupFilter={setSubGroupFilter}
+            />
         </div>
     );
 };
