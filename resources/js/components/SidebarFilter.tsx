@@ -86,21 +86,22 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                     <div>
                         {uniqueSourceNames.map((parent) => (
                             <div key={parent} className="mb-3">
-                                {/* Parent as dropdown */}
                                 <div className="group flex cursor-pointer items-center" onClick={() => handleToggleGroup(parent)}>
-                                    <label htmlFor={`filter-source-${parent}`} className="flex w-full items-center space-x-2">
-                                        <span className="mr-2 text-xl">{expandedGroups[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
+                                    <label
+                                        htmlFor={`filter-source-${parent}`}
+                                        className="flex items-center space-x-2"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
                                         <input
                                             type="checkbox"
                                             id={`filter-source-${parent}`}
                                             checked={activeSourceFilters[parent] || false}
                                             onChange={() => toggleSourceFilter(parent)}
-                                            onClick={(e) => e.stopPropagation()}
                                         />
-                                        <span className="font-semibold">{parent}</span>
                                     </label>
+                                    <span className="mx-2 text-xl">{expandedGroups[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
+                                    <span className="font-semibold">{parent}</span>
                                 </div>
-                                {/* Checklist Table */}
                                 {expandedGroups[parent] && groupedChildren[parent]?.length > 0 && (
                                     <table className="mt-2 min-w-full rounded border bg-gray-50 text-xs">
                                         <thead>
