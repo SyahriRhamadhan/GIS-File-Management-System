@@ -31,9 +31,8 @@ interface MapViewProps {
 const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const toggleSidebar = () => setSidebarOpen((open) => !open);
 
+    // Sort & Group data
     const sortedData = useMemo(() => {
         return [...geojsonData].sort((a, b) => {
             const aOrder = a.kategori?.layer_order ?? 0;
@@ -58,29 +57,19 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         return groups;
     }, [sortedData]);
 
-    // Grouped children per layer: child = id_geojson + label (property summary string)
+    // Grouped children per parent, id dan label (label = gabungan property k-v)
     const groupedChildren = useMemo(() => {
         const groups: Record<string, Array<{ id: string; label: string }>> = {};
         geojsonData.forEach((item) => {
             const parent = item.source_name;
-            const properties = item.geojson?.properties || {};
-            const propEntries = Object.entries(properties)
+            const propEntries = Object.entries(item.geojson.properties || {})
                 .filter(([k]) => k !== 'id_geojson')
                 .map(([k, v]) => `${k}: ${v}`);
-            let label: string;
-
-            if (propEntries.length > 0) {
-                label = propEntries.join(', ');
-            } else if (item.id_geojson) {
-                label = String(item.id_geojson);
-            } else {
-                label = 'Unknown';
-            }
-
-            const id = item.id_geojson ? String(item.id_geojson) : 'unknown';
+            // Label fallback ke id jika tidak ada property lain
+            const label = propEntries.length > 0 ? propEntries.join(', ') : String(item.id_geojson || 'Unknown');
+            const id = String(item.id_geojson || label);
 
             if (!groups[parent]) groups[parent] = [];
-            // Pastikan tidak duplikat (berdasarkan id)
             if (!groups[parent].find((c) => c.id === id)) {
                 groups[parent].push({ id, label });
             }
@@ -88,28 +77,15 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         return groups;
     }, [geojsonData]);
 
-    const [activeSourceFilters, setActiveSourceFilters] = useState<Record<string, boolean>>(() =>
-        uniqueSourceNames.reduce(
-            (acc, name) => {
-                acc[name] = true;
-                return acc;
-            },
-            {} as Record<string, boolean>,
-        ),
-    );
+    // State
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const toggleSidebar = () => setSidebarOpen((open) => !open);
 
-    // Child checklist state
+    // Parent & child checklist state
     const [activeChildFilters, setActiveChildFilters] = useState<Record<string, Record<string, boolean>>>({});
 
-    // Auto-initialize on data change
+    // Auto-initialize parent/child filter state
     useEffect(() => {
-        setActiveSourceFilters((prev) => {
-            const updated = { ...prev };
-            for (const parent of Object.keys(groupedChildren)) {
-                if (!(parent in updated)) updated[parent] = true;
-            }
-            return updated;
-        });
         setActiveChildFilters((prev) => {
             const updated = { ...prev };
             for (const [parent, children] of Object.entries(groupedChildren)) {
@@ -122,34 +98,63 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         });
     }, [groupedChildren]);
 
-    const toggleSourceFilter = (name: string) => {
-        setActiveSourceFilters((prev) => ({
-            ...prev,
-            [name]: !prev[name],
-        }));
+    // Parent toggle logic: toggle ALL child in group
+    const toggleSourceFilter = (parent: string) => {
+        setActiveChildFilters((prev) => {
+            const group = prev[parent] || {};
+            const allChecked = Object.values(group).every((v) => v);
+            // Jika semua aktif, uncheck semua, jika tidak, aktifkan semua
+            const newState = { ...prev };
+            newState[parent] = {};
+            (groupedChildren[parent] || []).forEach((child) => {
+                newState[parent][child.id] = !allChecked;
+            });
+            return newState;
+        });
     };
 
+    // Parent checked status = semua child dalam parent aktif
+    const isParentChecked = (parent: string) =>
+        groupedChildren[parent]?.length > 0 && groupedChildren[parent].every((child) => !!activeChildFilters[parent]?.[child.id]);
+
+    // Child handler
     const toggleChildFilter = (parent: string, childId: string) => {
         setActiveChildFilters((prev) => ({
             ...prev,
             [parent]: {
                 ...prev[parent],
-                [childId]: !prev[parent][childId],
+                [childId]: !prev[parent]?.[childId],
             },
         }));
     };
 
-    const handleShowAll = () => setActiveSourceFilters(Object.fromEntries(uniqueSourceNames.map((name) => [name, true])));
-    const handleHideAll = () => setActiveSourceFilters(Object.fromEntries(uniqueSourceNames.map((name) => [name, false])));
+    // Show/Hide all
+    const handleShowAll = () => {
+        setActiveChildFilters((prev) => {
+            const updated = { ...prev };
+            for (const parent of Object.keys(groupedChildren)) {
+                updated[parent] = {};
+                for (const child of groupedChildren[parent]) {
+                    updated[parent][child.id] = true;
+                }
+            }
+            return updated;
+        });
+    };
+    const handleHideAll = () => {
+        setActiveChildFilters((prev) => {
+            const updated = { ...prev };
+            for (const parent of Object.keys(groupedChildren)) {
+                updated[parent] = {};
+                for (const child of groupedChildren[parent]) {
+                    updated[parent][child.id] = false;
+                }
+            }
+            return updated;
+        });
+    };
 
-    const geojsonStyle = (feature: any): L.PathOptions => ({
-        color: feature.properties.kode_warna,
-        fillColor: feature.properties.kode_warna,
-        weight: 4,
-        opacity: 1,
-        fillOpacity: 0.5,
-    });
-
+    // Overlay visibility per child
     const renderPopupContent = (item: (typeof geojsonData)[0]) => (
         <div className="font-sans text-sm">
             {Object.entries(item.geojson.properties || {})
@@ -206,16 +211,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
 
                     <LayersControl position="topright">
                         <BaseLayers />
-
                         {/* Overlay filtered */}
                         {uniqueSourceNames.map((sourceName) => {
-                            if (!activeSourceFilters[sourceName]) return null;
-
-                            const items = groupedBySourceName[sourceName] || [];
+                            // Ambil id anak yang visible
                             const visibleChildrenIds = groupedChildren[sourceName]
                                 ? groupedChildren[sourceName].filter((child) => activeChildFilters[sourceName]?.[child.id]).map((c) => c.id)
                                 : [];
 
+                            const items = groupedBySourceName[sourceName] || [];
                             const filteredItems = items.filter((item) => visibleChildrenIds.includes(String(item.id_geojson)));
 
                             if (filteredItems.length === 0) return null;
@@ -236,7 +239,13 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                                                     },
                                                 } as Feature
                                             }
-                                            style={geojsonStyle}
+                                            style={(feature) => ({
+                                                color: feature.properties.kode_warna,
+                                                fillColor: feature.properties.kode_warna,
+                                                weight: 4,
+                                                opacity: 1,
+                                                fillOpacity: 0.5,
+                                            })}
                                         >
                                             <Popup>{renderPopupContent(item)}</Popup>
                                         </GeoJSON>
@@ -253,12 +262,13 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                 toggleSidebar={toggleSidebar}
                 uniqueSourceNames={Object.keys(groupedChildren)}
                 groupedChildren={groupedChildren}
-                activeSourceFilters={activeSourceFilters}
+                // activeSourceFilters={{}} // Tidak perlu, sudah digantikan dengan parent-child logic
                 toggleSourceFilter={toggleSourceFilter}
                 activeChildFilters={activeChildFilters}
                 toggleChildFilter={toggleChildFilter}
                 onShowAll={handleShowAll}
                 onHideAll={handleHideAll}
+                isParentChecked={isParentChecked} // Custom prop, opsional (bisa juga inline)
             />
         </div>
     );

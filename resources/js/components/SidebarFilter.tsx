@@ -7,12 +7,12 @@ interface SidebarFilterProps {
     toggleSidebar: () => void;
     uniqueSourceNames: string[];
     groupedChildren: Record<string, Array<{ id: string; label: string }>>;
-    activeSourceFilters: Record<string, boolean>; // For parent
+    activeChildFilters: Record<string, Record<string, boolean>>;
     toggleSourceFilter: (name: string) => void;
-    activeChildFilters: Record<string, Record<string, boolean>>; // {parent: {childId: true/false}}
     toggleChildFilter: (parent: string, childId: string) => void;
     onShowAll: () => void;
     onHideAll: () => void;
+    isParentChecked?: (parent: string) => boolean; // Tambahan (optional)
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -20,14 +20,13 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     toggleSidebar,
     uniqueSourceNames,
     groupedChildren,
-    activeSourceFilters,
-    toggleSourceFilter,
     activeChildFilters,
+    toggleSourceFilter,
     toggleChildFilter,
     onShowAll,
     onHideAll,
+    isParentChecked = () => false,
 }) => {
-    // Track which parent group is expanded
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
     const handleToggleGroup = (group: string) => {
@@ -37,14 +36,16 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         }));
     };
 
-    // Check "all checked" and "none checked"
-    const allChecked = uniqueSourceNames.every((name) => activeSourceFilters[name]);
-    const noneChecked = uniqueSourceNames.every((name) => !activeSourceFilters[name]);
+    // Check "all checked" and "none checked" for Show All/Hide All
+    const allChecked = uniqueSourceNames.every(
+        (parent) => groupedChildren[parent]?.length > 0 && groupedChildren[parent].every((child) => activeChildFilters[parent]?.[child.id]),
+    );
+    const noneChecked = uniqueSourceNames.every((parent) => !groupedChildren[parent]?.some((child) => activeChildFilters[parent]?.[child.id]));
 
     return (
         <div
             className={`fixed top-0 right-0 z-[9999] flex h-full flex-col border-l border-gray-300 bg-white shadow-lg transition-all duration-300 ${
-                sidebarOpen ? 'w-72 p-4' : 'w-0 p-0'
+                sidebarOpen ? 'w-96 p-4' : 'w-0 p-0'
             } overflow-auto`}
             style={{
                 minWidth: sidebarOpen ? '25rem' : '0',
@@ -95,7 +96,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                         <input
                                             type="checkbox"
                                             id={`filter-source-${parent}`}
-                                            checked={activeSourceFilters[parent] || false}
+                                            checked={isParentChecked(parent)}
                                             onChange={() => toggleSourceFilter(parent)}
                                         />
                                     </label>
