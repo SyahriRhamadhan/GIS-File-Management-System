@@ -6,12 +6,11 @@ interface SidebarFilterProps {
     sidebarOpen: boolean;
     toggleSidebar: () => void;
     uniqueSourceNames: string[];
-    // Map: sourceName -> list of child (your "layer" items)
-    groupedChildren: Record<string, string[]>;
+    groupedChildren: Record<string, Array<{ id: string; label: string }>>;
     activeSourceFilters: Record<string, boolean>; // For parent
     toggleSourceFilter: (name: string) => void;
-    activeChildFilters: Record<string, Record<string, boolean>>; // {parent: {child: true/false}}
-    toggleChildFilter: (parent: string, child: string) => void;
+    activeChildFilters: Record<string, Record<string, boolean>>; // {parent: {childId: true/false}}
+    toggleChildFilter: (parent: string, childId: string) => void;
     onShowAll: () => void;
     onHideAll: () => void;
 }
@@ -38,7 +37,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         }));
     };
 
-    // Check "all checked" and "none checked" (can be enhanced for group logic)
+    // Check "all checked" and "none checked"
     const allChecked = uniqueSourceNames.every((name) => activeSourceFilters[name]);
     const noneChecked = uniqueSourceNames.every((name) => !activeSourceFilters[name]);
 
@@ -48,8 +47,8 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                 sidebarOpen ? 'w-72 p-4' : 'w-0 p-0'
             } overflow-auto`}
             style={{
-                minWidth: sidebarOpen ? '18rem' : '0',
-                width: sidebarOpen ? '18rem' : '0',
+                minWidth: sidebarOpen ? '25rem' : '0',
+                width: sidebarOpen ? '25rem' : '0',
                 padding: sidebarOpen ? '1rem' : '0',
             }}
         >
@@ -66,7 +65,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             {sidebarOpen && (
                 <>
                     <h2 className="mb-3 font-semibold">Filter Layers</h2>
-                    <div className="mb-4 flex gap-2">
+                    <div className="mx-auto mb-4 flex gap-2">
                         <button
                             type="button"
                             className="rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-600 disabled:bg-blue-300"
@@ -89,35 +88,42 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                             <div key={parent} className="mb-3">
                                 {/* Parent as dropdown */}
                                 <div className="group flex cursor-pointer items-center" onClick={() => handleToggleGroup(parent)}>
-                                    <span className="mr-2 text-xl">{expandedGroups[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
                                     <label htmlFor={`filter-source-${parent}`} className="flex w-full items-center space-x-2">
-                                        {/* OPTIONAL: Parent checkbox (if you want select-all for group) */}
-                                        
+                                        <span className="mr-2 text-xl">{expandedGroups[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
                                         <input
                                             type="checkbox"
                                             id={`filter-source-${parent}`}
                                             checked={activeSourceFilters[parent] || false}
                                             onChange={() => toggleSourceFilter(parent)}
-                                            onClick={e => e.stopPropagation()} // so it doesn't toggle the accordion
+                                            onClick={(e) => e.stopPropagation()}
                                         />
-                                       
                                         <span className="font-semibold">{parent}</span>
                                     </label>
                                 </div>
+                                {/* Checklist Table */}
                                 {expandedGroups[parent] && groupedChildren[parent]?.length > 0 && (
-                                    <div className="pt-1 pl-8">
-                                        {groupedChildren[parent].map((child) => (
-                                            <label key={child} className="mb-1 flex items-center space-x-2">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`filter-child-${parent}-${child}`}
-                                                    checked={!!activeChildFilters[parent]?.[child]}
-                                                    onChange={() => toggleChildFilter(parent, child)}
-                                                />
-                                                <span>{child}</span>
-                                            </label>
-                                        ))}
-                                    </div>
+                                    <table className="mt-2 min-w-full rounded border bg-gray-50 text-xs">
+                                        <thead>
+                                            <tr>
+                                                <th className="p-1 text-left font-bold">Checklist</th>
+                                                <th className="p-1 text-left font-bold">Label</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {groupedChildren[parent].map((child) => (
+                                                <tr key={child.id}>
+                                                    <td className="p-1">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={!!activeChildFilters[parent]?.[child.id]}
+                                                            onChange={() => toggleChildFilter(parent, child.id)}
+                                                        />
+                                                    </td>
+                                                    <td className="p-1">{child.label}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 )}
                             </div>
                         ))}
