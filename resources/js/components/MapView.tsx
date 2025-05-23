@@ -4,7 +4,7 @@ import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { Feature } from 'geojson';
 import 'leaflet/dist/leaflet.css';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { FaFilePdf } from 'react-icons/fa6';
 import { IoAddCircleOutline } from 'react-icons/io5';
@@ -55,6 +55,17 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         });
         return groups;
     }, [sortedData]);
+
+    const groupedChildren = useMemo(() => {
+        const groups: Record<string, string[]> = {};
+        geojsonData.forEach((item) => {
+            const parent = item.source_name;
+            const child = String(item.id_geojson) || 'Unknown Layer';
+            if (!groups[parent]) groups[parent] = [];
+            if (!groups[parent].includes(child)) groups[parent].push(child);
+        });
+        return groups;
+    }, [geojsonData]);
 
     const subGroupsBySourceName = useMemo(() => {
         const result: Record<string, string[]> = {};
@@ -120,6 +131,40 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const handleShowAll = () => setActiveSourceFilters(Object.fromEntries(uniqueSourceNames.map((name) => [name, true])));
     const handleHideAll = () => setActiveSourceFilters(Object.fromEntries(uniqueSourceNames.map((name) => [name, false])));
 
+    // --- Checkbox Child ---
+    const [activeChildFilters, setActiveChildFilters] = useState<Record<string, Record<string, boolean>>>({});
+
+    useEffect(() => {
+        setActiveSourceFilters((prev) => {
+            const updated = { ...prev };
+            for (const parent of Object.keys(groupedChildren)) {
+                if (!(parent in updated)) updated[parent] = true;
+            }
+            return updated;
+        });
+        setActiveChildFilters((prev) => {
+            const updated = { ...prev };
+            for (const [parent, children] of Object.entries(groupedChildren)) {
+                if (!updated[parent]) updated[parent] = {};
+                for (const child of children) {
+                    if (!(child in updated[parent])) updated[parent][child] = true;
+                }
+            }
+            return updated;
+        });
+    }, [groupedChildren]);
+
+    // Handler Child
+    const toggleChildFilter = (parent: string, child: string) => {
+        setActiveChildFilters((prev) => ({
+            ...prev,
+            [parent]: {
+                ...prev[parent],
+                [child]: !prev[parent][child],
+            },
+        }));
+    };
+
     const renderPopupContent = (item: (typeof geojsonData)[0]) => (
         <div className="font-sans text-sm">
             {Object.entries(item.geojson.properties || {})
@@ -182,13 +227,17 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                             if (!activeSourceFilters[sourceName]) return null;
 
                             const items = groupedBySourceName[sourceName] || [];
+                            const visibleChildren = groupedChildren[sourceName]
+                                ? groupedChildren[sourceName].filter((childId) => activeChildFilters[sourceName]?.[childId])
+                                : [];
 
-                            const filteredItems =
+                            const filteredItems = (
                                 activeSubGroupFilters[sourceName] && activeSubGroupFilters[sourceName] !== 'all'
                                     ? items.filter(
                                           (item) => (item.geojson.properties?.sub_group || 'Undefined') === activeSubGroupFilters[sourceName],
                                       )
-                                    : items;
+                                    : items
+                            ).filter((item) => visibleChildren.includes(String(item.id_geojson)));
 
                             if (filteredItems.length === 0) return null;
 
@@ -223,12 +272,12 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
             <SidebarFilter
                 sidebarOpen={sidebarOpen}
                 toggleSidebar={toggleSidebar}
-                uniqueSourceNames={uniqueSourceNames}
+                uniqueSourceNames={Object.keys(groupedChildren)}
+                groupedChildren={groupedChildren}
                 activeSourceFilters={activeSourceFilters}
                 toggleSourceFilter={toggleSourceFilter}
-                subGroupsBySourceName={subGroupsBySourceName}
-                activeSubGroupFilters={activeSubGroupFilters}
-                setSubGroupFilter={setSubGroupFilter}
+                activeChildFilters={activeChildFilters}
+                toggleChildFilter={toggleChildFilter}
                 onShowAll={handleShowAll}
                 onHideAll={handleHideAll}
             />

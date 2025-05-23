@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { IoChevronDown, IoChevronForward } from 'react-icons/io5';
 import { MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
 
 interface SidebarFilterProps {
     sidebarOpen: boolean;
     toggleSidebar: () => void;
     uniqueSourceNames: string[];
-    activeSourceFilters: Record<string, boolean>;
+    // Map: sourceName -> list of child (your "layer" items)
+    groupedChildren: Record<string, string[]>;
+    activeSourceFilters: Record<string, boolean>; // For parent
     toggleSourceFilter: (name: string) => void;
-    subGroupsBySourceName: Record<string, string[]>;
-    activeSubGroupFilters: Record<string, string | 'all'>;
-    setSubGroupFilter: (sourceName: string, subGroup: string | 'all') => void;
+    activeChildFilters: Record<string, Record<string, boolean>>; // {parent: {child: true/false}}
+    toggleChildFilter: (parent: string, child: string) => void;
     onShowAll: () => void;
     onHideAll: () => void;
 }
@@ -18,14 +20,25 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     sidebarOpen,
     toggleSidebar,
     uniqueSourceNames,
+    groupedChildren,
     activeSourceFilters,
     toggleSourceFilter,
-    subGroupsBySourceName,
-    activeSubGroupFilters,
-    setSubGroupFilter,
+    activeChildFilters,
+    toggleChildFilter,
     onShowAll,
     onHideAll,
 }) => {
+    // Track which parent group is expanded
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+    const handleToggleGroup = (group: string) => {
+        setExpandedGroups((prev) => ({
+            ...prev,
+            [group]: !prev[group],
+        }));
+    };
+
+    // Check "all checked" and "none checked" (can be enhanced for group logic)
     const allChecked = uniqueSourceNames.every((name) => activeSourceFilters[name]);
     const noneChecked = uniqueSourceNames.every((name) => !activeSourceFilters[name]);
 
@@ -40,7 +53,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                 padding: sidebarOpen ? '1rem' : '0',
             }}
         >
-            {/* Tombol filter SELALU MUNCUL */}
+            {/* Filter button ALWAYS shown */}
             <button
                 onClick={toggleSidebar}
                 className="fixed top-2 right-6 z-[10001] rounded-full border border-gray-300 bg-white p-2 shadow hover:bg-gray-100"
@@ -50,16 +63,13 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             >
                 {sidebarOpen ? <MdOutlineFilterAltOff className="text-3xl" /> : <MdOutlineFilterAlt className="text-3xl" />}
             </button>
-
-            {/* Konten filter hanya muncul jika sidebarOpen */}
             {sidebarOpen && (
                 <>
                     <h2 className="mb-3 font-semibold">Filter Layers</h2>
-                    {/* Tombol Tampilkan Semua / Hide Semua */}
                     <div className="mb-4 flex gap-2">
                         <button
                             type="button"
-                            className={`rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-600 disabled:bg-blue-300`}
+                            className="rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-600 disabled:bg-blue-300"
                             onClick={onShowAll}
                             disabled={allChecked}
                         >
@@ -67,43 +77,51 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                         </button>
                         <button
                             type="button"
-                            className={`rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white hover:bg-red-600 disabled:bg-red-300`}
+                            className="rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white hover:bg-red-600 disabled:bg-red-300"
                             onClick={onHideAll}
                             disabled={noneChecked}
                         >
                             Sembunyikan Semua
                         </button>
                     </div>
-                    {uniqueSourceNames.map((sourceName) => (
-                        <div key={sourceName} className="mb-4">
-                            <label htmlFor={`filter-source-${sourceName}`} className="inline-flex cursor-pointer items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    id={`filter-source-${sourceName}`}
-                                    name={`filter-source-${sourceName}`}
-                                    checked={activeSourceFilters[sourceName] || false}
-                                    onChange={() => toggleSourceFilter(sourceName)}
-                                />
-                                <span>{sourceName}</span>
-                            </label>
-                            {activeSourceFilters[sourceName] && subGroupsBySourceName[sourceName]?.length > 1 && (
-                                <select
-                                    id={`subgroup-filter-${sourceName}`}
-                                    name={`subgroup-filter-${sourceName}`}
-                                    className="mt-1 w-full rounded border px-2 py-1"
-                                    value={activeSubGroupFilters[sourceName]}
-                                    onChange={(e) => setSubGroupFilter(sourceName, e.target.value)}
-                                >
-                                    <option value="all">All</option>
-                                    {subGroupsBySourceName[sourceName].map((subGroup) => (
-                                        <option key={subGroup} value={subGroup}>
-                                            {subGroup}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                        </div>
-                    ))}
+                    <div>
+                        {uniqueSourceNames.map((parent) => (
+                            <div key={parent} className="mb-3">
+                                {/* Parent as dropdown */}
+                                <div className="group flex cursor-pointer items-center" onClick={() => handleToggleGroup(parent)}>
+                                    <span className="mr-2 text-xl">{expandedGroups[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
+                                    <label htmlFor={`filter-source-${parent}`} className="flex w-full items-center space-x-2">
+                                        {/* OPTIONAL: Parent checkbox (if you want select-all for group) */}
+                                        
+                                        <input
+                                            type="checkbox"
+                                            id={`filter-source-${parent}`}
+                                            checked={activeSourceFilters[parent] || false}
+                                            onChange={() => toggleSourceFilter(parent)}
+                                            onClick={e => e.stopPropagation()} // so it doesn't toggle the accordion
+                                        />
+                                       
+                                        <span className="font-semibold">{parent}</span>
+                                    </label>
+                                </div>
+                                {expandedGroups[parent] && groupedChildren[parent]?.length > 0 && (
+                                    <div className="pt-1 pl-8">
+                                        {groupedChildren[parent].map((child) => (
+                                            <label key={child} className="mb-1 flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`filter-child-${parent}-${child}`}
+                                                    checked={!!activeChildFilters[parent]?.[child]}
+                                                    onChange={() => toggleChildFilter(parent, child)}
+                                                />
+                                                <span>{child}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </>
             )}
         </div>
