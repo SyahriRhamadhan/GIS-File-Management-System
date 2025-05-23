@@ -116,6 +116,10 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         fillOpacity: 0.5,
     });
 
+    // Tambahkan ini di MapView:
+    const handleShowAll = () => setActiveSourceFilters(Object.fromEntries(uniqueSourceNames.map((name) => [name, true])));
+    const handleHideAll = () => setActiveSourceFilters(Object.fromEntries(uniqueSourceNames.map((name) => [name, false])));
+
     const renderPopupContent = (item: (typeof geojsonData)[0]) => (
         <div className="font-sans text-sm">
             {Object.entries(item.geojson.properties || {})
@@ -225,6 +229,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                 subGroupsBySourceName={subGroupsBySourceName}
                 activeSubGroupFilters={activeSubGroupFilters}
                 setSubGroupFilter={setSubGroupFilter}
+                onShowAll={handleShowAll}
+                onHideAll={handleHideAll}
             />
         </div>
     );
