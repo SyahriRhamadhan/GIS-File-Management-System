@@ -42,6 +42,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
     const mapRef = useRef<LeafletMap | null>(null);
+    // Untuk simpan ref tiap fitur
+    const geoJsonRefs = useRef<Record<string, L.GeoJSON>>({});
 
     // Sort & Group data
     const sortedData = useMemo(() => {
@@ -212,22 +214,35 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
 
     // Handler for View (fly to location)
     const handleViewLocation = (parent: string, childId: string) => {
-        // Cari item yang sesuai
+        // Cari item
         const item = geojsonData.find((i) => String(i.id_geojson) === String(childId) && i.source_name === parent);
         if (!item) return;
-        // Ambil koordinat pusat geometry (bisa polygon/point)
+        // Cari koordinat
         let latLng: [number, number] | null = null;
         const geom = item.geojson.geometry;
         if (geom.type === 'Point') {
             latLng = geom.coordinates as [number, number];
         } else if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
-            // Ambil titik pertama dari koordinat (atau rumus centroid jika mau)
             const coords = geom.type === 'Polygon' ? geom.coordinates[0][0] : geom.coordinates[0][0][0];
             latLng = [coords[1], coords[0]] as [number, number];
         }
-        // Fly ke titik
+        // Fly dan buka popup
         if (latLng && mapRef.current) {
             mapRef.current.flyTo(latLng, 16, { duration: 1 });
+            setTimeout(() => {
+                // Buka popup setelah animasi
+                const refKey = `${parent}-${childId}`;
+                const layer = geoJsonRefs.current[refKey];
+                if (layer) {
+                    // Dapatkan Leaflet layer feature
+                    // Biasanya cuma 1 feature per GeoJSON
+                    layer.eachLayer((l) => {
+                        if ('openPopup' in l && typeof l.openPopup === 'function') {
+                            l.openPopup();
+                        }
+                    });
+                }
+            }, 1000); // delay 1 detik biar animasi selesai
         }
     };
 
@@ -263,6 +278,11 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                                     {filteredItems.map((item) => (
                                         <GeoJSON
                                             key={item.id_geojson}
+                                            ref={(layer) => {
+                                                if (layer) {
+                                                    geoJsonRefs.current[`${sourceName}-${item.id_geojson}`] = layer;
+                                                }
+                                            }}
                                             data={
                                                 {
                                                     type: 'Feature',
