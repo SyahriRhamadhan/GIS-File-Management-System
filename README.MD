@@ -4,3 +4,4 @@
 4. buat dashboard filter lebih smooth
 5. View list pdf
 6. Add Pdf
+7. bulk edit geojson list

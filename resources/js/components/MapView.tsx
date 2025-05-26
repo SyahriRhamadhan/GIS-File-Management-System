@@ -214,35 +214,38 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
 
     // Handler for View (fly to location)
     const handleViewLocation = (parent: string, childId: string) => {
-        // Cari item
         const item = geojsonData.find((i) => String(i.id_geojson) === String(childId) && i.source_name === parent);
         if (!item) return;
-        // Cari koordinat
         let latLng: [number, number] | null = null;
         const geom = item.geojson.geometry;
+
         if (geom.type === 'Point') {
-            latLng = geom.coordinates as [number, number];
-        } else if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
-            const coords = geom.type === 'Polygon' ? geom.coordinates[0][0] : geom.coordinates[0][0][0];
-            latLng = [coords[1], coords[0]] as [number, number];
+            latLng = [geom.coordinates[1], geom.coordinates[0]];
+        } else if (geom.type === 'LineString') {
+            latLng = [geom.coordinates[0][1], geom.coordinates[0][0]];
+        } else if (geom.type === 'Polygon') {
+            latLng = [geom.coordinates[0][0][1], geom.coordinates[0][0][0]];
+        } else if (geom.type === 'MultiPoint') {
+            latLng = [geom.coordinates[0][1], geom.coordinates[0][0]];
+        } else if (geom.type === 'MultiLineString') {
+            latLng = [geom.coordinates[0][0][1], geom.coordinates[0][0][0]];
+        } else if (geom.type === 'MultiPolygon') {
+            latLng = [geom.coordinates[0][0][0][1], geom.coordinates[0][0][0][0]];
         }
         // Fly dan buka popup
         if (latLng && mapRef.current) {
             mapRef.current.flyTo(latLng, 16, { duration: 1 });
             setTimeout(() => {
-                // Buka popup setelah animasi
                 const refKey = `${parent}-${childId}`;
                 const layer = geoJsonRefs.current[refKey];
                 if (layer) {
-                    // Dapatkan Leaflet layer feature
-                    // Biasanya cuma 1 feature per GeoJSON
                     layer.eachLayer((l) => {
                         if ('openPopup' in l && typeof l.openPopup === 'function') {
                             l.openPopup();
                         }
                     });
                 }
-            }, 1000); // delay 1 detik biar animasi selesai
+            }, 1000);
         }
     };
 
