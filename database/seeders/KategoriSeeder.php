@@ -168,7 +168,7 @@ class KategoriSeeder extends Seeder
             'nama' => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
             'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
-            'orde3' => 'Kawasan Konservasi Pesisir dan Pulau Pulau Kecil',
+            'orde3' => 'Kawasan Konservasi Pesisir dan PulauPulau Kecil',
             'orde4' => '',
             'kode'  => 'KP3K',
             'rgb'   => [20, 150, 170],
@@ -176,8 +176,11 @@ class KategoriSeeder extends Seeder
         [
             'nama' => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
-            'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
-            'orde3' => 'Kawasan Konservasi Pesisir dan Pulau Pulau Kecil',
+            'orde2' => 'Kawasan Konservasi
+di Wilayah Pesisir
+dan Pulau-Pulau
+Kecil',
+            'orde3' => 'Kawasan Konservasi Pesisir dan PulauPulau Kecil',
             'orde4' => 'Suaka Pesisir',
             'kode'  => 'SPS',
             'rgb'   => [70, 180, 190],
@@ -185,8 +188,12 @@ class KategoriSeeder extends Seeder
         [
             'nama' => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
-            'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
-            'orde3' => 'Kawasan Konservasi Pesisir dan Pulau Pulau Kecil',
+            'orde2' => 'Kawasan Konservasi
+di Wilayah Pesisir
+dan Pulau-Pulau
+Kecil',
+            'orde3' => 'Kawasan Konservasi
+Pesisir dan PulauPulau Kecil',
             'orde4' => 'Suaka Pulau Kecil',
             'kode'  => 'SPK',
             'rgb'   => [120, 205, 210],
@@ -194,8 +201,12 @@ class KategoriSeeder extends Seeder
         [
             'nama' => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
-            'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
-            'orde3' => 'Kawasan Konservasi Pesisir dan Pulau Pulau Kecil',
+            'orde2' => 'Kawasan Konservasi
+di Wilayah Pesisir
+dan Pulau-Pulau
+Kecil',
+            'orde3' => 'Kawasan Konservasi
+Pesisir dan PulauPulau Kecil',
             'orde4' => 'Taman Pesisir',
             'kode'  => 'TP',
             'rgb'   => [160, 230, 220],
@@ -204,8 +215,12 @@ class KategoriSeeder extends Seeder
         [
             'nama'  => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
-            'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
-            'orde3' => 'Kawasan Konservasi Pesisir dan Pulau Pulau Kecil',
+            'orde2' => 'Kawasan Konservasi
+di Wilayah Pesisir
+dan Pulau-Pulau
+Kecil',
+            'orde3' => 'Kawasan Konservasi
+Pesisir dan PulauPulau Kecil',
             'orde4' => 'Taman Pulau Kecil',
             'kode'  => 'TPK',
             'rgb'   => [200, 240, 230],
@@ -213,8 +228,12 @@ class KategoriSeeder extends Seeder
         [
             'nama'  => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
-            'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
-            'orde3' => 'Kawasan Konservasi Maritim',
+            'orde2' => 'Kawasan Konservasi
+di Wilayah Pesisir
+dan Pulau-Pulau
+Kecil',
+            'orde3' => 'Kawasan Konservasi
+Maritim',
             'orde4' => '',
             'kode'  => 'KMR',
             'rgb'   => [5, 160, 125],
@@ -222,7 +241,10 @@ class KategoriSeeder extends Seeder
         [
             'nama'  => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
-            'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
+            'orde2' => 'Kawasan Konservasi
+di Wilayah Pesisir
+dan Pulau-Pulau
+Kecil',
             'orde3' => 'Kawasan Konservasi Maritim',
             'orde4' => 'Daerah Perlindungan Adat Maritim',
             'kode'  => 'PAM',
@@ -231,7 +253,10 @@ class KategoriSeeder extends Seeder
         [
             'nama'  => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
-            'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
+            'orde2' => 'Kawasan Konservasi
+di Wilayah Pesisir
+dan Pulau-Pulau
+Kecil',
             'orde3' => 'Kawasan Konservasi Maritim',
             'orde4' => 'Daerah Perlindungan Budaya Maritim',
             'kode'  => 'PBM',
@@ -240,43 +265,46 @@ class KategoriSeeder extends Seeder
         [
             'nama'  => 'Kawasan Lindung',
             'orde1' => 'Kawasan Konservasi',
-            'orde2' => 'Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil',
+            'orde2' => 'Kawasan Konservasi
+di Wilayah Pesisir
+dan Pulau-Pulau
+Kecil',
             'orde3' => 'Kawasan Konservasi Perairan',
             'orde4' => '',
             'kode'  => 'KPR',
             'rgb'   => [80, 245, 125],
         ],
-        //
-        [
-            'nama'  => 'Kawasan Lindung',
-            'orde1' => 'Kawasan Lindung Geologi',
-            'orde2' => 'Kawasan Cagar Alam Geologi',
-            'orde3' => '',
-            'orde4' => '',
-            'kode'  => 'CAG',
-            'rgb'   => [110, 135, 110],
-        ],
-        [
-            'nama'  => 'Kawasan Lindung',
-            'orde1' => 'Kawasan Lindung Geologi',
-            'orde2' => 'Kawasan Cagar Alam Geologi',
-            'orde3' => 'Kawasan Keunikan Batuan dan Fosil',
-            'orde4' => '',
-            'kode'  => 'LGE-1',
-            'rgb'   => [150, 135, 150],
-        ],
-        [
-            'nama'  => 'Kawasan Lindung',
-            'orde1' => 'Kawasan Lindung Geologi',
-            'orde2' => 'Kawasan Cagar Alam Geologi',
-            'orde3' => 'Kawasan Keunikan Bentang Alam',
-            'orde4' => '',
-            'kode'  => 'LGE-2',
-            'rgb'   => [180, 135, 150],
-        ],
-        [
-            'nama'  => 'Kawasan Lindung',
-            'orde1' => 'Kawasan Lindung Geologi',
+
+
+
+
+    ];
+
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        foreach ($this->rows as $i => $r) {
+            // $nama = $r['orde3'] ?? $r['orde2'] ?? $r['orde1'];
+
+            Kategori::updateOrCreate(
+                ['kode' => $r['kode']],
+                [
+                    'orde0' => $r['nama'],
+                    'orde1'         => $r['orde1']        ?? null,
+                    'orde2'         => $r['orde2']        ?? null,
+                    'orde3'         => $r['orde3']        ?? null,
+                    'orde4'         => $r['orde4']        ?? null,
+                    'kode'          => $r['kode'],
+                    'kode_warna'    => $this->rgbToHex(...$r['rgb']),
+                    'ket_warna'     => $r['ket']          ?? null,
+                    'layer_order'   => '2',
+                ]
+            );
+        }
+    }
+}
             'orde2' => 'Kawasan Cagar Alam Geologi',
             'orde3' => 'Kawasan Keunikan Proses Geologi',
             'orde4' => '',

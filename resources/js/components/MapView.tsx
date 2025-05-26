@@ -3,12 +3,13 @@ import SidebarFilter from '@/components/SidebarFilter';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { Feature } from 'geojson';
+import { Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { FaFilePdf } from 'react-icons/fa6';
 import { IoAddCircleOutline } from 'react-icons/io5';
-import { GeoJSON, LayersControl, MapContainer, Popup, ScaleControl } from 'react-leaflet';
+import { GeoJSON, LayersControl, MapContainer, Popup, ScaleControl, useMap } from 'react-leaflet';
 import GeomanControl from './GeomanControl';
 
 const { BaseLayer, Overlay } = LayersControl;
@@ -28,9 +29,19 @@ interface MapViewProps {
     }>;
 }
 
+// Component to set mapRef after map is ready
+const MapRefSetter: React.FC<{ mapRef: React.MutableRefObject<LeafletMap | null> }> = ({ mapRef }) => {
+    const map = useMap();
+    useEffect(() => {
+        mapRef.current = map;
+    }, [map, mapRef]);
+    return null;
+};
+
 const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
+    const mapRef = useRef<LeafletMap | null>(null);
 
     // Sort & Group data
     const sortedData = useMemo(() => {
@@ -199,11 +210,35 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
         </div>
     );
 
+    // Handler for View (fly to location)
+    const handleViewLocation = (parent: string, childId: string) => {
+        // Cari item yang sesuai
+        const item = geojsonData.find((i) => String(i.id_geojson) === String(childId) && i.source_name === parent);
+        if (!item) return;
+        // Ambil koordinat pusat geometry (bisa polygon/point)
+        let latLng: [number, number] | null = null;
+        const geom = item.geojson.geometry;
+        if (geom.type === 'Point') {
+            latLng = geom.coordinates as [number, number];
+        } else if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
+            // Ambil titik pertama dari koordinat (atau rumus centroid jika mau)
+            const coords = geom.type === 'Polygon' ? geom.coordinates[0][0] : geom.coordinates[0][0][0];
+            latLng = [coords[1], coords[0]] as [number, number];
+        }
+        // Fly ke titik
+        if (latLng && mapRef.current) {
+            mapRef.current.flyTo(latLng, 16, { duration: 1 });
+        }
+    };
+
     return (
         <div className="flex h-screen">
             {/* Konten Peta */}
             <div className={`relative flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-67' : 'mr-0'}`}>
                 <MapContainer center={center} zoom={zoom} touchZoom scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+                    {/* Inilah kunci: ref setter */}
+                    <MapRefSetter mapRef={mapRef} />
+
                     <ScaleControl position="bottomleft" />
                     <ScaleControl position="topright" />
 
@@ -262,13 +297,13 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                 toggleSidebar={toggleSidebar}
                 uniqueSourceNames={Object.keys(groupedChildren)}
                 groupedChildren={groupedChildren}
-                // activeSourceFilters={{}} // Tidak perlu, sudah digantikan dengan parent-child logic
                 toggleSourceFilter={toggleSourceFilter}
                 activeChildFilters={activeChildFilters}
                 toggleChildFilter={toggleChildFilter}
                 onShowAll={handleShowAll}
                 onHideAll={handleHideAll}
-                isParentChecked={isParentChecked} // Custom prop, opsional (bisa juga inline)
+                onView={handleViewLocation}
+                isParentChecked={isParentChecked}
             />
         </div>
     );

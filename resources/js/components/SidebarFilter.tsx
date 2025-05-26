@@ -13,6 +13,7 @@ interface SidebarFilterProps {
     onShowAll: () => void;
     onHideAll: () => void;
     isParentChecked?: (parent: string) => boolean; // Tambahan (optional)
+    onView: (parent: string, childId: string) => void;
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -26,6 +27,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     onShowAll,
     onHideAll,
     isParentChecked = () => false,
+    onView,
 }) => {
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
@@ -103,11 +105,13 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                     <span className="mx-2 text-xl">{expandedGroups[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
                                     <span className="font-semibold">{parent}</span>
                                 </div>
+
                                 {expandedGroups[parent] && groupedChildren[parent]?.length > 0 && (
                                     <table className="mt-2 min-w-full rounded border bg-gray-50 text-xs">
                                         <thead>
                                             <tr>
                                                 <th className="p-1 text-left font-bold">Checklist</th>
+                                                <th className="p-1 text-left font-bold">Lokasi</th>
                                                 <th className="p-1 text-left font-bold">Label</th>
                                             </tr>
                                         </thead>
@@ -120,6 +124,15 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                             checked={!!activeChildFilters[parent]?.[child.id]}
                                                             onChange={() => toggleChildFilter(parent, child.id)}
                                                         />
+                                                    </td>
+                                                    <td className="p-1">
+                                                        <button
+                                                            type="button"
+                                                            className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
+                                                            onClick={() => onView(parent, child.id)}
+                                                        >
+                                                            View
+                                                        </button>
                                                     </td>
                                                     <td className="p-1">{child.label}</td>
                                                 </tr>
