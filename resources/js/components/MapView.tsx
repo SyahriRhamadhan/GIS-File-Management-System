@@ -240,8 +240,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                                                 } as Feature
                                             }
                                             style={(feature) => ({
-                                                color: feature.properties.kode_warna,
-                                                fillColor: feature.properties.kode_warna,
+                                                color: feature?.properties?.kode_warna || '#3388ff',
+                                                fillColor: feature?.properties?.kode_warna || '#3388ff',
                                                 weight: 4,
                                                 opacity: 1,
                                                 fillOpacity: 0.5,
