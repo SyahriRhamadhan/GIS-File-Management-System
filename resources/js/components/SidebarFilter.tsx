@@ -30,6 +30,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     onView,
 }) => {
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+    const [search, setSearch] = useState('');
 
     const handleToggleGroup = (group: string) => {
         setExpandedGroups((prev) => ({
@@ -43,6 +44,12 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         (parent) => groupedChildren[parent]?.length > 0 && groupedChildren[parent].every((child) => activeChildFilters[parent]?.[child.id]),
     );
     const noneChecked = uniqueSourceNames.every((parent) => !groupedChildren[parent]?.some((child) => activeChildFilters[parent]?.[child.id]));
+    // Filtering parents and children by search
+    const filteredSourceNames = uniqueSourceNames.filter(
+        (parent) =>
+            parent.toLowerCase().includes(search.toLowerCase()) ||
+            groupedChildren[parent]?.some((child) => child.label.toLowerCase().includes(search.toLowerCase())),
+    );
 
     return (
         <div
@@ -67,27 +74,39 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             </button>
             {sidebarOpen && (
                 <>
-                    <h2 className="mb-3 font-semibold">Filter Layers</h2>
-                    <div className="mx-auto mb-4 flex gap-2">
-                        <button
-                            type="button"
-                            className="rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-600 disabled:bg-blue-300"
-                            onClick={onShowAll}
-                            disabled={allChecked}
-                        >
-                            Tampilkan Semua
-                        </button>
-                        <button
-                            type="button"
-                            className="rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white hover:bg-red-600 disabled:bg-red-300"
-                            onClick={onHideAll}
-                            disabled={noneChecked}
-                        >
-                            Sembunyikan Semua
-                        </button>
+                    <h2 className="mb-2 font-semibold">Filter Layers</h2>
+                    <div className="mb-4 flex flex-col gap-2">
+                        {/* Search Bar */}
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                            placeholder="Cari layer atau label…"
+                        />
+                        {/* Tombol Aksi */}
+                        <div className="flex w-full gap-2">
+                            <button
+                                type="button"
+                                className="flex-1 rounded-lg bg-blue-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-600 disabled:bg-blue-300"
+                                onClick={onShowAll}
+                                disabled={allChecked}
+                            >
+                                Tampilkan Semua
+                            </button>
+                            <button
+                                type="button"
+                                className="flex-1 rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-600 disabled:bg-red-300"
+                                onClick={onHideAll}
+                                disabled={noneChecked}
+                            >
+                                Sembunyikan Semua
+                            </button>
+                        </div>
                     </div>
+
                     <div>
-                        {uniqueSourceNames.map((parent) => (
+                        {filteredSourceNames.map((parent) => (
                             <div key={parent} className="mb-3">
                                 <div className="group flex cursor-pointer items-center" onClick={() => handleToggleGroup(parent)}>
                                     <label
@@ -116,27 +135,33 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {groupedChildren[parent].map((child) => (
-                                                <tr key={child.id}>
-                                                    <td className="p-1">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={!!activeChildFilters[parent]?.[child.id]}
-                                                            onChange={() => toggleChildFilter(parent, child.id)}
-                                                        />
-                                                    </td>
-                                                    <td className="p-1">
-                                                        <button
-                                                            type="button"
-                                                            className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
-                                                            onClick={() => onView(parent, child.id)}
-                                                        >
-                                                            View
-                                                        </button>
-                                                    </td>
-                                                    <td className="p-1">{child.label}</td>
-                                                </tr>
-                                            ))}
+                                            {groupedChildren[parent]
+                                                .filter(
+                                                    (child) =>
+                                                        child.label.toLowerCase().includes(search.toLowerCase()) ||
+                                                        parent.toLowerCase().includes(search.toLowerCase()),
+                                                )
+                                                .map((child) => (
+                                                    <tr key={child.id}>
+                                                        <td className="p-1">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={!!activeChildFilters[parent]?.[child.id]}
+                                                                onChange={() => toggleChildFilter(parent, child.id)}
+                                                            />
+                                                        </td>
+                                                        <td className="p-1">
+                                                            <button
+                                                                type="button"
+                                                                className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
+                                                                onClick={() => onView(parent, child.id)}
+                                                            >
+                                                                View
+                                                            </button>
+                                                        </td>
+                                                        <td className="p-1">{child.label}</td>
+                                                    </tr>
+                                                ))}
                                         </tbody>
                                     </table>
                                 )}
