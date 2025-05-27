@@ -1,8 +1,7 @@
-// resources/js/Pages/Geojson/Create.tsx
 import AppLayout from '@/layouts/app-layout';
 import { router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 
@@ -33,6 +32,8 @@ interface FormValues {
 
 export default function GeojsonCreate({ user_name, user_id, regions, owner, kategoris }: GeojsonFormProps) {
     const { flash } = usePage().props as { flash?: { upload_errors?: string[] } };
+    const [fileList, setFileList] = useState<File[]>([]);
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         if (flash?.upload_errors) {
@@ -51,11 +52,41 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
 
     const [selectedKat, setSelectedKat] = useState<any>(null);
 
-    const selectedKatId = watch('id_kategori') || '';
+    // Always get file from react-hook-form
+    const files = watch('geojson_file');
 
-    // Handle category change
-    const handleCategoryChange = (selectedOption: any) => {
-        setSelectedKat(selectedOption); // Set selected category
+    // Sync fileList state for UI, always after file input changes
+    useEffect(() => {
+        if (files && files.length > 0) {
+            setFileList(Array.from(files));
+        } else {
+            setFileList([]);
+        }
+    }, [files]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setValue('geojson_file', e.target.files);
+            // state fileList diatur otomatis oleh useEffect di atas
+        }
+    };
+
+    const handleRemoveFile = (idx: number) => {
+        if (!files) return;
+        const fileArr = Array.from(files);
+        fileArr.splice(idx, 1);
+        // update file input via DataTransfer
+        const dataTransfer = new DataTransfer();
+        fileArr.forEach((file) => dataTransfer.items.add(file));
+        if (inputRef.current) inputRef.current.files = dataTransfer.files;
+        setValue('geojson_file', dataTransfer.files.length ? dataTransfer.files : undefined);
+        // fileList diupdate otomatis oleh useEffect di atas
+    };
+
+    const handleRemoveAll = () => {
+        if (inputRef.current) inputRef.current.value = '';
+        setValue('geojson_file', undefined);
+        // fileList diupdate otomatis oleh useEffect di atas
     };
 
     const onSubmit = (data: FormValues) => {
@@ -85,7 +116,7 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
     const categoryOptions = kategoris.map((k) => ({
         value: k.id_kategori,
         label: `${k.orde0} / ${k.orde1} / ${k.orde2} / ${k.orde3} / ${k.orde4}`,
-        ...k, // Attach the whole category data to the option
+        ...k,
     }));
 
     return (
@@ -125,9 +156,41 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                             accept=".geojson"
                             multiple
                             {...register('geojson_file')}
+                            ref={inputRef}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                            onChange={handleFileChange}
                         />
                         {errors.geojson_file && <p className="mt-1 text-sm text-red-600">{errors.geojson_file.message}</p>}
+
+                        {/* List nama file yang sudah dipilih */}
+                        {fileList.length > 0 && (
+                            <div className="mt-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
+                                <ul className="list-disc pl-6 text-xs text-gray-700 dark:text-gray-200">
+                                    {fileList.map((file, idx) => (
+                                        <li
+                                            key={idx}
+                                            className="flex items-center justify-between gap-2 border-b border-dashed border-gray-200 py-1 last:border-0 dark:border-gray-700"
+                                        >
+                                            <span className="truncate">{file.name}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveFile(idx)}
+                                                className="rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-500 transition hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveAll}
+                                    className="mt-3 rounded bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-red-700"
+                                >
+                                    Cancel Semua
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* User (readonly) */}
@@ -176,16 +239,15 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                     <div>
                         <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Category</label>
 
-                        {/* ganti <Select> biasa dengan Controller */}
                         <Controller
                             name="id_kategori"
                             control={control}
                             defaultValue=""
                             render={({ field }) => (
-                                <Select<typeof categoryOptions[0]>
+                                <Select<(typeof categoryOptions)[0]>
                                     {...field}
                                     options={categoryOptions}
-                                    value={categoryOptions.find(opt => opt.value.toString() === field.value)}
+                                    value={categoryOptions.find((opt) => opt.value.toString() === field.value)}
                                     onChange={(opt) => {
                                         field.onChange(opt?.value.toString() ?? '');
                                         setSelectedKat(opt);
