@@ -14,6 +14,7 @@ interface SidebarFilterProps {
     onHideAll: () => void;
     isParentChecked?: (parent: string) => boolean; // Tambahan (optional)
     onView: (parent: string, childId: string) => void;
+    onSearchCoordinate?: (x: string, y: string) => void; // Tambahan
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -28,9 +29,12 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     onHideAll,
     isParentChecked = () => false,
     onView,
+    onSearchCoordinate,
 }) => {
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
     const [search, setSearch] = useState('');
+    const [coordX, setCoordX] = useState('');
+    const [coordY, setCoordY] = useState('');
 
     const handleToggleGroup = (group: string) => {
         setExpandedGroups((prev) => ({
@@ -39,12 +43,11 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         }));
     };
 
-    // Check "all checked" and "none checked" for Show All/Hide All
     const allChecked = uniqueSourceNames.every(
         (parent) => groupedChildren[parent]?.length > 0 && groupedChildren[parent].every((child) => activeChildFilters[parent]?.[child.id]),
     );
     const noneChecked = uniqueSourceNames.every((parent) => !groupedChildren[parent]?.some((child) => activeChildFilters[parent]?.[child.id]));
-    // Filtering parents and children by search
+
     const filteredSourceNames = uniqueSourceNames.filter(
         (parent) =>
             parent.toLowerCase().includes(search.toLowerCase()) ||
@@ -75,17 +78,55 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             {sidebarOpen && (
                 <>
                     <h2 className="mb-2 font-semibold">Filter Layers</h2>
-                    <div className="mb-4 flex flex-col gap-2">
+                    <div className="mb-4 flex flex-col items-center gap-3 px-4">
                         {/* Search Bar */}
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                            className="w-full max-w-md rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                             placeholder="Cari layer atau label…"
                         />
+
+                        {/* Search by Koordinat */}
+                        <form
+                            className="w-full max-w-md"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                if (onSearchCoordinate && coordX && coordY) {
+                                    onSearchCoordinate(coordX, coordY);
+                                }
+                            }}
+                        >
+                            <div className="mb-3 flex gap-3">
+                                <input
+                                    type="text"
+                                    value={coordX}
+                                    onChange={(e) => setCoordX(e.target.value)}
+                                    className="flex-1 rounded-lg border border-gray-300 py-2 ps-2 text-xs"
+                                    placeholder="Koordinat X (Long)"
+                                />
+                                <input
+                                    type="text"
+                                    value={coordY}
+                                    onChange={(e) => setCoordY(e.target.value)}
+                                    className="flex-1 rounded-lg border border-gray-300 py-2 ps-2 text-xs"
+                                    placeholder="Koordinat Y (Lat)"
+                                />
+                            </div>
+                            <div className="flex justify-center">
+                                <button
+                                    type="submit"
+                                    disabled={!coordX || !coordY}
+                                    className="rounded-lg bg-green-500 px-6 py-2 text-xs font-semibold text-white hover:bg-green-600 disabled:opacity-50"
+                                >
+                                    Cari Koordinat
+                                </button>
+                            </div>
+                        </form>
+
                         {/* Tombol Aksi */}
-                        <div className="flex w-full gap-2">
+                        <div className="flex w-full max-w-md gap-3">
                             <button
                                 type="button"
                                 className="flex-1 rounded-lg bg-blue-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-600 disabled:bg-blue-300"

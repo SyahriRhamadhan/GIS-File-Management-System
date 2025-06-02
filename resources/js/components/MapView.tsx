@@ -248,6 +248,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
             }, 1000);
         }
     };
+    const handleSearchCoordinate = (x: string, y: string) => {
+        // Parsing ke number, pastikan valid
+        const lat = Number(y);
+        const lng = Number(x);
+        if (!isNaN(lat) && !isNaN(lng) && mapRef.current) {
+            mapRef.current.flyTo([lat, lng], 16, { duration: 1 });
+        }
+    };
 
     return (
         <div className="flex h-screen">
@@ -327,6 +335,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                 onHideAll={handleHideAll}
                 onView={handleViewLocation}
                 isParentChecked={isParentChecked}
+                onSearchCoordinate={handleSearchCoordinate}
             />
         </div>
     );
