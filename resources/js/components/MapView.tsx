@@ -179,7 +179,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
                 ))}
             <div className="mt-2 space-x-2 text-right">
                 <a
-                    href={`/dashboard/geojson/${item.id_geojson}/view`}
+                    href={`/dashboard/geojson/${item.id_geojson}/add`}
                     className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
                     target="_blank"
                     rel="noreferrer noopener"
