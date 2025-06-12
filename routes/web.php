@@ -57,6 +57,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // --- PDF GEOJSON ---
         Route::get('/geojson/{id}/add', [PdfGeojson::class, 'createFromGeojson'])
             ->name('geojson.add_pdf');
+        Route::get('/geojson/{id}/view', [PdfGeojson::class, 'index'])
+            ->name('geojson.list_pdf');
     });
 });
 

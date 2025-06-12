@@ -10,6 +10,20 @@ use Inertia\Inertia;
 
 class PdfGeojson  extends Controller
 {
+
+    public function index($id)
+    {
+        // Ambil hanya satu geojson (by id) beserta relasi report
+        $geojson = Geojson::with(['region', 'owner', 'reports' => function ($q) {
+            $q->orderBy('created_at', 'desc');
+        }])->findOrFail($id);
+
+        return Inertia::render('pdf/view', [
+            'geojsons' => [$geojson], // tetap array biar kompatibel sama view.tsx kamu
+        ]);
+    }
+
+
     public function createFromGeojson($id)
     {
         $geojson = Geojson::findOrFail($id);
