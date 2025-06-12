@@ -11,18 +11,31 @@ use Inertia\Inertia;
 class PdfGeojson  extends Controller
 {
 
-    public function index($id)
+    public function index(Request $request, $id)
     {
-        // Ambil hanya satu geojson (by id) beserta relasi report
-        $geojson = Geojson::with(['region', 'owner', 'reports' => function ($q) {
-            $q->orderBy('created_at', 'desc');
-        }])->findOrFail($id);
+        $perPage = $request->input('per_page', 10);
+        // Handle "all"
+        if ($perPage === 'all') {
+            $perPage = Geojson::with('reports')->findOrFail($id)->reports()->count();
+        }
+
+        $geojson = Geojson::with(['region', 'owner'])
+            ->findOrFail($id);
+
+        // Ambil reports dengan pagination (hanya untuk geojson ini)
+        $reports = $geojson->reports()
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->appends($request->except('page')); // supaya query param per_page tetap saat pindah page
+
+        // Gabungkan reports paginated ke geojsons
+        $geojsonArr = $geojson->toArray();
+        $geojsonArr['reports'] = $reports;
 
         return Inertia::render('pdf/view', [
-            'geojsons' => [$geojson], // tetap array biar kompatibel sama view.tsx kamu
+            'geojsons' => [$geojsonArr], // tetap array
         ]);
     }
-
 
     public function createFromGeojson($id)
     {

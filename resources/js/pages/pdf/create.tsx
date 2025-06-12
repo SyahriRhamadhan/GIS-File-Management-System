@@ -62,10 +62,13 @@ export default function Create({ geojsonSelected, regions, owners, user_id }: Cr
 
                 {geojsonSelected && (
                     <>
-                        <div className="mb-4 rounded border bg-gray-50 p-2">
-                            <p>
-                                <strong>GeoJSON Selected:</strong> {geojsonSelected.source_name} - Region: {geojsonSelected.region_name} - Owner:{' '}
-                                {geojsonSelected.owner_name}
+                        <div className="mb-4 rounded border bg-gray-50 p-2 transition-colors dark:border-[#232329] dark:bg-[#18181b]">
+                            <p className="text-gray-800 dark:text-gray-200">
+                                <strong>GeoJSON Selected:</strong> {geojsonSelected.source_name}
+                                {' - '}
+                                <span className="font-semibold">Region:</span> {geojsonSelected.region_name}
+                                {' - '}
+                                <span className="font-semibold">Owner:</span> {geojsonSelected.owner_name}
                             </p>
                         </div>
 
@@ -102,12 +105,12 @@ export default function Create({ geojsonSelected, regions, owners, user_id }: Cr
 
                         {/* Sifat */}
                         <div className="flex flex-col">
-                            <label className="block text-sm font-semibold">Sifat</label>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">Sifat</label>
                             <select
                                 name="sifat"
                                 value={data.sifat}
                                 onChange={(e) => setData('sifat', e.target.value)}
-                                className="w-full rounded-lg border p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-900 transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#232329] dark:bg-[#18181b] dark:text-gray-100"
                             >
                                 <option value="Biasa">Biasa</option>
                                 <option value="Rahasia">Rahasia</option>
