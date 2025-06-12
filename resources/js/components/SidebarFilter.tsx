@@ -56,7 +56,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
 
     return (
         <div
-            className={`fixed top-0 right-0 z-[9999] flex h-full flex-col border-l border-gray-300 bg-white shadow-lg transition-all duration-300 ${
+            className={`fixed top-0 right-0 z-[9999] flex h-full flex-col border-l border-gray-300 bg-white shadow-lg transition-all duration-300 dark:border-[#232329] dark:bg-[#18181b] ${
                 sidebarOpen ? 'w-96 p-4' : 'w-0 p-0'
             } overflow-auto`}
             style={{
@@ -68,7 +68,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             {/* Filter button ALWAYS shown */}
             <button
                 onClick={toggleSidebar}
-                className="fixed top-2 right-6 z-[10001] rounded-full border border-gray-300 bg-white p-2 shadow hover:bg-gray-100"
+                className="fixed top-2 right-6 z-[10001] rounded-full border border-gray-300 bg-white p-2 shadow hover:bg-gray-100 dark:border-[#393e41] dark:bg-[#232329] dark:text-gray-200 dark:hover:bg-[#29292f]"
                 aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
                 title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
                 type="button"
@@ -77,14 +77,14 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             </button>
             {sidebarOpen && (
                 <>
-                    <h2 className="mb-2 font-semibold">Filter Layers</h2>
+                    <h2 className="mb-2 font-semibold text-gray-800 dark:text-gray-100">Filter Layers</h2>
                     <div className="mb-4 flex flex-col items-center gap-3 px-4">
                         {/* Search Bar */}
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full max-w-md rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                            className="w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-[#393e41] dark:bg-[#232329] dark:text-gray-100"
                             placeholder="Cari layer atau label…"
                         />
 
@@ -103,14 +103,14 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                     type="text"
                                     value={coordX}
                                     onChange={(e) => setCoordX(e.target.value)}
-                                    className="flex-1 rounded-lg border border-gray-300 py-2 ps-2 text-xs"
+                                    className="flex-1 rounded-lg border border-gray-300 bg-white py-2 ps-2 text-xs text-gray-900 dark:border-[#393e41] dark:bg-[#232329] dark:text-gray-100"
                                     placeholder="Koordinat X (Long)"
                                 />
                                 <input
                                     type="text"
                                     value={coordY}
                                     onChange={(e) => setCoordY(e.target.value)}
-                                    className="flex-1 rounded-lg border border-gray-300 py-2 ps-2 text-xs"
+                                    className="flex-1 rounded-lg border border-gray-300 bg-white py-2 ps-2 text-xs text-gray-900 dark:border-[#393e41] dark:bg-[#232329] dark:text-gray-100"
                                     placeholder="Koordinat Y (Lat)"
                                 />
                             </div>
@@ -163,16 +163,16 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                         />
                                     </label>
                                     <span className="mx-2 text-xl">{expandedGroups[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
-                                    <span className="font-semibold">{parent}</span>
+                                    <span className="font-semibold text-gray-800 dark:text-gray-100">{parent}</span>
                                 </div>
 
                                 {expandedGroups[parent] && groupedChildren[parent]?.length > 0 && (
-                                    <table className="mt-2 min-w-full rounded border bg-gray-50 text-xs">
+                                    <table className="mt-2 min-w-full rounded border bg-gray-50 text-xs dark:border-[#393e41] dark:bg-[#232329]">
                                         <thead>
                                             <tr>
-                                                <th className="p-1 text-left font-bold">Checklist</th>
-                                                <th className="p-1 text-left font-bold">Lokasi</th>
-                                                <th className="p-1 text-left font-bold">Label</th>
+                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Checklist</th>
+                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Lokasi</th>
+                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Label</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -183,7 +183,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                         parent.toLowerCase().includes(search.toLowerCase()),
                                                 )
                                                 .map((child) => (
-                                                    <tr key={child.id}>
+                                                    <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
                                                         <td className="p-1">
                                                             <input
                                                                 type="checkbox"
@@ -200,7 +200,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                                 View
                                                             </button>
                                                         </td>
-                                                        <td className="p-1">{child.label}</td>
+                                                        <td className="p-1 text-gray-700 dark:text-gray-200">{child.label}</td>
                                                     </tr>
                                                 ))}
                                         </tbody>
