@@ -206,7 +206,52 @@ export default function GeojsonIndex() {
         value: src,
         label: src,
     }));
+    const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
 
+    const customSelectStyles = {
+        control: (provided: { boxShadow: any }, state: { isFocused: any }) => ({
+            ...provided,
+            backgroundColor: isDark ? '#374151' : '#fff', // dark:bg-gray-700, light:bg-white
+            color: isDark ? '#f3f4f6' : '#111827', // dark:text-gray-100, light:text-gray-900
+            borderColor: isDark ? '#4b5563' : '#d1d5db', // dark:border-gray-600, light:border-gray-300
+            boxShadow: state.isFocused ? '0 0 0 2px #2563eb22' : provided.boxShadow,
+        }),
+        menu: (provided: any) => ({
+            ...provided,
+            backgroundColor: isDark ? '#374151' : '#fff',
+            color: isDark ? '#f3f4f6' : '#111827',
+            zIndex: 99,
+        }),
+        option: (provided: any, state: { isSelected: any; isFocused: any }) => ({
+            ...provided,
+            backgroundColor: state.isSelected
+                ? isDark
+                    ? '#2563eb'
+                    : '#93c5fd'
+                : state.isFocused
+                  ? isDark
+                      ? '#4b5563'
+                      : '#f3f4f6'
+                  : isDark
+                    ? '#374151'
+                    : '#fff',
+            color: isDark ? '#f3f4f6' : '#111827',
+            cursor: 'pointer',
+        }),
+        singleValue: (provided: any) => ({
+            ...provided,
+            color: isDark ? '#f3f4f6' : '#111827',
+        }),
+        input: (provided: any) => ({
+            ...provided,
+            color: isDark ? '#f3f4f6' : '#111827',
+        }),
+        placeholder: (provided: any) => ({
+            ...provided,
+            color: isDark ? '#9ca3af' : '#6b7280',
+        }),
+        menuPortal: (provided: any) => ({ ...provided, zIndex: 9999 }),
+    };
     return (
         <AppLayout
             breadcrumbs={[
@@ -247,7 +292,54 @@ export default function GeojsonIndex() {
                     />
                     <Select
                         options={sourceOptions}
-                        className="w-full max-w-xs rounded border bg-white px-3 py-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100"
+                        className="w-full max-w-xs rounded" // cukup, biar nggak duplikat styling
+                        styles={{
+                            control: (base, state) => ({
+                                ...base,
+                                backgroundColor: isDark ? '#374151' : '#fff',
+                                color: isDark ? '#f3f4f6' : '#111827',
+                                borderColor: isDark ? '#4b5563' : '#d1d5db',
+                                boxShadow: state.isFocused ? '0 0 0 2px #2563eb22' : base.boxShadow,
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: isDark ? '#374151' : '#fff',
+                                color: isDark ? '#f3f4f6' : '#111827',
+                                zIndex: 99,
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isSelected
+                                    ? isDark
+                                        ? '#2563eb'
+                                        : '#93c5fd'
+                                    : state.isFocused
+                                      ? isDark
+                                          ? '#4b5563'
+                                          : '#f3f4f6'
+                                      : isDark
+                                        ? '#374151'
+                                        : '#fff',
+                                color: isDark ? '#f3f4f6' : '#111827',
+                                cursor: 'pointer',
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: isDark ? '#f3f4f6' : '#111827',
+                            }),
+                            input: (base) => ({
+                                ...base,
+                                color: isDark ? '#f3f4f6' : '#111827',
+                            }),
+                            placeholder: (base) => ({
+                                ...base,
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                            }),
+                            menuPortal: (base) => ({
+                                ...base,
+                                zIndex: 9999,
+                            }),
+                        }}
                         value={sourceOptions.find((option) => option.value === sourceFilter) || null}
                         onChange={(selectedOption) => {
                             setSourceFilter(selectedOption ? selectedOption.value : '');
@@ -255,6 +347,7 @@ export default function GeojsonIndex() {
                         }}
                         isClearable
                         placeholder="Pilih source..."
+                        menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
                     />
 
                     {/* user */}

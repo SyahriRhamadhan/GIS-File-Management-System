@@ -117,27 +117,14 @@ export default function Navbar() {
                             >
                                 Dashboard
                             </Link>
-                        ) : // <Link
-                        //     href={route('register')}
-                        //     className="rounded border border-[#ebe129] px-5 py-2 font-medium text-[#ebe129] transition hover:bg-[#ebe129] hover:text-white dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-500 dark:hover:text-[#18181b]"
-                        // >
-                        //     Register
-                        // </Link>
-                        null}
-                        <>
+                        ) : (
                             <Link
                                 href={route('login')}
                                 className="rounded border border-[#ebe129] px-5 py-2 font-medium text-[#ebe129] transition hover:bg-[#ebe129] hover:text-white dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-500 dark:hover:text-[#18181b]"
                             >
                                 Log in
                             </Link>
-                            {/* <Link
-                                    href={route('register')}
-                                    className="ml-2 rounded border border-[#ebe129] px-5 py-2 font-medium text-[#ebe129] transition hover:bg-[#ebe129] hover:text-white dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-500 dark:hover:text-[#18181b]"
-                                >
-                                    Register
-                                </Link> */}
-                        </>
+                        )}
                     </li>
                 </ul>
             </nav>
@@ -215,22 +202,13 @@ export default function Navbar() {
                                     Dashboard
                                 </Link>
                             ) : (
-                                <>
-                                    <Link
-                                        href={route('login')}
-                                        className="block rounded border border-[#ebe129] px-4 py-2 font-medium text-[#ebe129] transition hover:bg-[#ebe129] hover:text-white dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-500 dark:hover:text-[#18181b]"
-                                        onClick={() => setOpen(false)}
-                                    >
-                                        Log in
-                                    </Link>
-                                    {/* <Link
-                                        href={route('register')}
-                                        className="block rounded border border-[#ebe129] px-4 py-2 font-medium text-[#ebe129] transition hover:bg-[#ebe129] hover:text-white dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-500 dark:hover:text-[#18181b]"
-                                        onClick={() => setOpen(false)}
-                                    >
-                                        Register
-                                    </Link> */}
-                                </>
+                                <Link
+                                    href={route('login')}
+                                    className="block rounded border border-[#ebe129] px-4 py-2 font-medium text-[#ebe129] transition hover:bg-[#ebe129] hover:text-white dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-500 dark:hover:text-[#18181b]"
+                                    onClick={() => setOpen(false)}
+                                >
+                                    Log in
+                                </Link>
                             )}
                         </li>
                     </ul>
