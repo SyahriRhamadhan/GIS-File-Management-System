@@ -138,7 +138,6 @@ export default function Navbar() {
                                     Register
                                 </Link> */}
                         </>
-                        ){'}'}
                     </li>
                 </ul>
             </nav>
