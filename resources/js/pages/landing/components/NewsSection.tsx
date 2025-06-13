@@ -22,19 +22,19 @@ const newsData = [
 ];
 
 const NewsSection = () => (
-    <section className="px-6 py-12">
+    <section className="bg-white px-4 py-12 sm:px-6 dark:bg-[#18181b]">
         <div className="mb-8 text-center">
-            <h2 className="text-3xl font-semibold">Berita Terbaru</h2>
-            <p className="text-gray-600">Berita dan informasi terkini dari DINAS PUPRP KAB. BINTAN</p>
+            <h2 className="text-3xl font-semibold text-yellow-500 dark:text-yellow-400">Berita Terbaru</h2>
+            <p className="text-gray-600 dark:text-gray-300">Berita dan informasi terkini dari DINAS PUPRP KAB. BINTAN</p>
         </div>
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {newsData.map((news, idx) => (
-                <div key={idx} className="overflow-hidden rounded-lg bg-white shadow-lg">
+                <div key={idx} className="flex flex-col overflow-hidden rounded-lg bg-white shadow-lg dark:bg-[#232323]">
                     <img className="h-40 w-full object-cover" src={news.image} alt="news image" />
-                    <div className="p-4">
-                        <h3 className="text-xl font-semibold">{news.title}</h3>
-                        <p className="mt-2 text-sm text-gray-600">{news.description}</p>
-                        <Link href={news.link} className="mt-4 inline-block text-blue-500">
+                    <div className="flex flex-1 flex-col p-4">
+                        <h3 className="text-xl font-semibold text-yellow-700 dark:text-yellow-400">{news.title}</h3>
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{news.description}</p>
+                        <Link href={news.link} className="mt-4 inline-block font-semibold text-yellow-500 transition hover:text-yellow-600">
                             Baca selengkapnya
                         </Link>
                     </div>

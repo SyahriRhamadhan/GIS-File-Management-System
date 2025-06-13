@@ -4,7 +4,7 @@ import HeroSection from './landing/components/HeroSection';
 import NewsSection from './landing/components/NewsSection';
 import ServicesSection from './landing/components/ServicesSection';
 import VisionMissionSection from './landing/components/VisionMissionSection';
-import Footer from './landing/footer';
+import Footer from './landing/components/Footer';
 import Navbar from './landing/navbar';
 import Pengumuman from './landing/pengumuman';
 

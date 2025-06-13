@@ -22,15 +22,18 @@ const services = [
 ];
 
 const ServicesSection = () => (
-    <section className="bg-white py-12">
-        <div className="container mx-auto px-6">
-            <h2 className="mb-8 text-center text-3xl font-bold text-blue-900">Layanan Kami</h2>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+    <section className="bg-white py-12 dark:bg-[#18181b]">
+        <div className="container mx-auto px-4 sm:px-6">
+            <h2 className="mb-8 text-center text-3xl font-bold text-yellow-500 dark:text-yellow-400">Layanan Kami</h2>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 {services.map((service, idx) => (
-                    <div key={idx} className="rounded-lg border border-blue-100 bg-blue-50 p-6 text-center shadow-sm">
+                    <div
+                        key={idx}
+                        className="flex flex-col items-center rounded-lg border border-yellow-100 bg-yellow-50 p-6 text-center shadow-sm dark:border-yellow-700 dark:bg-[#232323]"
+                    >
                         <div className="mb-4 text-5xl">{service.icon}</div>
-                        <h3 className="mb-2 text-xl font-semibold text-blue-800">{service.title}</h3>
-                        <p className="text-blue-700">{service.description}</p>
+                        <h3 className="mb-2 text-xl font-semibold text-yellow-700 dark:text-yellow-400">{service.title}</h3>
+                        <p className="text-yellow-800 dark:text-yellow-200">{service.description}</p>
                     </div>
                 ))}
             </div>

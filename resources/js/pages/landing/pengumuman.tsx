@@ -54,8 +54,8 @@ export default function PengumumanCarousel() {
 
     if (announcements.length === 0) {
         return (
-            <div className="flex items-center gap-2 bg-[#f4f4f4] px-4 py-2 text-gray-500">
-                <span className="font-semibold text-[#1656b9]">Pengumuman</span>
+            <div className="flex items-center gap-2 bg-[#f4f4f4] px-4 py-2 text-gray-500 dark:bg-[#232323]">
+                <span className="font-semibold text-yellow-500 dark:text-yellow-400">Pengumuman</span>
                 <span className="ml-4">Belum ada pengumuman.</span>
             </div>
         );
@@ -67,50 +67,33 @@ export default function PengumumanCarousel() {
     const prev = () => setActive((prev) => (prev - 1 + announcements.length) % announcements.length);
 
     return (
-        <div className="flex w-full items-center border-b border-[#ededed] bg-[#f4f4f4] px-3 py-2">
+        <div className="flex w-full items-center border-b border-[#ededed] bg-[#f4f4f4] px-3 py-2 dark:bg-[#232323]">
             {/* Label */}
-            <span className="min-w-max px-2 font-bold text-[#ebe129]">Pengumuman</span>
+            <span className="min-w-max px-2 font-bold text-yellow-500 dark:text-yellow-400">Pengumuman</span>
 
             {/* Tombol kiri */}
-            <button
-                onClick={prev}
-                className="mx-2 rounded p-1 transition hover:bg-gray-200"
-                aria-label="Sebelumnya"
-            >
-                <ChevronLeft size={20} />
+            <button onClick={prev} className="mx-2 rounded p-1 transition hover:bg-yellow-100 dark:hover:bg-yellow-700" aria-label="Sebelumnya">
+                <ChevronLeft size={20} className="text-yellow-500 dark:text-yellow-400" />
             </button>
 
             {/* Isi pengumuman */}
-            <div className="flex-1 overflow-x-auto px-1 text-sm whitespace-nowrap">
-                <span className="font-medium">{current.title}</span>
-                <span className="mx-2 text-[#393e41]">|</span>
-                <span className="text-gray-600">{current.description}</span>
+            <div className="flex-1 overflow-hidden">
+                <div className="truncate text-sm text-gray-800 dark:text-white">
+                    <span className="font-semibold text-yellow-700 dark:text-yellow-400">{current.title}</span>
+                    <span className="mx-2 text-gray-400">|</span>
+                    <span className="text-gray-600 dark:text-gray-300">{current.description}</span>
+                    {current.file && (
+                        <a href={current.file} className="ml-2 inline-flex items-center text-yellow-500 transition hover:text-yellow-600" download>
+                            <Download size={16} className="mr-1" />
+                            Unduh
+                        </a>
+                    )}
+                </div>
             </div>
 
-            {/* Unduh/tanggal */}
-            {current.file ? (
-                <a
-                    href={current.file}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-2 flex items-center gap-1 rounded bg-[#ebe129] px-3 py-1 text-xs font-semibold text-[#393e41] transition hover:bg-[#d9cc00]"
-                >
-                    <Download size={16} />
-                    Unduh
-                </a>
-            ) : (
-                <span className="ml-2 min-w-max text-xs text-gray-500">
-                    {new Date(current.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </span>
-            )}
-
             {/* Tombol kanan */}
-            <button
-                onClick={next}
-                className="ml-2 rounded p-1 transition hover:bg-gray-200"
-                aria-label="Selanjutnya"
-            >
-                <ChevronRight size={20} />
+            <button onClick={next} className="mx-2 rounded p-1 transition hover:bg-yellow-100 dark:hover:bg-yellow-700" aria-label="Berikutnya">
+                <ChevronRight size={20} className="text-yellow-500 dark:text-yellow-400" />
             </button>
         </div>
     );

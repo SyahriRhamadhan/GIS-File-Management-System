@@ -2,8 +2,8 @@ const year = new Date().getFullYear();
 
 export default function Footer() {
     return (
-        <footer className="mt-auto bg-[#1b1b18] py-8 text-white">
-            <div className="mx-auto flex max-w-screen-xl flex-col items-center justify-between gap-4 px-6 md:flex-row">
+        <footer className="mt-auto bg-[#1b1b18] dark:bg-[#18181b] py-8 text-white">
+            <div className="mx-auto flex max-w-screen-xl flex-col items-center justify-between gap-4 px-4 sm:px-6 md:flex-row">
                 {/* Left: Copyright */}
                 <div className="text-center text-sm md:text-left">&copy; {year} Dinas PUPR Kabupaten Bintan. Semua hak dilindungi.</div>
                 {/* Middle: Link Navigasi */}
@@ -21,7 +21,7 @@ export default function Footer() {
                 {/* Right: Social Media (Optional, hapus kalau tidak pakai) */}
                 <div className="flex justify-center gap-3">
                     {/* Contoh ikon pakai SVG, bisa ganti atau hapus */}
-                    <a href="#" aria-label="Instagram" className="transition hover:text-yellow-500">
+                    <a href="#" aria-label="Instagram" className="transition text-white hover:text-yellow-500 dark:hover:text-yellow-400">
                         <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                             <path
                                 d="M12,2.2c3.2,0,3.6,0,4.8,0.1c1.2,0.1,2,0.2,2.5,0.4c0.6,0.2,1,0.5,1.5,0.9c0.4,0.4,0.7,0.9,0.9,1.5
