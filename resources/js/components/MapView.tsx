@@ -260,7 +260,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
     return (
         <div className="flex h-screen">
             {/* Konten Peta */}
-            <div className={`relative flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-67' : 'mr-0'}`}>
+            <div className={`relative flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-67' : 'mr-0'}`} style={{ zIndex: 10 }}>
                 <MapContainer center={center} zoom={zoom} touchZoom scrollWheelZoom style={{ height: '100%', width: '100%' }}>
                     {/* Inilah kunci: ref setter */}
                     <MapRefSetter mapRef={mapRef} />
