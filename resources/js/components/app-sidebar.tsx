@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Layers2, Earth, FileText, Folder, LayoutGrid, MapPin } from 'lucide-react';
+import { Earth, FileText, Folder, Layers2, LayoutGrid, MapPin } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -31,6 +31,19 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Tambah Kategori',
         href: '/dashboard/kategori',
+        icon: Layers2,
+    },
+];
+
+const secondNavItems: NavItem[] = [
+    {
+        title: 'Daftar Artikel',
+        href: '/artikel',
+        icon: FileText,
+    },
+    {
+        title: 'Tambah Artikel',
+        href: '/artikel/tambah',
         icon: Layers2,
     },
 ];
@@ -65,6 +78,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <NavMain secondNavItems={secondNavItems} items={[]} />
             </SidebarContent>
 
             <SidebarFooter>
