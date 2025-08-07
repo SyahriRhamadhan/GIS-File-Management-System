@@ -119,7 +119,7 @@ class ReportController extends Controller
 
     public function edit(Report $report)
     {
-        return Inertia::render('report/edit', [
+        return Inertia::render('report/update', [
             'report' => $report,
             'geojsons' => Geojson::select('id_geojson', 'source_name')->get(),
         ]);

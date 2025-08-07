@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-
+import berita from '../../../../image/berita.jpg';
 type Holiday = {
     holiday_name: string;
     holiday_date: string;
@@ -16,8 +16,9 @@ const newsTicker = [
 const featuredNews = {
     date: 'Jumat, 17 Januari 2025',
     category: 'Acara',
-    title: 'HIMA PBSI Gelar Festival Bulan Bahasa Dan Kenalkan Budaya Ke Generasi Muda',
-    image: 'https://via.placeholder.com/800x400',
+    title: 'Kepala Dinas PUPRP Kabupaten Bintan menghadiri Rapat Persiapan Pawai Takbir, Sholat Ied, dan Open House Tingkat Kabupaten Bintan Tahun 1446 H/2025 M.',
+    image: berita,
+
 };
 
 const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];

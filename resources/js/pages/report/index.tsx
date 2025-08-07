@@ -143,60 +143,68 @@ export default function ReportIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedReports.map((report, index) => (
-                                <tr key={report.id_report}>
-                                    <td className="border px-4 py-2">{(currentPage - 1) * perPage + index + 1}</td>
-                                    <td className="border px-4 py-2">{report.nomor}</td>
-                                    <td className="border px-4 py-2">{report.sifat}</td>
-                                    <td className="border px-4 py-2">{report.hal}</td>
-                                    <td className="border px-4 py-2">{report.kepada}</td>
-                                    <td className="border px-4 py-2">{report.geojson?.source_name ?? `Geojson ID ${report.id_geojson}`}</td>
-                                    <td className="border px-4 py-2">
-                                        <a
-                                            href={`/storage/${report.file_path}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 underline"
-                                        >
-                                            Lihat PDF
-                                        </a>
-                                    </td>
-
-                                    <td className="flex flex-wrap items-center justify-center gap-1 border px-4 py-2">
-                                        <Link
-                                            href={`/dashboard/report/${report.id_report}/edit`}
-                                            className="rounded bg-yellow-500 px-2 py-1 text-white hover:bg-yellow-600"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <button
-                                            onClick={() => confirmDelete(report.id_report)}
-                                            className="rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600"
-                                        >
-                                            Delete
-                                        </button>
-                                        {showConfirm && selectedId === report.id_report && (
-                                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                                                <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
-                                                    <h2 className="mb-4 text-lg font-semibold">Konfirmasi</h2>
-                                                    <p>Yakin ingin menghapus laporan ini?</p>
-                                                    <div className="mx-auto mt-4 flex items-center justify-center gap-2">
-                                                        <button
-                                                            onClick={() => setShowConfirm(false)}
-                                                            className="rounded bg-gray-300 px-3 py-1 dark:bg-gray-700"
-                                                        >
-                                                            Batal
-                                                        </button>
-                                                        <button onClick={handleConfirmDelete} className="rounded bg-red-600 px-3 py-1 text-white">
-                                                            Hapus
-                                                        </button>
+                            {paginatedReports.map((report, index) => {
+                                console.log('Sebelumnya:', {
+                                    nomor: report.nomor,
+                                    sifat: report.sifat,
+                                    hal: report.hal,
+                                    kepada: report.kepada,
+                                    deskripsi: report.description,
+                                });
+                                return (
+                                    <tr key={report.id_report}>
+                                        <td className="border px-4 py-2">{(currentPage - 1) * perPage + index + 1}</td>
+                                        <td className="border px-4 py-2">{report.nomor}</td>
+                                        <td className="border px-4 py-2">{report.sifat}</td>
+                                        <td className="border px-4 py-2">{report.hal}</td>
+                                        <td className="border px-4 py-2">{report.kepada}</td>
+                                        <td className="border px-4 py-2">{report.geojson?.source_name ?? `Geojson ID ${report.id_geojson}`}</td>
+                                        <td className="border px-4 py-2">
+                                            <a
+                                                href={`/storage/${report.file_path}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 underline"
+                                            >
+                                                Lihat PDF
+                                            </a>
+                                        </td>
+                                        <td className="flex flex-wrap items-center justify-center gap-1 border px-4 py-2">
+                                            <Link
+                                                href={`/dashboard/tambah-pdf/${report.id_report}/edit`}
+                                                className="rounded bg-yellow-500 px-2 py-1 text-white hover:bg-yellow-600"
+                                            >
+                                                Edit
+                                            </Link>
+                                            <button
+                                                onClick={() => confirmDelete(report.id_report)}
+                                                className="rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600"
+                                            >
+                                                Delete
+                                            </button>
+                                            {showConfirm && selectedId === report.id_report && (
+                                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                                                    <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
+                                                        <h2 className="mb-4 text-lg font-semibold">Konfirmasi</h2>
+                                                        <p>Yakin ingin menghapus laporan ini?</p>
+                                                        <div className="mx-auto mt-4 flex items-center justify-center gap-2">
+                                                            <button
+                                                                onClick={() => setShowConfirm(false)}
+                                                                className="rounded bg-gray-300 px-3 py-1 dark:bg-gray-700"
+                                                            >
+                                                                Batal
+                                                            </button>
+                                                            <button onClick={handleConfirmDelete} className="rounded bg-red-600 px-3 py-1 text-white">
+                                                                Hapus
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
