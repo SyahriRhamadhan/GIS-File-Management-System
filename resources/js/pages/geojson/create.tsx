@@ -5,6 +5,46 @@ import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 
+// Custom styles for React Select to support dark/light mode
+const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+    
+    const selectStyles = {
+        control: (provided: any, state: any) => ({
+            ...provided,
+            backgroundColor: isDark ? '#374151' : '#ffffff',
+            borderColor: state.isFocused ? (isDark ? '#4b5563' : '#d1d5db') : (isDark ? '#4b5563' : '#d1d5db'),
+            color: isDark ? '#f3f4f6' : '#111827',
+            '&:hover': {
+                borderColor: isDark ? '#4b5563' : '#d1d5db',
+            },
+        }),
+        menu: (provided: any) => ({
+            ...provided,
+            backgroundColor: isDark ? '#374151' : '#ffffff',
+        }),
+        option: (provided: any, state: any) => ({
+            ...provided,
+            backgroundColor: state.isSelected 
+                ? (isDark ? '#4b5563' : '#f3f4f6') 
+                : state.isFocused 
+                    ? (isDark ? '#4b5563' : '#f3f4f6') 
+                    : (isDark ? '#374151' : '#ffffff'),
+            color: isDark ? '#f3f4f6' : '#111827',
+        }),
+        singleValue: (provided: any) => ({
+            ...provided,
+            color: isDark ? '#f3f4f6' : '#111827',
+        }),
+        placeholder: (provided: any) => ({
+            ...provided,
+            color: isDark ? '#9ca3af' : '#6b7280',
+        }),
+        input: (provided: any) => ({
+            ...provided,
+            color: isDark ? '#f3f4f6' : '#111827',
+        }),
+    };
+
 interface GeojsonFormProps {
     user_name: string;
     user_id: number;
@@ -40,6 +80,8 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
             flash.upload_errors.forEach((msg) => toast.error(msg));
         }
     }, [flash]);
+
+
 
     const {
         register,
@@ -255,7 +297,9 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                                     getOptionLabel={(e) => e.label}
                                     getOptionValue={(e) => e.value.toString()}
                                     placeholder="— Select Category —"
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    styles={selectStyles}
+                                    className="react-select-container"
+                                    classNamePrefix="react-select"
                                 />
                             )}
                         />

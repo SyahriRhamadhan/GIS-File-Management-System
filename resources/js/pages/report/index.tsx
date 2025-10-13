@@ -155,7 +155,7 @@ export default function ReportIndex() {
         >
             <Head title="Laporan" />
             <div className="p-6">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+                {/* <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
                     <h1 className="text-2xl font-bold">Daftar Laporan</h1>
                     <Link
                         href="/dashboard/tambah-pdf/create"
@@ -163,7 +163,7 @@ export default function ReportIndex() {
                     >
                         + Tambah Laporan
                     </Link>
-                </div>
+                </div> */}
 
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                     <input

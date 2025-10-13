@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaTimes } from 'react-icons/fa';
 import { FaEye, FaEyeSlash } from 'react-icons/fa6';
 import { GeoJSON, MapContainer, TileLayer, useMap } from 'react-leaflet';
 import shp from 'shpjs';
@@ -13,8 +13,17 @@ export default function ShpClientFullscreen() {
     const [geojson, setGeojson] = useState<any>(null);
     const [previewGeojsons, setPreviewGeojsons] = useState<any[]>([]); // Untuk menyimpan preview GeoJSON
     const [filename, setFilename] = useState<string>('converted.geojson');
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false); // State untuk modal sidebar
     const geoJsonLayerRef = useRef<any>(null);
     const mapRef = useRef<any>(null);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    const closeSidebar = () => {
+        setIsSidebarOpen(false);
+    };
 
     const handleZipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -38,6 +47,7 @@ export default function ShpClientFullscreen() {
                     };
                 });
                 setPreviewGeojsons(previewData);
+                setIsSidebarOpen(true); // Buka sidebar otomatis ketika ada preview
             }
             // kasus satu file
             else {
@@ -45,6 +55,8 @@ export default function ShpClientFullscreen() {
                 setGeojson(fc);
                 const name = fc.fileName ? `${fc.fileName.replace(/\.[^/.]+$/, '')}.geojson` : `${files[0].name.replace(/\.[^/.]+$/, '')}.geojson`;
                 setFilename(name);
+                setPreviewGeojsons([]); // Reset preview untuk single file
+                setIsSidebarOpen(false); // Tutup sidebar untuk single file
             }
         } catch (err) {
             alert('Gagal mengonversi file: ' + err);
@@ -152,10 +164,19 @@ export default function ShpClientFullscreen() {
 
                                 {/* Preview GeoJSON jika ada lebih dari satu */}
 
-                                <div className="flex justify-end">
+                                <div className="flex justify-end space-x-2">
+                                    {previewGeojsons.length > 0 && (
+                                        <button
+                                            onClick={toggleSidebar}
+                                            className="inline-block rounded bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700"
+                                        >
+                                            Preview GeoJSON ({previewGeojsons.length})
+                                        </button>
+                                    )}
                                     <button
                                         onClick={handleDownload}
                                         className="inline-block rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+                                        disabled={!geojson && previewGeojsons.length === 0}
                                     >
                                         {previewGeojsons.length > 0 ? 'Download All GeoJSON' : 'Download GeoJSON'}
                                     </button>
@@ -189,44 +210,68 @@ export default function ShpClientFullscreen() {
                           )}
                 </MapContainer>
 
-                {previewGeojsons.length > 0 && (
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative mt-5 h-auto flex-1 space-y-4 overflow-hidden rounded-xl border p-5 md:min-h-min">
-                        <div>
-                            <h4 className="justify-content-center text-start text-xl font-semibold">Preview GeoJSON</h4>
-                            <div className="flex justify-end">
+                {/* Modal Sidebar untuk Preview GeoJSON */}
+                {isSidebarOpen && (
+                    <div className={`fixed right-0 top-0 z-[1001] h-full w-1/2 transform bg-white shadow-2xl transition-transform duration-300 ease-in-out dark:bg-gray-900 ${
+                        isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+                    }`}>
+                        {/* Header Sidebar */}
+                        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                                Preview GeoJSON ({previewGeojsons.length} files)
+                            </h3>
+                            <div className="flex items-center space-x-2">
                                 <button
                                     onClick={handleDownload}
-                                    className="inline-block rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+                                    className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
                                 >
-                                    {previewGeojsons.length > 0 ? 'Download All GeoJSON' : 'Download GeoJSON'}
+                                    Download All
+                                </button>
+                                <button
+                                    onClick={closeSidebar}
+                                    className="rounded-full p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                >
+                                    <FaTimes size={16} />
                                 </button>
                             </div>
                         </div>
-                        <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                            {previewGeojsons.map((file, index) => (
-                                <li key={index} className="flex flex-col overflow-hidden rounded-lg bg-white shadow-md">
-                                    {/* Header kartu: nama file & tombol */}
-                                    <div className="flex items-center justify-between border-b px-4 py-2">
-                                        <span className="truncate text-sm font-medium text-gray-800">{file.filename}</span>
-                                        <button
-                                            onClick={() => downloadSingle(file)}
-                                            className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
-                                        >
-                                            Download
-                                        </button>
-                                    </div>
 
-                                    {/* Konten kartu: peta */}
-                                    <div className="flex-1">
-                                        <MapContainer style={{ height: '300px', width: '100%' }} scrollWheelZoom>
-                                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                                            {/* Ini yang menampilkan popup saat klik feature */}
-                                            <PreviewGeoJSON data={file.data} />
-                                        </MapContainer>
+                        {/* Content Sidebar */}
+                        <div className="h-full overflow-y-auto pb-20">
+                            <div className="space-y-4 p-6">
+                                {previewGeojsons.map((file, index) => (
+                                    <div key={index} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                                        {/* Header kartu: nama file & tombol */}
+                                        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-700">
+                                            <span className="truncate text-sm font-medium text-gray-800 dark:text-gray-200">
+                                                {file.filename}
+                                            </span>
+                                            <button
+                                                onClick={() => downloadSingle(file)}
+                                                className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+                                            >
+                                                Download
+                                            </button>
+                                        </div>
+
+                                        {/* Konten kartu: peta */}
+                                        <div className="p-4">
+                                            <div className="h-64 overflow-hidden rounded border border-gray-200 dark:border-gray-600">
+                                                <MapContainer 
+                                                    style={{ height: '100%', width: '100%' }} 
+                                                    scrollWheelZoom={false}
+                                                    center={[1, 104.521117]}
+                                                    zoom={11}
+                                                >
+                                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                                    <PreviewGeoJSON data={file.data} />
+                                                </MapContainer>
+                                            </div>
+                                        </div>
                                     </div>
-                                </li>
-                            ))}
-                        </ul>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
 

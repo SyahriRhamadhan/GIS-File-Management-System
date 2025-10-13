@@ -1,8 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
 import { useForm } from '@inertiajs/react';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet';
+import CoordinateDisplay from '@/components/CoordinateDisplay';
+import { calculateGeojsonCenter, formatCoordinates, toDMS } from '@/utils/geojsonUtils';
 
 type CreateProps = {
     geojsonSelected?: {
@@ -46,8 +48,17 @@ export default function Create({ geojsonSelected, regions, owners, user_id }: Cr
         console.log('GeoJSON data:', geojsonSelected?.geojson);
     }, [geojsonSelected]);
 
-    // Default center (bisa disesuaikan, atau hitung centroid GeoJSON jika perlu)
-    const center: [number, number] = [1.0, 104.521117];
+    // Calculate center coordinates from GeoJSON data
+    const mapBounds = useMemo(() => {
+        if (geojsonSelected?.geojson) {
+            return calculateGeojsonCenter(geojsonSelected.geojson);
+        }
+        // Default center (Indonesia center)
+        return { center: [1.0, 104.521117] as [number, number], zoom: 11 };
+    }, [geojsonSelected?.geojson]);
+
+    const center = mapBounds.center;
+    const zoom = mapBounds.zoom;
 
     return (
         <AppLayout
@@ -73,15 +84,18 @@ export default function Create({ geojsonSelected, regions, owners, user_id }: Cr
                         </div>
 
                         {geojsonSelected.geojson && (
-                            <div className="mb-6 h-64 w-full rounded border">
-                                <MapContainer center={center} zoom={11} style={{ height: '100%', width: '100%' }}>
-                                    <TileLayer
-                                        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
-                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                    />
-                                    <GeoJSON data={geojsonSelected.geojson} />
-                                </MapContainer>
-                            </div>
+                            <>
+                                {/* Map */}
+                                <div className="mb-6 h-64 w-full rounded border">
+                                    <MapContainer center={center} zoom={zoom} style={{ height: '100%', width: '100%' }}>
+                                        <TileLayer
+                                            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        />
+                                        <GeoJSON data={geojsonSelected.geojson} />
+                                    </MapContainer>
+                                </div>
+                            </>
                         )}
                     </>
                 )}
