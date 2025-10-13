@@ -183,18 +183,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
 
     // Auto-initialize filter state for three levels
     useEffect(() => {
-        console.log('🚀 MapView: Initializing filter states');
-        console.log('📊 Initial data:', { 
-            uniqueCategoryNames, 
-            groupedByCategory, 
-            initialVisibleIds,
-            geojsonDataLength: geojsonData.length 
-        });
-        
         const hasInitial = Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0;
         const initialSet = new Set(initialVisibleIds.map((v) => String(v)));
-
-        console.log('🎯 Initialization settings:', { hasInitial, initialSet: Array.from(initialSet) });
 
         // Initialize category filters
         setActiveCategoryFilters(() => {
@@ -202,7 +192,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             for (const category of uniqueCategoryNames) {
                 updated[category] = !hasInitial; // Show all categories by default if no initial IDs
             }
-            console.log('📂 Initialized category filters:', updated);
             return updated;
         });
 
@@ -215,7 +204,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                     updated[category][parent] = !hasInitial; // Show all parents by default if no initial IDs
                 }
             }
-            console.log('👥 Initialized parent filters:', updated);
             return updated;
         });
 
@@ -233,30 +221,15 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                     }
                 }
             }
-            console.log('👶 Initialized child filters:', updated);
             return updated;
         });
     }, [groupedByCategory, uniqueCategoryNames, initialVisibleIds]);
 
     // Category toggle logic: toggle ALL parents and children in category
     const toggleCategoryFilter = (category: string) => {
-        console.log('🔄 toggleCategoryFilter called:', { category });
-        console.log('📊 Current state before toggle:', {
-            activeCategoryFilters: activeCategoryFilters[category],
-            activeParentFilters: activeParentFilters[category],
-            activeChildFilters: activeChildFilters[category]
-        });
-        
         setActiveCategoryFilters((prev) => {
             const newCategoryState = !prev[category];
             const updated = { ...prev, [category]: newCategoryState };
-            
-            console.log('📊 Category state change:', { 
-                category, 
-                oldState: prev[category], 
-                newState: newCategoryState, 
-                fullUpdated: updated 
-            });
             
             // Also update all parents and children in this category
             setActiveParentFilters((prevParents) => {
@@ -264,17 +237,9 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 if (!updatedParents[category]) updatedParents[category] = {};
                 
                 for (const parent of Object.keys(groupedByCategory[category] || {})) {
-                    const oldParentState = updatedParents[category][parent];
                     updatedParents[category][parent] = newCategoryState;
-                    console.log('👥 Parent state change:', { 
-                        category, 
-                        parent, 
-                        oldState: oldParentState, 
-                        newState: newCategoryState 
-                    });
                 }
                 
-                console.log('👥 All parent filters updated:', { category, updatedParents: updatedParents[category] });
                 return updatedParents;
             });
             
@@ -285,19 +250,10 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 for (const [parent, children] of Object.entries(groupedByCategory[category] || {})) {
                     if (!updatedChildren[category][parent]) updatedChildren[category][parent] = {};
                     for (const child of children) {
-                        const oldChildState = updatedChildren[category][parent][child.id];
                         updatedChildren[category][parent][child.id] = newCategoryState;
-                        console.log('👶 Child state change:', { 
-                            category, 
-                            parent, 
-                            childId: child.id, 
-                            oldState: oldChildState, 
-                            newState: newCategoryState 
-                        });
                     }
                 }
                 
-                console.log('👶 All child filters updated:', { category, updatedChildren: updatedChildren[category] });
                 return updatedChildren;
             });
             
@@ -307,23 +263,9 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
 
     // Parent toggle logic: toggle ALL children in parent
     const toggleParentFilter = (category: string, parent: string) => {
-        console.log('🔄 toggleParentFilter called:', { category, parent });
-        console.log('📊 Current parent state before toggle:', {
-            activeParentFilters: activeParentFilters[category]?.[parent],
-            activeChildFilters: activeChildFilters[category]?.[parent]
-        });
-        
         setActiveParentFilters((prev) => {
             const currentState = prev[category]?.[parent] || false;
             const newState = !currentState;
-            
-            console.log('📊 Parent toggle details:', { 
-                category, 
-                parent, 
-                currentState, 
-                newState,
-                prevCategoryState: prev[category]
-            });
             
             const updated = {
                 ...prev,
@@ -333,44 +275,16 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 },
             };
             
-            console.log('👥 Parent filter updated:', { 
-                category, 
-                parent, 
-                newState, 
-                updatedCategory: updated[category] 
-            });
-            
             // Also update all children in this parent to match parent state
             setActiveChildFilters((prevChildren) => {
                 const updatedChildren = { ...prevChildren };
                 if (!updatedChildren[category]) updatedChildren[category] = {};
                 if (!updatedChildren[category][parent]) updatedChildren[category][parent] = {};
                 
-                console.log('👶 Before updating children:', { 
-                    category, 
-                    parent, 
-                    currentChildren: updatedChildren[category][parent],
-                    childrenToUpdate: groupedByCategory[category]?.[parent] || []
-                });
-                
                 for (const child of groupedByCategory[category]?.[parent] || []) {
-                    const oldChildState = updatedChildren[category][parent][child.id];
                     updatedChildren[category][parent][child.id] = newState;
-                    console.log('👶 Child updated in parent toggle:', { 
-                        category, 
-                        parent, 
-                        childId: child.id, 
-                        oldState: oldChildState, 
-                        newState 
-                    });
                 }
                 
-                console.log('👶 All children updated for parent:', { 
-                    category, 
-                    parent, 
-                    newState, 
-                    updatedChildren: updatedChildren[category][parent] 
-                });
                 return updatedChildren;
             });
             
@@ -378,11 +292,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             if (newState) {
                 setActiveCategoryFilters((prevCategories) => {
                     const updatedCategories = { ...prevCategories, [category]: true };
-                    console.log('📂 Category activated due to parent activation:', { 
-                        category, 
-                        parent, 
-                        updatedCategories 
-                    });
                     return updatedCategories;
                 });
             }
@@ -393,25 +302,9 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
 
     // Child toggle logic
     const toggleChildFilter = (category: string, parent: string, childId: string) => {
-        console.log('🔄 toggleChildFilter called:', { category, parent, childId });
-        console.log('📊 Current child state before toggle:', {
-            activeChildFilters: activeChildFilters[category]?.[parent]?.[childId],
-            parentState: activeParentFilters[category]?.[parent],
-            categoryState: activeCategoryFilters[category]
-        });
-        
         setActiveChildFilters((prev) => {
             const currentState = prev[category]?.[parent]?.[childId] || false;
             const newState = !currentState;
-            
-            console.log('📊 Child toggle details:', { 
-                category, 
-                parent, 
-                childId, 
-                currentState, 
-                newState,
-                prevParentState: prev[category]?.[parent]
-            });
             
             const updated = {
                 ...prev,
@@ -424,14 +317,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 },
             };
             
-            console.log('👶 Child filter updated:', { 
-                category, 
-                parent, 
-                childId, 
-                newState, 
-                updatedParent: updated[category][parent] 
-            });
-            
             // If child is being activated, also activate parent and category
             if (newState) {
                 setActiveParentFilters((prevParents) => {
@@ -442,42 +327,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                             [parent]: true
                         }
                     };
-                    console.log('👥 Parent activated due to child activation:', { 
-                        category, 
-                        parent, 
-                        updatedParents: updatedParents[category] 
-                    });
                     return updatedParents;
                 });
                 
                 setActiveCategoryFilters((prevCategories) => {
                     const updatedCategories = { ...prevCategories, [category]: true };
-                    console.log('📂 Category activated due to child activation:', { 
-                        category, 
-                        parent, 
-                        childId, 
-                        updatedCategories 
-                    });
                     return updatedCategories;
                 });
             }
-            
-            // Check if this affects parent/category state
-            const allChildrenInParent = groupedByCategory[category]?.[parent] || [];
-            const allChildrenActive = allChildrenInParent.every(child => 
-                updated[category][parent][child.id]
-            );
-            
-            console.log('🔍 Parent state check after child toggle:', {
-                category,
-                parent,
-                allChildrenInParent: allChildrenInParent.map(c => c.id),
-                allChildrenActive,
-                childStates: allChildrenInParent.map(c => ({
-                    id: c.id,
-                    active: updated[category][parent][c.id]
-                }))
-            });
             
             return updated;
         });
@@ -487,7 +344,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     const isCategoryChecked = (category: string) => {
         const parents = groupedByCategory[category];
         if (!parents || Object.keys(parents).length === 0) {
-            console.log('✅ isCategoryChecked - no parents:', { category, result: false });
             return false;
         }
         
@@ -498,30 +354,10 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             const children = parents[parent];
             const allChildrenActive = children.every((child) => !!activeChildFilters[category]?.[parent]?.[child.id]);
             
-            console.log('🔍 Parent check in category:', {
-                category,
-                parent,
-                parentActive,
-                allChildrenActive,
-                children: children.map(c => ({
-                    id: c.id,
-                    active: !!activeChildFilters[category]?.[parent]?.[c.id]
-                }))
-            });
-            
             return parentActive && allChildrenActive;
         });
         
         const result = categoryActive && allParentsAndChildrenActive;
-        console.log('✅ isCategoryChecked result:', { 
-            category, 
-            result, 
-            categoryActive, 
-            allParentsAndChildrenActive,
-            activeCategoryFilters: activeCategoryFilters[category],
-            activeParentFilters: activeParentFilters[category],
-            activeChildFilters: activeChildFilters[category] 
-        });
         return result;
     };
 
@@ -529,7 +365,6 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     const isParentChecked = (category: string, parent: string) => {
         const children = groupedByCategory[category]?.[parent];
         if (!children || children.length === 0) {
-            console.log('✅ isParentChecked - no children:', { category, parent, result: false });
             return false;
         }
         
@@ -538,91 +373,39 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         const allChildrenActive = children.every((child) => !!activeChildFilters[category]?.[parent]?.[child.id]);
         
         const result = parentActive && allChildrenActive;
-        console.log('✅ isParentChecked result:', { 
-            category, 
-            parent, 
-            result, 
-            parentActive, 
-            allChildrenActive,
-            activeParent: activeParentFilters[category]?.[parent],
-            activeChildren: activeChildFilters[category]?.[parent],
-            childrenDetails: children.map(c => ({
-                id: c.id,
-                active: !!activeChildFilters[category]?.[parent]?.[c.id]
-            }))
-        });
         return result;
     };
 
     // Show/Hide all
     const handleShowAll = () => {
-        setActiveCategoryFilters((prev) => {
-            const updated: Record<string, boolean> = {};
-            for (const category of uniqueCategoryNames) {
-                updated[category] = true;
-            }
-            return updated;
+        const allCategories: { [key: string]: boolean } = {};
+        const allParents: { [category: string]: { [parent: string]: boolean } } = {};
+        const allChildren: { [category: string]: { [parent: string]: { [childId: string]: boolean } } } = {};
+
+        Object.keys(groupedByCategory).forEach(category => {
+            allCategories[category] = true;
+            allParents[category] = {};
+            allChildren[category] = {};
+
+            Object.keys(groupedByCategory[category]).forEach(parent => {
+                allParents[category][parent] = true;
+                allChildren[category][parent] = {};
+
+                groupedByCategory[category][parent].forEach(child => {
+                    allChildren[category][parent][child.id] = true;
+                });
+            });
         });
-        
-        setActiveParentFilters((prev) => {
-            const updated: Record<string, Record<string, boolean>> = {};
-            for (const [category, parents] of Object.entries(groupedByCategory)) {
-                updated[category] = {};
-                for (const parent of Object.keys(parents)) {
-                    updated[category][parent] = true;
-                }
-            }
-            return updated;
-        });
-        
-        setActiveChildFilters((prev) => {
-            const updated: Record<string, Record<string, Record<string, boolean>>> = {};
-            for (const [category, parents] of Object.entries(groupedByCategory)) {
-                updated[category] = {};
-                for (const [parent, children] of Object.entries(parents)) {
-                    updated[category][parent] = {};
-                    for (const child of children) {
-                        updated[category][parent][child.id] = true;
-                    }
-                }
-            }
-            return updated;
-        });
+
+        setActiveCategoryFilters(allCategories);
+        setActiveParentFilters(allParents);
+        setActiveChildFilters(allChildren);
     };
 
     const handleHideAll = () => {
-        setActiveCategoryFilters((prev) => {
-            const updated: Record<string, boolean> = {};
-            for (const category of uniqueCategoryNames) {
-                updated[category] = false;
-            }
-            return updated;
-        });
-        
-        setActiveParentFilters((prev) => {
-            const updated: Record<string, Record<string, boolean>> = {};
-            for (const [category, parents] of Object.entries(groupedByCategory)) {
-                updated[category] = {};
-                for (const parent of Object.keys(parents)) {
-                    updated[category][parent] = false;
-                }
-            }
-            return updated;
-        });
-        
-        setActiveChildFilters((prev) => {
-            const updated: Record<string, Record<string, Record<string, boolean>>> = {};
-            for (const [category, parents] of Object.entries(groupedByCategory)) {
-                updated[category] = {};
-                for (const [parent, children] of Object.entries(parents)) {
-                    updated[category][parent] = {};
-                    for (const child of children) {
-                        updated[category][parent][child.id] = false;
-                    }
-                }
-            }
-            return updated;
-        });
+        setActiveCategoryFilters({});
+        setActiveParentFilters({});
+        setActiveChildFilters({});
     };
 
     // Overlay visibility per child

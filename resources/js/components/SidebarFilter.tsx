@@ -203,11 +203,6 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                         id={`category-${category}`}
                                         checked={isCategoryChecked(category)}
                                         onChange={(e) => {
-                                            console.log('🔄 Category checkbox onChange:', { 
-                                                category, 
-                                                checked: e.target.checked,
-                                                event: 'category-checkbox-change'
-                                            });
                                             e.stopPropagation();
                                             toggleCategoryFilter(category);
                                         }}
@@ -242,12 +237,6 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                         id={`parent-${category}-${parent}`}
                                                         checked={isParentChecked(category, parent)}
                                                         onChange={(e) => {
-                                                            console.log('🔄 Parent checkbox onChange:', { 
-                                                                category, 
-                                                                parent, 
-                                                                checked: e.target.checked,
-                                                                event: 'parent-checkbox-change'
-                                                            });
                                                             e.stopPropagation();
                                                             toggleParentFilter(category, parent);
                                                         }}
@@ -284,13 +273,6 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                                                     id={`child-${category}-${parent}-${child.id}`}
                                                                                     checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
                                                                                     onChange={(e) => {
-                                                                                        console.log('🔄 Child checkbox onChange:', { 
-                                                                                            category, 
-                                                                                            parent, 
-                                                                                            childId: child.id, 
-                                                                                            checked: e.target.checked,
-                                                                                            event: 'child-checkbox-change'
-                                                                                        });
                                                                                         e.stopPropagation();
                                                                                         toggleChildFilter(category, parent, child.id);
                                                                                     }}
