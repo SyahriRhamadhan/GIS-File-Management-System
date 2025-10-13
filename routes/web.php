@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/geojson/{id}/edit', [GeojsonController::class, 'edit'])->name('geojson.edit');
         Route::put('/geojson/{id}', [GeojsonController::class, 'update'])->name('geojson.update');
         Route::delete('/geojson/{id}', [GeojsonController::class, 'destroy'])->name('geojson.destroy');
+        Route::get('/api/geojson/{id}/data', [GeojsonController::class, 'getGeojsonData'])->name('geojson.data');
 
         // --- PDF ROUTES ---
         Route::get('/tambah-pdf', [ReportController::class, 'index'])->name('report.index');

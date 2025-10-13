@@ -79,11 +79,11 @@ export default function ViewPdfGeojson({ geojsons }: Props) {
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'PDF', href: '/dashboard/view-pdf' },
+                // { title: 'PDF', href: '/dashboard/view-pdf' },
                 { title: 'View PDF', href: '' },
             ]}
         >
-            <div className="mx-auto max-w-4xl px-4 py-8">
+            <div className="w-full px-6 py-8">
                 <h1 className="mb-8 text-3xl font-extrabold tracking-tight text-[#1656b9] dark:text-[#ffffff]">Daftar GeoJSON & PDF</h1>
                 {!geojson ? (
                     <div className="rounded-lg border bg-white py-12 text-center text-gray-400 shadow dark:border-[#232329] dark:bg-[#18181b] dark:text-gray-500">
@@ -225,16 +225,16 @@ export default function ViewPdfGeojson({ geojsons }: Props) {
                         )}
                         {/* Modal Preview PDF */}
                         {open && pdfUrl && (
-                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                                <div className="relative w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-lg dark:bg-[#18181b]">
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                                <div className="relative w-full max-w-6xl overflow-hidden rounded-xl bg-white shadow-lg dark:bg-[#18181b]">
                                     <button
-                                        className="absolute top-2 right-2 rounded-full bg-[#ebe129] px-2 py-1 font-bold text-[#393e41] hover:bg-yellow-500"
+                                        className="absolute top-2 right-2 z-10 rounded-full bg-[#ebe129] px-2 py-1 font-bold text-[#393e41] hover:bg-yellow-500"
                                         onClick={handleClose}
                                         title="Tutup"
                                     >
                                         ✕
                                     </button>
-                                    <iframe src={pdfUrl} title="Preview PDF" className="h-[80vh] w-[90vw] max-w-2xl" style={{ border: 'none' }} />
+                                    <iframe src={pdfUrl} title="Preview PDF" className="h-[85vh] w-full" style={{ border: 'none' }} />
                                 </div>
                             </div>
                         )}

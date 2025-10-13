@@ -3,6 +3,20 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
+type Region = {
+    id_region: number;
+    name: string;
+};
+
+type Kategori = {
+    id_kategori: number;
+    orde0: string;
+    orde1?: string;
+    orde2?: string;
+    orde3?: string;
+    orde4?: string;
+};
+
 type Report = {
     id_report: number;
     id_geojson: number;
@@ -17,21 +31,35 @@ type Report = {
     geojson?: {
         id_geojson: number;
         source_name?: string;
+        region?: Region;
+        kategori?: Kategori;
     };
 };
 
 export default function ReportIndex() {
-    const { reports, flash } = usePage<{ reports: Report[]; flash?: { success?: string; error?: string } }>().props;
+    const { reports, regions, kategoris, flash } = usePage<{ 
+        reports: Report[]; 
+        regions: Region[];
+        kategoris: Kategori[];
+        flash?: { success?: string; error?: string } 
+    }>().props;
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('nomor');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    
+    // Filter states
+    const [sifatFilter, setSifatFilter] = useState('');
+    const [regionFilter, setRegionFilter] = useState('');
+    const [kategoriFilter, setKategoriFilter] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
     const perPage = 10;
 
     const filteredReports = useMemo(() => {
         let data = [...reports];
+        
+        // Search filter
         if (search) {
             data = data.filter(
                 (item) =>
@@ -39,6 +67,21 @@ export default function ReportIndex() {
                     item.hal.toLowerCase().includes(search.toLowerCase()) ||
                     item.kepada.toLowerCase().includes(search.toLowerCase()),
             );
+        }
+
+        // Sifat filter
+        if (sifatFilter) {
+            data = data.filter((item) => item.sifat === sifatFilter);
+        }
+
+        // Region filter
+        if (regionFilter) {
+            data = data.filter((item) => item.geojson?.region?.id_region.toString() === regionFilter);
+        }
+
+        // Kategori filter
+        if (kategoriFilter) {
+            data = data.filter((item) => item.geojson?.kategori?.id_kategori.toString() === kategoriFilter);
         }
 
         data.sort((a, b) => {
@@ -50,7 +93,7 @@ export default function ReportIndex() {
         });
 
         return data;
-    }, [reports, search, sortBy, sortDirection]);
+    }, [reports, search, sifatFilter, regionFilter, kategoriFilter, sortBy, sortDirection]);
 
     const paginatedReports = useMemo(() => {
         const start = (currentPage - 1) * perPage;
@@ -90,12 +133,18 @@ export default function ReportIndex() {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [search]);
+    }, [search, sifatFilter, regionFilter, kategoriFilter]);
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
+
+    // Get unique sifat values
+    const uniqueSifat = useMemo(() => {
+        const sifatSet = new Set(reports.map(report => report.sifat));
+        return Array.from(sifatSet).sort();
+    }, [reports]);
 
     return (
         <AppLayout
@@ -126,6 +175,81 @@ export default function ReportIndex() {
                     />
                 </div>
 
+                {/* Filter Section */}
+                <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                    {/* Sifat Filter */}
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Filter Sifat
+                        </label>
+                        <select
+                            value={sifatFilter}
+                            onChange={(e) => setSifatFilter(e.target.value)}
+                            className="w-full rounded border px-3 py-2 text-sm shadow-sm dark:bg-gray-800"
+                        >
+                            <option value="">Semua Sifat</option>
+                            {uniqueSifat.map((sifat) => (
+                                <option key={sifat} value={sifat}>
+                                    {sifat}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Region Filter */}
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Filter Region
+                        </label>
+                        <select
+                            value={regionFilter}
+                            onChange={(e) => setRegionFilter(e.target.value)}
+                            className="w-full rounded border px-3 py-2 text-sm shadow-sm dark:bg-gray-800"
+                        >
+                            <option value="">Semua Region</option>
+                            {regions.map((region) => (
+                                <option key={region.id_region} value={region.id_region.toString()}>
+                                    {region.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Kategori Filter */}
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Filter Kategori
+                        </label>
+                        <select
+                            value={kategoriFilter}
+                            onChange={(e) => setKategoriFilter(e.target.value)}
+                            className="w-full rounded border px-3 py-2 text-sm shadow-sm dark:bg-gray-800"
+                        >
+                            <option value="">Semua Kategori</option>
+                            {kategoris.map((kategori) => (
+                                <option key={kategori.id_kategori} value={kategori.id_kategori.toString()}>
+                                    {kategori.orde0} {kategori.orde1 ? `/ ${kategori.orde1}` : ''} {kategori.orde2 ? `/ ${kategori.orde2}` : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Clear Filters Button */}
+                    <div className="flex items-end">
+                        <button
+                            onClick={() => {
+                                setSifatFilter('');
+                                setRegionFilter('');
+                                setKategoriFilter('');
+                                setSearch('');
+                            }}
+                            className="w-full rounded bg-gray-500 px-3 py-2 text-sm text-white hover:bg-gray-600"
+                        >
+                            Reset Filter
+                        </button>
+                    </div>
+                </div>
+
                 <div className="overflow-x-auto rounded-lg shadow-sm">
                     <table className="w-full min-w-[800px] border text-sm">
                         <thead className="bg-gray-100 dark:bg-gray-800">
@@ -137,6 +261,8 @@ export default function ReportIndex() {
                                 <th className="border px-4 py-2 text-left">Sifat</th>
                                 <th className="border px-4 py-2 text-left">Hal</th>
                                 <th className="border px-4 py-2 text-left">Kepada</th>
+                                <th className="border px-4 py-2 text-left">Region</th>
+                                <th className="border px-4 py-2 text-left">Kategori</th>
                                 <th className="border px-4 py-2 text-left">Geojson</th>
                                 <th className="border px-4 py-2 text-left">PDF</th>
                                 <th className="border px-4 py-2 text-left">Aksi</th>
@@ -158,6 +284,13 @@ export default function ReportIndex() {
                                         <td className="border px-4 py-2">{report.sifat}</td>
                                         <td className="border px-4 py-2">{report.hal}</td>
                                         <td className="border px-4 py-2">{report.kepada}</td>
+                                        <td className="border px-4 py-2">{report.geojson?.region?.name ?? '-'}</td>
+                                        <td className="border px-4 py-2">
+                                            {report.geojson?.kategori ? 
+                                                `${report.geojson.kategori.orde0}${report.geojson.kategori.orde1 ? ` / ${report.geojson.kategori.orde1}` : ''}` 
+                                                : '-'
+                                            }
+                                        </td>
                                         <td className="border px-4 py-2">{report.geojson?.source_name ?? `Geojson ID ${report.id_geojson}`}</td>
                                         <td className="border px-4 py-2">
                                             <a

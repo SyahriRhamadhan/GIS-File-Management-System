@@ -2,8 +2,12 @@
 
 import AppLayout from '@/layouts/app-layout';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useRef, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import { LatLngBounds } from 'leaflet';
+import axios from 'axios';
 
 export default function CreateReportWizard() {
     const { geojsons, regions, owners, user_id } = usePage<{
@@ -30,6 +34,8 @@ export default function CreateReportWizard() {
 
     const [step, setStep] = useState(1);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [selectedGeojsonData, setSelectedGeojsonData] = useState<any>(null);
+    const [loadingGeojson, setLoadingGeojson] = useState(false);
 
     transform(() => {
         const formData = new FormData();
@@ -52,6 +58,76 @@ export default function CreateReportWizard() {
 
     const nextStep = () => setStep((prev) => prev + 1);
     const prevStep = () => setStep((prev) => prev - 1);
+
+    // Function to calculate bounds and center of GeoJSON
+    const calculateMapBounds = (geojsonData: any) => {
+        if (!geojsonData || !geojsonData.geometry || !geojsonData.geometry.coordinates) {
+            return { center: [1.0, 104.521117], zoom: 11 };
+        }
+
+        const coords = geojsonData.geometry.coordinates;
+        let allCoords: number[][] = [];
+
+        // Extract all coordinates based on geometry type
+        if (geojsonData.geometry.type === 'Polygon') {
+            allCoords = coords[0]; // First ring of polygon
+        } else if (geojsonData.geometry.type === 'MultiPolygon') {
+            coords.forEach((polygon: number[][][]) => {
+                allCoords = allCoords.concat(polygon[0]); // First ring of each polygon
+            });
+        }
+
+        if (allCoords.length === 0) {
+            return { center: [1.0, 104.521117], zoom: 11 };
+        }
+
+        // Calculate bounds
+        const lats = allCoords.map(coord => coord[1]);
+        const lngs = allCoords.map(coord => coord[0]);
+        
+        const minLat = Math.min(...lats);
+        const maxLat = Math.max(...lats);
+        const minLng = Math.min(...lngs);
+        const maxLng = Math.max(...lngs);
+
+        // Calculate center
+        const centerLat = (minLat + maxLat) / 2;
+        const centerLng = (minLng + maxLng) / 2;
+
+        // Calculate appropriate zoom level based on bounds
+        const latDiff = maxLat - minLat;
+        const lngDiff = maxLng - minLng;
+        const maxDiff = Math.max(latDiff, lngDiff);
+        
+        let zoom = 11;
+        if (maxDiff < 0.01) zoom = 15;
+        else if (maxDiff < 0.05) zoom = 13;
+        else if (maxDiff < 0.1) zoom = 12;
+        else if (maxDiff < 0.5) zoom = 10;
+        else zoom = 9;
+
+        return { center: [centerLat, centerLng], zoom };
+    };
+
+    // Fetch GeoJSON data when selected
+    useEffect(() => {
+        if (data.id_geojson) {
+            setLoadingGeojson(true);
+            axios.get(`/dashboard/api/geojson/${data.id_geojson}/data`)
+                .then(response => {
+                    setSelectedGeojsonData(response.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching GeoJSON data:', error);
+                    toast.error('Gagal memuat data GeoJSON');
+                })
+                .finally(() => {
+                    setLoadingGeojson(false);
+                });
+        } else {
+            setSelectedGeojsonData(null);
+        }
+    }, [data.id_geojson]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -82,6 +158,53 @@ export default function CreateReportWizard() {
                             </select>
                         </div>
 
+                        {/* Map Preview */}
+                        {data.id_geojson && (
+                            <div className="md:col-span-2">
+                                <label className={labelClass}>Preview Map</label>
+                                {loadingGeojson ? (
+                                    <div className="mt-2 flex h-64 items-center justify-center rounded border bg-gray-50 dark:bg-gray-800">
+                                        <div className="text-gray-500">Loading map preview...</div>
+                                    </div>
+                                ) : selectedGeojsonData && selectedGeojsonData.geojson ? (
+                                    <div className="mt-2">
+                                        <div className="mb-2 rounded border bg-gray-50 p-2 text-sm dark:bg-gray-800">
+                                            <strong>GeoJSON:</strong> {selectedGeojsonData.source_name} | 
+                                            <strong> Region:</strong> {selectedGeojsonData.region_name} | 
+                                            <strong> Owner:</strong> {selectedGeojsonData.owner_name}
+                                        </div>
+                                        <div className="h-64 w-full rounded border">
+                                            {(() => {
+                                                const mapBounds = calculateMapBounds(selectedGeojsonData.geojson);
+                                                return (
+                                                    <MapContainer 
+                                                        center={mapBounds.center as [number, number]} 
+                                                        zoom={mapBounds.zoom} 
+                                                        style={{ height: '100%', width: '100%' }}
+                                                        key={`map-${data.id_geojson}`} // Force re-render when GeoJSON changes
+                                                    >
+                                                        <TileLayer
+                                                            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
+                                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                                        />
+                                                        <GeoJSON 
+                                                            data={selectedGeojsonData.geojson}
+                                                            style={{
+                                                                color: '#3388ff',
+                                                                weight: 2,
+                                                                fillOpacity: 0.2
+                                                            }}
+                                                        />
+                                                    </MapContainer>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                ) : null}
+                            </div>
+                        )}
+
+                        {/* Upload GeoJSON section - only show when no existing GeoJSON is selected */}
                         {!data.id_geojson && (
                             <>
                                 <div>
@@ -102,30 +225,32 @@ export default function CreateReportWizard() {
                                         className={inputClass}
                                     />
                                 </div>
-                                <div>
-                                    <label className={labelClass}>Pilih Region</label>
-                                    <select value={data.id_region} onChange={(e) => setData('id_region', e.target.value)} className={inputClass}>
-                                        <option value="">-- Pilih Region --</option>
-                                        {regions.map((r) => (
-                                            <option key={r.id_region} value={r.id_region}>
-                                                {r.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Pilih Owner</label>
-                                    <select value={data.id_owner} onChange={(e) => setData('id_owner', e.target.value)} className={inputClass}>
-                                        <option value="">-- Pilih Owner --</option>
-                                        {owners.map((o) => (
-                                            <option key={o.id_owner} value={o.id_owner}>
-                                                {o.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
                             </>
                         )}
+
+                        {/* Region and Owner selection - always visible */}
+                        <div>
+                            <label className={labelClass}>Pilih Region</label>
+                            <select value={data.id_region} onChange={(e) => setData('id_region', e.target.value)} className={inputClass}>
+                                <option value="">-- Pilih Region --</option>
+                                {regions.map((r) => (
+                                    <option key={r.id_region} value={r.id_region}>
+                                        {r.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className={labelClass}>Pilih Owner</label>
+                            <select value={data.id_owner} onChange={(e) => setData('id_owner', e.target.value)} className={inputClass}>
+                                <option value="">-- Pilih Owner --</option>
+                                {owners.map((o) => (
+                                    <option key={o.id_owner} value={o.id_owner}>
+                                        {o.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
                         <div className="flex justify-end md:col-span-2">
                             <button
@@ -231,7 +356,7 @@ export default function CreateReportWizard() {
             ]}
         >
             <Head title="Tambah Laporan" />
-            <div className="mx-auto max-w-screen-lg px-4 py-6 md:px-6">
+            <div className="mx-auto max-w-screen-xl px-4 py-6 md:px-6">
                 <h1 className="mb-2 text-2xl font-bold">Tambah Laporan & GeoJSON</h1>
                 <form onSubmit={handleSubmit}>{renderStep()}</form>
             </div>

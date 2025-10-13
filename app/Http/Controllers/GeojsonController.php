@@ -48,6 +48,25 @@ class GeojsonController extends Controller
         ]);
     }
 
+    public function getGeojsonData($id)
+    {
+        $geojson = Geojson::with(['region', 'owner'])->findOrFail($id);
+        
+        // Ensure geojson data is properly formatted
+        $geojsonData = $geojson->geojson;
+        if (is_string($geojsonData)) {
+            $geojsonData = json_decode($geojsonData, true);
+        }
+
+        return response()->json([
+            'id_geojson' => $geojson->id_geojson,
+            'source_name' => $geojson->source_name,
+            'region_name' => $geojson->region->name ?? '-',
+            'owner_name' => $geojson->owner->name ?? '-',
+            'geojson' => $geojsonData
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

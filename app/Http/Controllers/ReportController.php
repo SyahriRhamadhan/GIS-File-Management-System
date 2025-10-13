@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Report, Geojson, Region, Owner};
+use App\Models\{Report, Geojson, Region, Owner, Kategori};
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,8 +12,12 @@ class ReportController extends Controller
 {
     public function index()
     {
+        $reports = Report::with(['geojson.region', 'geojson.owner', 'geojson.kategori'])->get();
+        
         return Inertia::render('report/index', [
-            'reports' => Report::with('geojson')->get(),
+            'reports' => $reports,
+            'regions' => Region::select('id_region', 'name')->get(),
+            'kategoris' => Kategori::select('id_kategori', 'orde0', 'orde1', 'orde2', 'orde3', 'orde4')->get(),
         ]);
     }
 
