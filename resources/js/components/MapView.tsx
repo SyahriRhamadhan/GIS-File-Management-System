@@ -27,6 +27,8 @@ interface MapViewProps {
         };
         source_name: string;
     }>;
+    // Optional: daftar id yang ingin ditampilkan secara default
+    initialVisibleIds?: Array<string | number>;
 }
 
 // Component to set mapRef after map is ready
@@ -38,7 +40,7 @@ const MapRefSetter: React.FC<{ mapRef: React.MutableRefObject<LeafletMap | null>
     return null;
 };
 
-const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
+const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
     const mapRef = useRef<LeafletMap | null>(null);
@@ -99,17 +101,22 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
 
     // Auto-initialize parent/child filter state
     useEffect(() => {
-        setActiveChildFilters((prev) => {
-            const updated = { ...prev };
+        setActiveChildFilters(() => {
+            const updated: Record<string, Record<string, boolean>> = {};
+            const hasInitial = Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0;
+            const initialSet = new Set(initialVisibleIds.map((v) => String(v)));
+
             for (const [parent, children] of Object.entries(groupedChildren)) {
-                if (!updated[parent]) updated[parent] = {};
+                updated[parent] = {};
                 for (const child of children) {
-                    if (!(child.id in updated[parent])) updated[parent][child.id] = true;
+                    const idStr = String(child.id);
+                    // Jika ada initialVisibleIds, aktifkan hanya id yang termasuk; kalau tidak, aktifkan semua
+                    updated[parent][child.id] = hasInitial ? initialSet.has(idStr) : false;
                 }
             }
             return updated;
         });
-    }, [groupedChildren]);
+    }, [groupedChildren, initialVisibleIds]);
 
     // Parent toggle logic: toggle ALL child in group
     const toggleSourceFilter = (parent: string) => {
@@ -272,54 +279,51 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData }) => {
 
                     <LayersControl position="topright">
                         <BaseLayers />
-                        {/* Overlay filtered */}
-                        {uniqueSourceNames.map((sourceName) => {
-                            // Ambil id anak yang visible
-                            const visibleChildrenIds = groupedChildren[sourceName]
-                                ? groupedChildren[sourceName].filter((child) => activeChildFilters[sourceName]?.[child.id]).map((c) => c.id)
-                                : [];
-
-                            const items = groupedBySourceName[sourceName] || [];
-                            const filteredItems = items.filter((item) => visibleChildrenIds.includes(String(item.id_geojson)));
-
-                            if (filteredItems.length === 0) return null;
-
-                            return (
-                                <Overlay key={sourceName} name={sourceName} checked>
-                                    {filteredItems.map((item) => (
-                                        <GeoJSON
-                                            key={item.id_geojson}
-                                            ref={(layer) => {
-                                                if (layer) {
-                                                    geoJsonRefs.current[`${sourceName}-${item.id_geojson}`] = layer;
-                                                }
-                                            }}
-                                            data={
-                                                {
-                                                    type: 'Feature',
-                                                    geometry: item.geojson.geometry,
-                                                    properties: {
-                                                        ...item.geojson.properties,
-                                                        id_geojson: item.id_geojson,
-                                                        kode_warna: item.kode_warna || '#3388ff',
-                                                    },
-                                                } as Feature
-                                            }
-                                            style={(feature) => ({
-                                                color: feature?.properties?.kode_warna || '#3388ff',
-                                                fillColor: feature?.properties?.kode_warna || '#3388ff',
-                                                weight: 4,
-                                                opacity: 1,
-                                                fillOpacity: 0.5,
-                                            })}
-                                        >
-                                            <Popup>{renderPopupContent(item)}</Popup>
-                                        </GeoJSON>
-                                    ))}
-                                </Overlay>
-                            );
-                        })}
                     </LayersControl>
+
+                    {/* Render GeoJSON langsung tanpa Overlay wrapper */}
+                    {uniqueSourceNames.map((sourceName) => {
+                        // Ambil id anak yang visible
+                        const visibleChildrenIds = groupedChildren[sourceName]
+                            ? groupedChildren[sourceName].filter((child) => activeChildFilters[sourceName]?.[child.id]).map((c) => c.id)
+                            : [];
+
+                        const items = groupedBySourceName[sourceName] || [];
+                        const filteredItems = items.filter((item) => visibleChildrenIds.includes(String(item.id_geojson)));
+
+                        if (filteredItems.length === 0) return null;
+
+                        return filteredItems.map((item) => (
+                            <GeoJSON
+                                key={`${sourceName}-${item.id_geojson}`}
+                                ref={(layer) => {
+                                    if (layer) {
+                                        geoJsonRefs.current[`${sourceName}-${item.id_geojson}`] = layer;
+                                    }
+                                }}
+                                data={
+                                    {
+                                        type: 'Feature',
+                                        geometry: item.geojson.geometry,
+                                        properties: {
+                                            ...item.geojson.properties,
+                                            id_geojson: item.id_geojson,
+                                            kode_warna: item.kode_warna || '#3388ff',
+                                        },
+                                    } as Feature
+                                }
+                                style={(feature) => ({
+                                    color: feature?.properties?.kode_warna || '#3388ff',
+                                    fillColor: feature?.properties?.kode_warna || '#3388ff',
+                                    weight: 4,
+                                    opacity: 1,
+                                    fillOpacity: 0.5,
+                                })}
+                            >
+                                <Popup>{renderPopupContent(item)}</Popup>
+                            </GeoJSON>
+                        ));
+                    })}
                 </MapContainer>
             </div>
 

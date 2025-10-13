@@ -11,7 +11,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Dashboard = ({ geojsons, regions, user }: { geojsons: any; regions: any; user: any }) => {
+const Dashboard = ({ geojsons, regions, user, selectedIds }: { geojsons: any; regions: any; user: any; selectedIds?: Array<string | number> }) => {
     // Parse geojsons into a proper GeoJSON object if needed
     const geojsonData = Array.isArray(geojsons) ? geojsons : [];
 
@@ -31,8 +31,8 @@ const Dashboard = ({ geojsons, regions, user }: { geojsons: any; regions: any; u
                     </div>
                 </div> */}
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-auto flex-1 overflow-hidden rounded-xl border md:min-h-min">
-                    {/* Pass geojsonData to MapView */}
-                    <MapView geojsonData={geojsonData} />
+                    {/* Pass geojsonData to MapView with optional default visible ids */}
+                    <MapView geojsonData={geojsonData} initialVisibleIds={selectedIds ?? []} />
                 </div>
             </div>
         </AppLayout>

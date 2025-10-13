@@ -65,8 +65,8 @@ const Footer = () => {
                 <div className="flex min-w-[120px] flex-1 flex-col items-center md:items-start">
                     <h3 className="mb-2 text-lg font-bold text-gray-800 dark:text-white">Logo Dinas & Kabupaten</h3>
                     <div className="flex gap-3">
-                        <img src="/logo-puprp.png" alt="Logo PUPRP" className="h-10 w-10 object-contain" />
-                        <img src="/logo-bintan.png" alt="Logo Kabupaten Bintan" className="h-10 w-10 object-contain" />
+                        <img src="/logo-pu.png" alt="Logo Dinas PU" className="h-10 w-10 object-contain" />
+                        {/* <img src="/logo-bintan.png" alt="Logo Kabupaten Bintan" className="h-10 w-10 object-contain" /> */}
                     </div>
                 </div>
             </div>
