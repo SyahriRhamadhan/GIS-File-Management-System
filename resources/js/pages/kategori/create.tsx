@@ -49,9 +49,10 @@ export default function Create() {
                         </div>
 
                         <div>
-                            <label className="block font-medium">Kode (unik)</label>
+                            <label className="block font-medium">Kode (unik) *</label>
                             <input
                                 type="text"
+                                required
                                 value={data.kode}
                                 onChange={(e) => setData('kode', e.target.value.toUpperCase())}
                                 className={inputClasses}

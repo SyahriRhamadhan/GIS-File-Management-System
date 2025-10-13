@@ -7,7 +7,7 @@ export default function AppLogo() {
                 <AppLogoIcon className="" />
             </div>
             <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-none font-semibold">Dinas PRP Kab. Bimtan</span>
+                <span className="mb-0.5 truncate leading-none font-semibold">Dinas PURP Kab. Bimtan</span>
             </div>
         </>
     );

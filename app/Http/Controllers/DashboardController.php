@@ -27,7 +27,7 @@ class DashboardController extends Controller
             $selectedIds = [(int) $idParam];
         }
 
-        $geojsonQuery = Geojson::query();
+        $geojsonQuery = Geojson::with('kategori');
         if (!empty($selectedIds)) {
             $geojsonQuery->whereIn('id_geojson', $selectedIds);
         }

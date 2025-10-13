@@ -5,54 +5,96 @@ import { MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
 interface SidebarFilterProps {
     sidebarOpen: boolean;
     toggleSidebar: () => void;
-    uniqueSourceNames: string[];
-    groupedChildren: Record<string, Array<{ id: string; label: string }>>;
-    activeChildFilters: Record<string, Record<string, boolean>>;
-    toggleSourceFilter: (name: string) => void;
-    toggleChildFilter: (parent: string, childId: string) => void;
+    uniqueCategoryNames: string[];
+    groupedByCategory: Record<string, Record<string, Array<{ id: string; label: string }>>>;
+    categoryColors?: Record<string, string>;
+    categoryCodes?: Record<string, string>;
+    isLoading?: boolean;
+    activeCategoryFilters: Record<string, boolean>;
+    activeParentFilters: Record<string, Record<string, boolean>>;
+    activeChildFilters: Record<string, Record<string, Record<string, boolean>>>;
+    toggleCategoryFilter: (category: string) => void;
+    toggleParentFilter: (category: string, parent: string) => void;
+    toggleChildFilter: (category: string, parent: string, childId: string) => void;
     onShowAll: () => void;
     onHideAll: () => void;
-    isParentChecked?: (parent: string) => boolean; // Tambahan (optional)
-    onView: (parent: string, childId: string) => void;
-    onSearchCoordinate?: (x: string, y: string) => void; // Tambahan
+    isCategoryChecked?: (category: string) => boolean;
+    isParentChecked?: (category: string, parent: string) => boolean;
+    onView: (category: string, parent: string, childId: string) => void;
+    onSearchCoordinate?: (x: string, y: string) => void;
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
     sidebarOpen,
     toggleSidebar,
-    uniqueSourceNames,
-    groupedChildren,
+    uniqueCategoryNames,
+    groupedByCategory,
+    categoryColors = {},
+    categoryCodes = {},
+    isLoading = false,
+    activeCategoryFilters,
+    activeParentFilters,
     activeChildFilters,
-    toggleSourceFilter,
+    toggleCategoryFilter,
+    toggleParentFilter,
     toggleChildFilter,
     onShowAll,
     onHideAll,
+    isCategoryChecked = () => false,
     isParentChecked = () => false,
     onView,
     onSearchCoordinate,
 }) => {
-    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+    const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+    const [expandedParents, setExpandedParents] = useState<Record<string, Record<string, boolean>>>({});
     const [search, setSearch] = useState('');
     const [coordX, setCoordX] = useState('');
     const [coordY, setCoordY] = useState('');
 
-    const handleToggleGroup = (group: string) => {
-        setExpandedGroups((prev) => ({
+    const handleToggleCategory = (category: string) => {
+        setExpandedCategories((prev) => ({
             ...prev,
-            [group]: !prev[group],
+            [category]: !prev[category],
         }));
     };
 
-    const allChecked = uniqueSourceNames.every(
-        (parent) => groupedChildren[parent]?.length > 0 && groupedChildren[parent].every((child) => activeChildFilters[parent]?.[child.id]),
-    );
-    const noneChecked = uniqueSourceNames.every((parent) => !groupedChildren[parent]?.some((child) => activeChildFilters[parent]?.[child.id]));
+    const handleToggleParent = (category: string, parent: string) => {
+        setExpandedParents((prev) => ({
+            ...prev,
+            [category]: {
+                ...prev[category],
+                [parent]: !prev[category]?.[parent],
+            },
+        }));
+    };
 
-    const filteredSourceNames = uniqueSourceNames.filter(
-        (parent) =>
-            parent.toLowerCase().includes(search.toLowerCase()) ||
-            groupedChildren[parent]?.some((child) => child.label.toLowerCase().includes(search.toLowerCase())),
+    // Check if all items are checked
+    const allChecked = uniqueCategoryNames.every((category) =>
+        activeCategoryFilters[category] &&
+        Object.keys(groupedByCategory[category] || {}).every((parent) =>
+            activeParentFilters[category]?.[parent] &&
+            groupedByCategory[category][parent]?.every((child) => activeChildFilters[category]?.[parent]?.[child.id])
+        )
     );
+
+    // Check if no items are checked
+    const noneChecked = uniqueCategoryNames.every((category) =>
+        !activeCategoryFilters[category] ||
+        !Object.keys(groupedByCategory[category] || {}).some((parent) =>
+            activeParentFilters[category]?.[parent] &&
+            groupedByCategory[category][parent]?.some((child) => activeChildFilters[category]?.[parent]?.[child.id])
+        )
+    );
+
+    // Filter categories based on search
+    const filteredCategories = uniqueCategoryNames.filter((category) => {
+        if (category.toLowerCase().includes(search.toLowerCase())) return true;
+        
+        return Object.entries(groupedByCategory[category] || {}).some(([parent, children]) => {
+            if (parent.toLowerCase().includes(search.toLowerCase())) return true;
+            return children.some((child) => child.label.toLowerCase().includes(search.toLowerCase()));
+        });
+    });
 
     return (
         <div
@@ -77,7 +119,12 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             </button>
             {sidebarOpen && (
                 <>
-                    <h2 className="mb-2 font-semibold text-gray-800 dark:text-gray-100">Filter Layers</h2>
+                    <div className="mb-2 flex items-center gap-2">
+                        <h2 className="font-semibold text-gray-800 dark:text-gray-100">Filter Layers</h2>
+                        {isLoading && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                        )}
+                    </div>
                     <div className="mb-4 flex flex-col items-center gap-3 px-4">
                         {/* Search Bar */}
                         <input
@@ -147,64 +194,128 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                     </div>
 
                     <div>
-                        {filteredSourceNames.map((parent) => (
-                            <div key={parent} className="mb-3">
-                                <div className="group flex cursor-pointer items-center" onClick={() => handleToggleGroup(parent)}>
-                                    <label
-                                        htmlFor={`filter-source-${parent}`}
-                                        className="flex items-center space-x-2"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            id={`filter-source-${parent}`}
-                                            checked={isParentChecked(parent)}
-                                            onChange={() => toggleSourceFilter(parent)}
-                                        />
-                                    </label>
-                                    <span className="mx-2 text-xl">{expandedGroups[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
-                                    <span className="font-semibold text-gray-800 dark:text-gray-100">{parent}</span>
+                        {filteredCategories.map((category) => (
+                            <div key={category} className="mb-4">
+                                {/* Category Level */}
+                                <div className="group flex cursor-pointer items-center">
+                                    <input
+                                        type="checkbox"
+                                        id={`category-${category}`}
+                                        checked={isCategoryChecked(category)}
+                                        onChange={(e) => {
+                                            console.log('🔄 Category checkbox onChange:', { 
+                                                category, 
+                                                checked: e.target.checked,
+                                                event: 'category-checkbox-change'
+                                            });
+                                            e.stopPropagation();
+                                            toggleCategoryFilter(category);
+                                        }}
+                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                                    />
+                                    <span className="mx-2 text-xl cursor-pointer" onClick={() => handleToggleCategory(category)}>{expandedCategories[category] ? <IoChevronDown /> : <IoChevronForward />}</span>
+                                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleToggleCategory(category)}>
+                                        {categoryColors[category] && (
+                                            <div 
+                                                className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600 flex-shrink-0"
+                                                style={{ backgroundColor: categoryColors[category] }}
+                                                title={`Warna kategori: ${categoryColors[category]}`}
+                                            ></div>
+                                        )}
+                                        <span className="font-bold text-lg text-blue-600 dark:text-blue-400">{category}</span>
+                                        {categoryCodes[category] && (
+                                            <span className="ml-2 px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded border">
+                                                {categoryCodes[category]}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
-                                {expandedGroups[parent] && groupedChildren[parent]?.length > 0 && (
-                                    <table className="mt-2 min-w-full rounded border bg-gray-50 text-xs dark:border-[#393e41] dark:bg-[#232329]">
-                                        <thead>
-                                            <tr>
-                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Checklist</th>
-                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Lokasi</th>
-                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Label</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {groupedChildren[parent]
-                                                .filter(
-                                                    (child) =>
-                                                        child.label.toLowerCase().includes(search.toLowerCase()) ||
-                                                        parent.toLowerCase().includes(search.toLowerCase()),
-                                                )
-                                                .map((child) => (
-                                                    <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
-                                                        <td className="p-1">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={!!activeChildFilters[parent]?.[child.id]}
-                                                                onChange={() => toggleChildFilter(parent, child.id)}
-                                                            />
-                                                        </td>
-                                                        <td className="p-1">
-                                                            <button
-                                                                type="button"
-                                                                className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
-                                                                onClick={() => onView(parent, child.id)}
-                                                            >
-                                                                View
-                                                            </button>
-                                                        </td>
-                                                        <td className="p-1 text-gray-700 dark:text-gray-200">{child.label}</td>
-                                                    </tr>
-                                                ))}
-                                        </tbody>
-                                    </table>
+                                {/* Parent Level */}
+                                {expandedCategories[category] && groupedByCategory[category] && (
+                                    <div className="ml-6 mt-2">
+                                        {Object.entries(groupedByCategory[category]).map(([parent, children]) => (
+                                            <div key={`${category}-${parent}`} className="mb-3">
+                                                <div className="group flex cursor-pointer items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`parent-${category}-${parent}`}
+                                                        checked={isParentChecked(category, parent)}
+                                                        onChange={(e) => {
+                                                            console.log('🔄 Parent checkbox onChange:', { 
+                                                                category, 
+                                                                parent, 
+                                                                checked: e.target.checked,
+                                                                event: 'parent-checkbox-change'
+                                                            });
+                                                            e.stopPropagation();
+                                                            toggleParentFilter(category, parent);
+                                                        }}
+                                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                                                    />
+                                                    <span className="mx-2 text-lg cursor-pointer" onClick={() => handleToggleParent(category, parent)}>{expandedParents[category]?.[parent] ? <IoChevronDown /> : <IoChevronForward />}</span>
+                                                    <span className="font-semibold text-gray-800 dark:text-gray-100 cursor-pointer" onClick={() => handleToggleParent(category, parent)}>{parent}</span>
+                                                </div>
+
+                                                {/* Children Level */}
+                                                {expandedParents[category]?.[parent] && children?.length > 0 && (
+                                                    <div className="ml-6 mt-2">
+                                                        <table className="min-w-full rounded border bg-gray-50 text-xs dark:border-[#393e41] dark:bg-[#232329]">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Checklist</th>
+                                                                    <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Lokasi</th>
+                                                                    <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">Label</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {children
+                                                                    .filter(
+                                                                        (child) =>
+                                                                            child.label.toLowerCase().includes(search.toLowerCase()) ||
+                                                                            parent.toLowerCase().includes(search.toLowerCase()) ||
+                                                                            category.toLowerCase().includes(search.toLowerCase()),
+                                                                    )
+                                                                    .map((child) => (
+                                                                        <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
+                                                                            <td className="p-1">
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    id={`child-${category}-${parent}-${child.id}`}
+                                                                                    checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
+                                                                                    onChange={(e) => {
+                                                                                        console.log('🔄 Child checkbox onChange:', { 
+                                                                                            category, 
+                                                                                            parent, 
+                                                                                            childId: child.id, 
+                                                                                            checked: e.target.checked,
+                                                                                            event: 'child-checkbox-change'
+                                                                                        });
+                                                                                        e.stopPropagation();
+                                                                                        toggleChildFilter(category, parent, child.id);
+                                                                                    }}
+                                                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                                />
+                                                                            </td>
+                                                                            <td className="p-1">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
+                                                                                    onClick={() => onView(category, parent, child.id)}
+                                                                                >
+                                                                                    View
+                                                                                </button>
+                                                                            </td>
+                                                                            <td className="p-1 text-gray-700 dark:text-gray-200">{child.label}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
                         ))}

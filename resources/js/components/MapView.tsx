@@ -3,9 +3,9 @@ import SidebarFilter from '@/components/SidebarFilter';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { Feature } from 'geojson';
-import { Map as LeafletMap } from 'leaflet';
+import L, { Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { FaFilePdf } from 'react-icons/fa6';
 import { IoAddCircleOutline } from 'react-icons/io5';
@@ -22,8 +22,11 @@ interface MapViewProps {
             properties: Record<string, any>;
         };
         kode_warna: string;
-        kategori: {
+        kategori?: {
             layer_order: number;
+            orde0?: string;
+            kode_warna?: string;
+            kode?: string;
         };
         source_name: string;
     }>;
@@ -72,7 +75,71 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         return groups;
     }, [sortedData]);
 
-    // Grouped children per parent, id dan label (label = gabungan property k-v)
+    // Grouped children per category > parent > child
+    const groupedByCategory = useMemo(() => {
+        const groups: Record<string, Record<string, Array<{ id: string; label: string }>>> = {};
+        
+        geojsonData.forEach((item) => {
+            const categoryName = item.kategori?.orde0 || 'Uncategorized';
+            const parent = item.source_name || 'Unknown';
+            
+            const propEntries = Object.entries(item.geojson.properties || {})
+                .filter(([k]) => k !== 'id_geojson')
+                .map(([k, v]) => `${k}: ${v}`);
+            // Label fallback ke id jika tidak ada property lain
+            const label = propEntries.length > 0 ? propEntries.join(', ') : String(item.id_geojson || 'Unknown');
+            const id = String(item.id_geojson || label);
+
+            if (!groups[categoryName]) groups[categoryName] = {};
+            if (!groups[categoryName][parent]) groups[categoryName][parent] = [];
+            if (!groups[categoryName][parent].find((c) => c.id === id)) {
+                groups[categoryName][parent].push({ id, label });
+            }
+        });
+        
+        return groups;
+    }, [geojsonData]);
+
+    // Create category to unique code mapping for better performance
+    const categoryToCodes = useMemo(() => {
+        const mapping: Record<string, string> = {};
+        geojsonData.forEach((item) => {
+            const categoryName = item.kategori?.orde0 || 'Uncategorized';
+            const uniqueCode = item.kategori?.kode || 'N/A';
+            if (!mapping[categoryName]) {
+                mapping[categoryName] = uniqueCode;
+            }
+        });
+        return mapping;
+    }, [geojsonData])
+
+    // Create category colors mapping (still needed for visual indicators)
+    const categoryColors = useMemo(() => {
+        const colors: Record<string, string> = {};
+        geojsonData.forEach((item) => {
+            const categoryName = item.kategori?.orde0 || 'Uncategorized';
+            if (!colors[categoryName]) {
+                // Use kode_warna from kategori if available, otherwise from item
+                colors[categoryName] = item.kategori?.kode_warna || item.kode_warna || '#3388ff';
+            }
+        });
+        return colors;
+    }, [geojsonData]);
+
+    // Utility functions for using unique codes as differentiators
+    const getCategoryByCode = useCallback((code: string): string => {
+        return Object.keys(categoryToCodes).find(cat => categoryToCodes[cat] === code) || 'Uncategorized';
+    }, [categoryToCodes]);
+
+    const getCodeByCategory = useCallback((categoryName: string): string => {
+        return categoryToCodes[categoryName] || 'N/A';
+    }, [categoryToCodes]);
+
+    // Get unique category names
+    const uniqueCategoryNames = useMemo(() => {
+        return Object.keys(groupedByCategory);
+    }, [groupedByCategory]);
+
     const groupedChildren = useMemo(() => {
         const groups: Record<string, Array<{ id: string; label: string }>> = {};
         geojsonData.forEach((item) => {
@@ -94,80 +161,464 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
 
     // State
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const toggleSidebar = () => setSidebarOpen((open) => !open);
 
-    // Parent & child checklist state
-    const [activeChildFilters, setActiveChildFilters] = useState<Record<string, Record<string, boolean>>>({});
-
-    // Auto-initialize parent/child filter state
+    // Loading effect when data changes
     useEffect(() => {
-        setActiveChildFilters(() => {
-            const updated: Record<string, Record<string, boolean>> = {};
-            const hasInitial = Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0;
-            const initialSet = new Set(initialVisibleIds.map((v) => String(v)));
+        if (geojsonData.length > 0) {
+            setIsLoading(true);
+            // Simulate processing time for large datasets
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [geojsonData]);
 
-            for (const [parent, children] of Object.entries(groupedChildren)) {
-                updated[parent] = {};
-                for (const child of children) {
-                    const idStr = String(child.id);
-                    // Jika ada initialVisibleIds, aktifkan hanya id yang termasuk; kalau tidak, aktifkan semua
-                    updated[parent][child.id] = hasInitial ? initialSet.has(idStr) : false;
-                }
+    // State for three-level hierarchy: category > parent > child
+    const [activeCategoryFilters, setActiveCategoryFilters] = useState<Record<string, boolean>>({});
+    const [activeParentFilters, setActiveParentFilters] = useState<Record<string, Record<string, boolean>>>({});
+    const [activeChildFilters, setActiveChildFilters] = useState<Record<string, Record<string, Record<string, boolean>>>>({});
+
+    // Auto-initialize filter state for three levels
+    useEffect(() => {
+        console.log('🚀 MapView: Initializing filter states');
+        console.log('📊 Initial data:', { 
+            uniqueCategoryNames, 
+            groupedByCategory, 
+            initialVisibleIds,
+            geojsonDataLength: geojsonData.length 
+        });
+        
+        const hasInitial = Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0;
+        const initialSet = new Set(initialVisibleIds.map((v) => String(v)));
+
+        console.log('🎯 Initialization settings:', { hasInitial, initialSet: Array.from(initialSet) });
+
+        // Initialize category filters
+        setActiveCategoryFilters(() => {
+            const updated: Record<string, boolean> = {};
+            for (const category of uniqueCategoryNames) {
+                updated[category] = !hasInitial; // Show all categories by default if no initial IDs
             }
+            console.log('📂 Initialized category filters:', updated);
             return updated;
         });
-    }, [groupedChildren, initialVisibleIds]);
 
-    // Parent toggle logic: toggle ALL child in group
-    const toggleSourceFilter = (parent: string) => {
-        setActiveChildFilters((prev) => {
-            const group = prev[parent] || {};
-            const allChecked = Object.values(group).every((v) => v);
-            // Jika semua aktif, uncheck semua, jika tidak, aktifkan semua
-            const newState = { ...prev };
-            newState[parent] = {};
-            (groupedChildren[parent] || []).forEach((child) => {
-                newState[parent][child.id] = !allChecked;
+        // Initialize parent filters
+        setActiveParentFilters(() => {
+            const updated: Record<string, Record<string, boolean>> = {};
+            for (const [category, parents] of Object.entries(groupedByCategory)) {
+                updated[category] = {};
+                for (const parent of Object.keys(parents)) {
+                    updated[category][parent] = !hasInitial; // Show all parents by default if no initial IDs
+                }
+            }
+            console.log('👥 Initialized parent filters:', updated);
+            return updated;
+        });
+
+        // Initialize child filters
+        setActiveChildFilters(() => {
+            const updated: Record<string, Record<string, Record<string, boolean>>> = {};
+            for (const [category, parents] of Object.entries(groupedByCategory)) {
+                updated[category] = {};
+                for (const [parent, children] of Object.entries(parents)) {
+                    updated[category][parent] = {};
+                    for (const child of children) {
+                        const idStr = String(child.id);
+                        // If there are initial IDs, only show those; otherwise show none by default
+                        updated[category][parent][child.id] = hasInitial ? initialSet.has(idStr) : false;
+                    }
+                }
+            }
+            console.log('👶 Initialized child filters:', updated);
+            return updated;
+        });
+    }, [groupedByCategory, uniqueCategoryNames, initialVisibleIds]);
+
+    // Category toggle logic: toggle ALL parents and children in category
+    const toggleCategoryFilter = (category: string) => {
+        console.log('🔄 toggleCategoryFilter called:', { category });
+        console.log('📊 Current state before toggle:', {
+            activeCategoryFilters: activeCategoryFilters[category],
+            activeParentFilters: activeParentFilters[category],
+            activeChildFilters: activeChildFilters[category]
+        });
+        
+        setActiveCategoryFilters((prev) => {
+            const newCategoryState = !prev[category];
+            const updated = { ...prev, [category]: newCategoryState };
+            
+            console.log('📊 Category state change:', { 
+                category, 
+                oldState: prev[category], 
+                newState: newCategoryState, 
+                fullUpdated: updated 
             });
-            return newState;
+            
+            // Also update all parents and children in this category
+            setActiveParentFilters((prevParents) => {
+                const updatedParents = { ...prevParents };
+                if (!updatedParents[category]) updatedParents[category] = {};
+                
+                for (const parent of Object.keys(groupedByCategory[category] || {})) {
+                    const oldParentState = updatedParents[category][parent];
+                    updatedParents[category][parent] = newCategoryState;
+                    console.log('👥 Parent state change:', { 
+                        category, 
+                        parent, 
+                        oldState: oldParentState, 
+                        newState: newCategoryState 
+                    });
+                }
+                
+                console.log('👥 All parent filters updated:', { category, updatedParents: updatedParents[category] });
+                return updatedParents;
+            });
+            
+            setActiveChildFilters((prevChildren) => {
+                const updatedChildren = { ...prevChildren };
+                if (!updatedChildren[category]) updatedChildren[category] = {};
+                
+                for (const [parent, children] of Object.entries(groupedByCategory[category] || {})) {
+                    if (!updatedChildren[category][parent]) updatedChildren[category][parent] = {};
+                    for (const child of children) {
+                        const oldChildState = updatedChildren[category][parent][child.id];
+                        updatedChildren[category][parent][child.id] = newCategoryState;
+                        console.log('👶 Child state change:', { 
+                            category, 
+                            parent, 
+                            childId: child.id, 
+                            oldState: oldChildState, 
+                            newState: newCategoryState 
+                        });
+                    }
+                }
+                
+                console.log('👶 All child filters updated:', { category, updatedChildren: updatedChildren[category] });
+                return updatedChildren;
+            });
+            
+            return updated;
         });
     };
 
-    // Parent checked status = semua child dalam parent aktif
-    const isParentChecked = (parent: string) =>
-        groupedChildren[parent]?.length > 0 && groupedChildren[parent].every((child) => !!activeChildFilters[parent]?.[child.id]);
+    // Parent toggle logic: toggle ALL children in parent
+    const toggleParentFilter = (category: string, parent: string) => {
+        console.log('🔄 toggleParentFilter called:', { category, parent });
+        console.log('📊 Current parent state before toggle:', {
+            activeParentFilters: activeParentFilters[category]?.[parent],
+            activeChildFilters: activeChildFilters[category]?.[parent]
+        });
+        
+        setActiveParentFilters((prev) => {
+            const currentState = prev[category]?.[parent] || false;
+            const newState = !currentState;
+            
+            console.log('📊 Parent toggle details:', { 
+                category, 
+                parent, 
+                currentState, 
+                newState,
+                prevCategoryState: prev[category]
+            });
+            
+            const updated = {
+                ...prev,
+                [category]: {
+                    ...prev[category],
+                    [parent]: newState,
+                },
+            };
+            
+            console.log('👥 Parent filter updated:', { 
+                category, 
+                parent, 
+                newState, 
+                updatedCategory: updated[category] 
+            });
+            
+            // Also update all children in this parent to match parent state
+            setActiveChildFilters((prevChildren) => {
+                const updatedChildren = { ...prevChildren };
+                if (!updatedChildren[category]) updatedChildren[category] = {};
+                if (!updatedChildren[category][parent]) updatedChildren[category][parent] = {};
+                
+                console.log('👶 Before updating children:', { 
+                    category, 
+                    parent, 
+                    currentChildren: updatedChildren[category][parent],
+                    childrenToUpdate: groupedByCategory[category]?.[parent] || []
+                });
+                
+                for (const child of groupedByCategory[category]?.[parent] || []) {
+                    const oldChildState = updatedChildren[category][parent][child.id];
+                    updatedChildren[category][parent][child.id] = newState;
+                    console.log('👶 Child updated in parent toggle:', { 
+                        category, 
+                        parent, 
+                        childId: child.id, 
+                        oldState: oldChildState, 
+                        newState 
+                    });
+                }
+                
+                console.log('👶 All children updated for parent:', { 
+                    category, 
+                    parent, 
+                    newState, 
+                    updatedChildren: updatedChildren[category][parent] 
+                });
+                return updatedChildren;
+            });
+            
+            // If parent is being activated, also activate the category
+            if (newState) {
+                setActiveCategoryFilters((prevCategories) => {
+                    const updatedCategories = { ...prevCategories, [category]: true };
+                    console.log('📂 Category activated due to parent activation:', { 
+                        category, 
+                        parent, 
+                        updatedCategories 
+                    });
+                    return updatedCategories;
+                });
+            }
+            
+            return updated;
+        });
+    };
 
-    // Child handler
-    const toggleChildFilter = (parent: string, childId: string) => {
-        setActiveChildFilters((prev) => ({
-            ...prev,
-            [parent]: {
-                ...prev[parent],
-                [childId]: !prev[parent]?.[childId],
-            },
-        }));
+    // Child toggle logic
+    const toggleChildFilter = (category: string, parent: string, childId: string) => {
+        console.log('🔄 toggleChildFilter called:', { category, parent, childId });
+        console.log('📊 Current child state before toggle:', {
+            activeChildFilters: activeChildFilters[category]?.[parent]?.[childId],
+            parentState: activeParentFilters[category]?.[parent],
+            categoryState: activeCategoryFilters[category]
+        });
+        
+        setActiveChildFilters((prev) => {
+            const currentState = prev[category]?.[parent]?.[childId] || false;
+            const newState = !currentState;
+            
+            console.log('📊 Child toggle details:', { 
+                category, 
+                parent, 
+                childId, 
+                currentState, 
+                newState,
+                prevParentState: prev[category]?.[parent]
+            });
+            
+            const updated = {
+                ...prev,
+                [category]: {
+                    ...prev[category],
+                    [parent]: {
+                        ...prev[category]?.[parent],
+                        [childId]: newState,
+                    },
+                },
+            };
+            
+            console.log('👶 Child filter updated:', { 
+                category, 
+                parent, 
+                childId, 
+                newState, 
+                updatedParent: updated[category][parent] 
+            });
+            
+            // If child is being activated, also activate parent and category
+            if (newState) {
+                setActiveParentFilters((prevParents) => {
+                    const updatedParents = { 
+                        ...prevParents,
+                        [category]: {
+                            ...prevParents[category],
+                            [parent]: true
+                        }
+                    };
+                    console.log('👥 Parent activated due to child activation:', { 
+                        category, 
+                        parent, 
+                        updatedParents: updatedParents[category] 
+                    });
+                    return updatedParents;
+                });
+                
+                setActiveCategoryFilters((prevCategories) => {
+                    const updatedCategories = { ...prevCategories, [category]: true };
+                    console.log('📂 Category activated due to child activation:', { 
+                        category, 
+                        parent, 
+                        childId, 
+                        updatedCategories 
+                    });
+                    return updatedCategories;
+                });
+            }
+            
+            // Check if this affects parent/category state
+            const allChildrenInParent = groupedByCategory[category]?.[parent] || [];
+            const allChildrenActive = allChildrenInParent.every(child => 
+                updated[category][parent][child.id]
+            );
+            
+            console.log('🔍 Parent state check after child toggle:', {
+                category,
+                parent,
+                allChildrenInParent: allChildrenInParent.map(c => c.id),
+                allChildrenActive,
+                childStates: allChildrenInParent.map(c => ({
+                    id: c.id,
+                    active: updated[category][parent][c.id]
+                }))
+            });
+            
+            return updated;
+        });
+    };
+
+    // Check if category is checked (all parents and children are active)
+    const isCategoryChecked = (category: string) => {
+        const parents = groupedByCategory[category];
+        if (!parents || Object.keys(parents).length === 0) {
+            console.log('✅ isCategoryChecked - no parents:', { category, result: false });
+            return false;
+        }
+        
+        // Category is checked if it's active AND all its parents and children are active
+        const categoryActive = !!activeCategoryFilters[category];
+        const allParentsAndChildrenActive = Object.keys(parents).every((parent) => {
+            const parentActive = !!activeParentFilters[category]?.[parent];
+            const children = parents[parent];
+            const allChildrenActive = children.every((child) => !!activeChildFilters[category]?.[parent]?.[child.id]);
+            
+            console.log('🔍 Parent check in category:', {
+                category,
+                parent,
+                parentActive,
+                allChildrenActive,
+                children: children.map(c => ({
+                    id: c.id,
+                    active: !!activeChildFilters[category]?.[parent]?.[c.id]
+                }))
+            });
+            
+            return parentActive && allChildrenActive;
+        });
+        
+        const result = categoryActive && allParentsAndChildrenActive;
+        console.log('✅ isCategoryChecked result:', { 
+            category, 
+            result, 
+            categoryActive, 
+            allParentsAndChildrenActive,
+            activeCategoryFilters: activeCategoryFilters[category],
+            activeParentFilters: activeParentFilters[category],
+            activeChildFilters: activeChildFilters[category] 
+        });
+        return result;
+    };
+
+    // Check if parent is checked (parent is active AND all children are active)
+    const isParentChecked = (category: string, parent: string) => {
+        const children = groupedByCategory[category]?.[parent];
+        if (!children || children.length === 0) {
+            console.log('✅ isParentChecked - no children:', { category, parent, result: false });
+            return false;
+        }
+        
+        // Parent is checked if it's active AND all its children are active
+        const parentActive = !!activeParentFilters[category]?.[parent];
+        const allChildrenActive = children.every((child) => !!activeChildFilters[category]?.[parent]?.[child.id]);
+        
+        const result = parentActive && allChildrenActive;
+        console.log('✅ isParentChecked result:', { 
+            category, 
+            parent, 
+            result, 
+            parentActive, 
+            allChildrenActive,
+            activeParent: activeParentFilters[category]?.[parent],
+            activeChildren: activeChildFilters[category]?.[parent],
+            childrenDetails: children.map(c => ({
+                id: c.id,
+                active: !!activeChildFilters[category]?.[parent]?.[c.id]
+            }))
+        });
+        return result;
     };
 
     // Show/Hide all
     const handleShowAll = () => {
+        setActiveCategoryFilters((prev) => {
+            const updated: Record<string, boolean> = {};
+            for (const category of uniqueCategoryNames) {
+                updated[category] = true;
+            }
+            return updated;
+        });
+        
+        setActiveParentFilters((prev) => {
+            const updated: Record<string, Record<string, boolean>> = {};
+            for (const [category, parents] of Object.entries(groupedByCategory)) {
+                updated[category] = {};
+                for (const parent of Object.keys(parents)) {
+                    updated[category][parent] = true;
+                }
+            }
+            return updated;
+        });
+        
         setActiveChildFilters((prev) => {
-            const updated = { ...prev };
-            for (const parent of Object.keys(groupedChildren)) {
-                updated[parent] = {};
-                for (const child of groupedChildren[parent]) {
-                    updated[parent][child.id] = true;
+            const updated: Record<string, Record<string, Record<string, boolean>>> = {};
+            for (const [category, parents] of Object.entries(groupedByCategory)) {
+                updated[category] = {};
+                for (const [parent, children] of Object.entries(parents)) {
+                    updated[category][parent] = {};
+                    for (const child of children) {
+                        updated[category][parent][child.id] = true;
+                    }
                 }
             }
             return updated;
         });
     };
+
     const handleHideAll = () => {
+        setActiveCategoryFilters((prev) => {
+            const updated: Record<string, boolean> = {};
+            for (const category of uniqueCategoryNames) {
+                updated[category] = false;
+            }
+            return updated;
+        });
+        
+        setActiveParentFilters((prev) => {
+            const updated: Record<string, Record<string, boolean>> = {};
+            for (const [category, parents] of Object.entries(groupedByCategory)) {
+                updated[category] = {};
+                for (const parent of Object.keys(parents)) {
+                    updated[category][parent] = false;
+                }
+            }
+            return updated;
+        });
+        
         setActiveChildFilters((prev) => {
-            const updated = { ...prev };
-            for (const parent of Object.keys(groupedChildren)) {
-                updated[parent] = {};
-                for (const child of groupedChildren[parent]) {
-                    updated[parent][child.id] = false;
+            const updated: Record<string, Record<string, Record<string, boolean>>> = {};
+            for (const [category, parents] of Object.entries(groupedByCategory)) {
+                updated[category] = {};
+                for (const [parent, children] of Object.entries(parents)) {
+                    updated[category][parent] = {};
+                    for (const child of children) {
+                        updated[category][parent][child.id] = false;
+                    }
                 }
             }
             return updated;
@@ -219,40 +670,32 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         </div>
     );
 
-    // Handler for View (fly to location)
-    const handleViewLocation = (parent: string, childId: string) => {
-        const item = geojsonData.find((i) => String(i.id_geojson) === String(childId) && i.source_name === parent);
-        if (!item) return;
-        let latLng: [number, number] | null = null;
-        const geom = item.geojson.geometry;
+    // Handler for View (fly to location) - updated for three-level hierarchy
+    const handleViewLocation = (category: string, parent: string, childId: string) => {
+        const item = geojsonData.find((i) => {
+            const itemCategory = i.kategori?.orde0 || 'Uncategorized';
+            return String(i.id_geojson) === String(childId) && 
+                   i.source_name === parent && 
+                   itemCategory === category;
+        });
+        if (!item || !mapRef.current) return;
 
-        if (geom.type === 'Point') {
-            latLng = [geom.coordinates[1], geom.coordinates[0]];
-        } else if (geom.type === 'LineString') {
-            latLng = [geom.coordinates[0][1], geom.coordinates[0][0]];
-        } else if (geom.type === 'Polygon') {
-            latLng = [geom.coordinates[0][0][1], geom.coordinates[0][0][0]];
-        } else if (geom.type === 'MultiPoint') {
-            latLng = [geom.coordinates[0][1], geom.coordinates[0][0]];
-        } else if (geom.type === 'MultiLineString') {
-            latLng = [geom.coordinates[0][0][1], geom.coordinates[0][0][0]];
-        } else if (geom.type === 'MultiPolygon') {
-            latLng = [geom.coordinates[0][0][0][1], geom.coordinates[0][0][0][0]];
+        const geometry = item.geojson.geometry;
+        if (geometry.type === 'Point') {
+            const [lng, lat] = geometry.coordinates;
+            mapRef.current.flyTo([lat, lng], 15);
+        } else if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+            const bounds = L.geoJSON(geometry).getBounds();
+            mapRef.current.fitBounds(bounds);
         }
-        // Fly dan buka popup
-        if (latLng && mapRef.current) {
-            mapRef.current.flyTo(latLng, 16, { duration: 1 });
+
+        // Open popup for the specific item
+        const refKey = `${category}-${parent}-${childId}`;
+        const geoJsonLayer = geoJsonRefs.current[refKey];
+        if (geoJsonLayer) {
             setTimeout(() => {
-                const refKey = `${parent}-${childId}`;
-                const layer = geoJsonRefs.current[refKey];
-                if (layer) {
-                    layer.eachLayer((l) => {
-                        if ('openPopup' in l && typeof l.openPopup === 'function') {
-                            l.openPopup();
-                        }
-                    });
-                }
-            }, 1000);
+                geoJsonLayer.openPopup();
+            }, 500);
         }
     };
     const handleSearchCoordinate = (x: string, y: string) => {
@@ -281,63 +724,63 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                         <BaseLayers />
                     </LayersControl>
 
-                    {/* Render GeoJSON langsung tanpa Overlay wrapper */}
-                    {uniqueSourceNames.map((sourceName) => {
-                        // Ambil id anak yang visible
-                        const visibleChildrenIds = groupedChildren[sourceName]
-                            ? groupedChildren[sourceName].filter((child) => activeChildFilters[sourceName]?.[child.id]).map((c) => c.id)
-                            : [];
+                    {/* Render GeoJSON using three-level hierarchy */}
+                    {groupedBySourceName &&
+                        Object.entries(groupedBySourceName).map(([sourceName, items]) => {
+                            return items.map((item) => {
+                                const itemCategory = item.kategori?.orde0 || 'Uncategorized';
+                                const parent = item.source_name || 'Unknown';
+                                const childId = String(item.id_geojson);
+                                
+                                // Check if this item should be visible based on three-level filters
+                                const isVisible = activeCategoryFilters[itemCategory] && 
+                                                activeParentFilters[itemCategory]?.[parent] && 
+                                                activeChildFilters[itemCategory]?.[parent]?.[childId];
+                                
+                                if (!isVisible) return null;
 
-                        const items = groupedBySourceName[sourceName] || [];
-                        const filteredItems = items.filter((item) => visibleChildrenIds.includes(String(item.id_geojson)));
-
-                        if (filteredItems.length === 0) return null;
-
-                        return filteredItems.map((item) => (
-                            <GeoJSON
-                                key={`${sourceName}-${item.id_geojson}`}
-                                ref={(layer) => {
-                                    if (layer) {
-                                        geoJsonRefs.current[`${sourceName}-${item.id_geojson}`] = layer;
-                                    }
-                                }}
-                                data={
-                                    {
-                                        type: 'Feature',
-                                        geometry: item.geojson.geometry,
-                                        properties: {
-                                            ...item.geojson.properties,
-                                            id_geojson: item.id_geojson,
-                                            kode_warna: item.kode_warna || '#3388ff',
-                                        },
-                                    } as Feature
-                                }
-                                style={(feature) => ({
-                                    color: feature?.properties?.kode_warna || '#3388ff',
-                                    fillColor: feature?.properties?.kode_warna || '#3388ff',
-                                    weight: 4,
-                                    opacity: 1,
-                                    fillOpacity: 0.5,
-                                })}
-                            >
-                                <Popup>{renderPopupContent(item)}</Popup>
-                            </GeoJSON>
-                        ));
-                    })}
+                                const refKey = `${itemCategory}-${parent}-${childId}`;
+                                return (
+                                    <GeoJSON
+                                        key={`${item.id_geojson}-${sourceName}`}
+                                        ref={(ref) => {
+                                            if (ref) geoJsonRefs.current[refKey] = ref;
+                                        }}
+                                        data={item.geojson as Feature}
+                                        style={() => ({
+                                            color: item.kode_warna || '#3388ff',
+                                            weight: 2,
+                                            opacity: 0.8,
+                                            fillColor: item.kode_warna || '#3388ff',
+                                            fillOpacity: 0.5,
+                                        })}
+                                    >
+                                        <Popup>{renderPopupContent(item)}</Popup>
+                                    </GeoJSON>
+                                );
+                            });
+                        })}
                 </MapContainer>
             </div>
 
             <SidebarFilter
                 sidebarOpen={sidebarOpen}
                 toggleSidebar={toggleSidebar}
-                uniqueSourceNames={Object.keys(groupedChildren)}
-                groupedChildren={groupedChildren}
-                toggleSourceFilter={toggleSourceFilter}
+                uniqueCategoryNames={uniqueCategoryNames}
+                groupedByCategory={groupedByCategory}
+                categoryColors={categoryColors}
+                categoryCodes={categoryToCodes}
+                isLoading={isLoading}
+                activeCategoryFilters={activeCategoryFilters}
+                activeParentFilters={activeParentFilters}
                 activeChildFilters={activeChildFilters}
+                toggleCategoryFilter={toggleCategoryFilter}
+                toggleParentFilter={toggleParentFilter}
                 toggleChildFilter={toggleChildFilter}
                 onShowAll={handleShowAll}
                 onHideAll={handleHideAll}
                 onView={handleViewLocation}
+                isCategoryChecked={isCategoryChecked}
                 isParentChecked={isParentChecked}
                 onSearchCoordinate={handleSearchCoordinate}
             />
