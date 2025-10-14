@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 import OwnerSearchInput from '@/components/OwnerSearchInput';
+import RegionSearchInput from '@/components/RegionSearchInput';
 
 // Custom styles for React Select to support dark/light mode
 const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -49,7 +50,16 @@ const isDark = typeof document !== 'undefined' && document.documentElement.class
 interface GeojsonFormProps {
     user_name: string;
     user_id: number;
-    regions: { id_region: number; name: string }[];
+    regions: { 
+        id_region: number; 
+        name: string;
+        provinsi?: string;
+        kabupaten?: string;
+        kecamatan?: string;
+        desa?: string;
+        detail?: string;
+        link?: string;
+    }[];
     owner: { 
         id_owner: number; 
         name: string; 
@@ -180,6 +190,43 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                 <h1 className="mb-4 text-2xl font-bold">Create Geojson</h1>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+                    
+                    {/* Region */}
+                    <div>
+                        <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Region</label>
+                        <Controller
+                            name="id_region"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <RegionSearchInput
+                                    regions={regions}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={fieldState.error?.message}
+                                    placeholder="Cari atau pilih region..."
+                                />
+                            )}
+                        />
+                    </div>
+
+                    {/* Owner */}
+                    <div>
+                        <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Owner</label>
+                        <Controller
+                            name="id_owner"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <OwnerSearchInput
+                                    owners={owner}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={fieldState.error?.message}
+                                    placeholder="Cari atau pilih owner..."
+                                />
+                            )}
+                        />
+                    </div>
                     {/* GeoJSON Text */}
                     <div>
                         <label htmlFor="geojson" className="mb-1 block font-medium text-gray-700 dark:text-gray-300">
@@ -252,39 +299,6 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                         />
                     </div>
 
-                    {/* Region */}
-                    <div>
-                        <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Region</label>
-                        <select
-                            {...register('id_region')}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        >
-                            <option value="">— Tidak Memilih —</option>
-                            {regions.map((r) => (
-                                <option key={r.id_region} value={r.id_region}>
-                                    {r.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Owner */}
-                    <div>
-                        <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Owner</label>
-                        <Controller
-                            name="id_owner"
-                            control={control}
-                            render={({ field, fieldState }) => (
-                                <OwnerSearchInput
-                                    owners={owner}
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    error={fieldState.error?.message}
-                                    placeholder="Cari atau pilih owner..."
-                                />
-                            )}
-                        />
-                    </div>
 
                     {/* Category with live-preview */}
                     <div>

@@ -45,13 +45,21 @@ class RegionController extends Controller
             ->exists();
 
         if ($exists) {
-            throw ValidationException::withMessages([
-                'desa' => 'Wilayah dengan kombinasi ini sudah terdaftar.',
-            ]);
+            return redirect()->back()
+                ->withErrors(['desa' => 'Wilayah dengan kombinasi ini sudah terdaftar.'])
+                ->withInput();
         }
 
-        Region::create($validated);
+        $region = Region::create($validated);
 
+        // Check if this is an AJAX request from modal (for geojson create page)
+        if ($request->expectsJson() || $request->header('X-Inertia')) {
+            return redirect()->back()
+                ->with('success', 'Region berhasil ditambahkan')
+                ->with('new_region', $region);
+        }
+
+        // Default redirect for regular region management
         return redirect()->route('dashboard.region.index')->with('success', 'Data wilayah berhasil ditambahkan.');
     }
 
