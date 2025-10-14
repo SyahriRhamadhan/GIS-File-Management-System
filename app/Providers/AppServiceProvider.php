@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Configure model binding to include soft deleted users for restore and force-delete routes
+        Route::bind('user', function ($value, $route) {
+            if (in_array($route->getName(), ['users.restore', 'users.force-delete'])) {
+                return User::withTrashed()->findOrFail($value);
+            }
+            return User::findOrFail($value);
+        });
     }
 }

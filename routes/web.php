@@ -9,6 +9,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\PdfGeojson;
+use App\Http\Controllers\UserController;
 // Halaman utama
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
 
@@ -58,6 +59,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // --- OWNER ROUTES ---
         Route::post('/owner', [OwnerController::class, 'store'])->name('owner.store');
+
+        // --- USER MANAGEMENT ROUTES ---
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/bulk-delete', [UserController::class, 'bulkDelete'])->name('users.bulk-delete');
+        Route::post('/users/{user}/restore', [UserController::class, 'restore'])->name('users.restore');
+        Route::delete('/users/{user}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
 
         // --- PDF GEOJSON ---
         Route::get('/geojson/{id}/add', [PdfGeojson::class, 'createFromGeojson'])
