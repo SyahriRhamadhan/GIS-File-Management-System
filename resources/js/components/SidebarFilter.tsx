@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IoChevronDown, IoChevronForward } from 'react-icons/io5';
+import { IoChevronDown, IoChevronForward, IoInformationCircleOutline } from 'react-icons/io5';
 import { MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
 
 interface SidebarFilterProps {
@@ -50,6 +50,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [search, setSearch] = useState('');
     const [coordX, setCoordX] = useState('');
     const [coordY, setCoordY] = useState('');
+    const [showCategoryInfo, setShowCategoryInfo] = useState<Record<string, boolean>>({});
 
     const handleToggleCategory = (category: string) => {
         setExpandedCategories((prev) => ({
@@ -66,6 +67,30 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                 [parent]: !prev[category]?.[parent],
             },
         }));
+    };
+
+    const handleToggleCategoryInfo = (category: string) => {
+        setShowCategoryInfo((prev) => ({
+            ...prev,
+            [category]: !prev[category],
+        }));
+    };
+
+    // Function to get category description based on category name
+    const getCategoryDescription = (category: string): string => {
+        // Map category names to descriptions
+        const categoryDescriptions: Record<string, string> = {
+            'Infrastruktur': 'Kategori ini mencakup semua infrastruktur fisik seperti jalan, jembatan, gedung pemerintahan, fasilitas umum, dan infrastruktur pendukung lainnya yang penting untuk pembangunan daerah.',
+            'Lingkungan': 'Kategori ini meliputi data terkait lingkungan hidup seperti kawasan hutan, daerah aliran sungai, area konservasi, zona hijau, dan wilayah yang memerlukan perlindungan lingkungan.',
+            'Ekonomi': 'Kategori ini berisi informasi tentang pusat-pusat ekonomi, kawasan industri, pasar tradisional, area perdagangan, dan zona ekonomi khusus yang mendukung pertumbuhan ekonomi daerah.',
+            'Sosial': 'Kategori ini mencakup fasilitas sosial seperti sekolah, rumah sakit, tempat ibadah, pusat komunitas, dan fasilitas pelayanan masyarakat lainnya.',
+            'Transportasi': 'Kategori ini meliputi sistem transportasi termasuk terminal, pelabuhan, bandara, stasiun, jalur transportasi umum, dan infrastruktur pendukung mobilitas masyarakat.',
+            'Pariwisata': 'Kategori ini berisi informasi tentang objek wisata, destinasi pariwisata, hotel, restoran, dan fasilitas pendukung industri pariwisata daerah.',
+            'Pertanian': 'Kategori ini mencakup lahan pertanian, perkebunan, area irigasi, gudang penyimpanan hasil pertanian, dan infrastruktur pendukung sektor pertanian.',
+            'Kesehatan': 'Kategori ini meliputi fasilitas kesehatan seperti rumah sakit, puskesmas, klinik, apotek, dan infrastruktur kesehatan masyarakat lainnya.',
+        };
+
+        return categoryDescriptions[category] || `Informasi detail untuk kategori ${category}. Kategori ini berisi data geospasial yang relevan dengan ${category.toLowerCase()} di wilayah ini.`;
     };
 
     // Check if all items are checked
@@ -224,7 +249,61 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                             </span>
                                         )}
                                     </div>
+                                    {/* Info Icon */}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleToggleCategoryInfo(category);
+                                        }}
+                                        className="ml-2 p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+                                        title="Lihat informasi kategori"
+                                    >
+                                        <IoInformationCircleOutline className="text-lg" />
+                                    </button>
                                 </div>
+
+                                {/* Category Information Popup */}
+                                {showCategoryInfo[category] && (
+                                    <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg shadow-sm">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-semibold text-blue-800 dark:text-blue-200">
+                                                Informasi Kategori: {category}
+                                            </h4>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggleCategoryInfo(category)}
+                                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                                title="Tutup informasi"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        <div className="text-sm text-gray-700 dark:text-gray-300">
+                                            <p className="mb-2">
+                                                <strong>Kode Kategori:</strong> {categoryCodes[category] || 'Tidak tersedia'}
+                                            </p>
+                                            <p className="mb-2">
+                                                <strong>Warna:</strong> 
+                                                <span className="ml-2 inline-flex items-center gap-2">
+                                                    {categoryColors[category] && (
+                                                        <div 
+                                                            className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600"
+                                                            style={{ backgroundColor: categoryColors[category] }}
+                                                        ></div>
+                                                    )}
+                                                    {categoryColors[category] || 'Tidak tersedia'}
+                                                </span>
+                                            </p>
+                                            <p className="mb-2">
+                                                <strong>Deskripsi:</strong>
+                                            </p>
+                                            <div className="bg-white dark:bg-gray-800 p-3 rounded border text-sm">
+                                                {getCategoryDescription(category)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Parent Level */}
                                 {expandedCategories[category] && groupedByCategory[category] && (

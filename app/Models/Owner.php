@@ -17,6 +17,7 @@ class Owner extends Model
         'name',
         'wali',
         'type',
+        'no_hp',
     ];
     protected $dates = ['deleted_at'];
 

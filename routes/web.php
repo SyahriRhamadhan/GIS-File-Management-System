@@ -7,6 +7,7 @@ use App\Http\Controllers\RegionController;
 use App\Http\Controllers\GeojsonController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\PdfGeojson;
 // Halaman utama
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
@@ -54,6 +55,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/kategori/{id}/edit', [KategoriController::class, 'edit'])->name('kategori.edit');
         Route::put('/kategori/{id}', [KategoriController::class, 'update'])->name('kategori.update');
         Route::delete('/kategori/{id}', [KategoriController::class, 'destroy'])->name('kategori.destroy');
+
+        // --- OWNER ROUTES ---
+        Route::post('/owner', [OwnerController::class, 'store'])->name('owner.store');
 
         // --- PDF GEOJSON ---
         Route::get('/geojson/{id}/add', [PdfGeojson::class, 'createFromGeojson'])

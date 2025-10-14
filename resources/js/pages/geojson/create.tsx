@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
+import OwnerSearchInput from '@/components/OwnerSearchInput';
 
 // Custom styles for React Select to support dark/light mode
 const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -49,7 +50,13 @@ interface GeojsonFormProps {
     user_name: string;
     user_id: number;
     regions: { id_region: number; name: string }[];
-    owner: { id_owner: number; name: string }[];
+    owner: { 
+        id_owner: number; 
+        name: string; 
+        wali?: string; 
+        type?: string; 
+        no_hp?: string; 
+    }[];
     kategoris: {
         orde1: string;
         orde2: string;
@@ -264,17 +271,19 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                     {/* Owner */}
                     <div>
                         <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Owner</label>
-                        <select
-                            {...register('id_owner')}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        >
-                            <option value="">— Tidak Memilih —</option>
-                            {owner.map((o) => (
-                                <option key={o.id_owner} value={o.id_owner}>
-                                    {o.name}
-                                </option>
-                            ))}
-                        </select>
+                        <Controller
+                            name="id_owner"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <OwnerSearchInput
+                                    owners={owner}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={fieldState.error?.message}
+                                    placeholder="Cari atau pilih owner..."
+                                />
+                            )}
+                        />
                     </div>
 
                     {/* Category with live-preview */}
