@@ -1,7 +1,7 @@
 import Modal from '@/components/Modal'; // Keep the original Modal intact
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 
@@ -37,29 +37,61 @@ interface Kategori {
     layer_order?: number;
 }
 
+interface PaginatedData<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    links: Array<{
+        url: string | null;
+        label: string;
+        active: boolean;
+    }>;
+}
+
 interface PageProps {
-    geojsons: Geojson[];
+    geojsons: PaginatedData<Geojson>;
     users: { id: number; name: string }[];
     regions: { id_region: number; name: string }[];
     owners: { id_owner: number; name: string }[];
     kategoris: Kategori[];
+    sourceNames: string[];
+    filters: {
+        search: string;
+        user_filter: string;
+        region_filter: string;
+        owner_filter: string;
+        category_filter: string;
+        source_filter: string;
+        sort_by: string;
+        sort_direction: string;
+        per_page: number | string;
+    };
     flash?: { success?: string; error?: string };
     [key: string]: any;
 }
 
 export default function GeojsonIndex() {
-    const { geojsons, users, regions, owners, kategoris, flash } = usePage<PageProps>().props;
+    const { geojsons, users, regions, owners, kategoris, sourceNames, filters, flash } = usePage<PageProps>().props;
     const [showBulkModal, setShowBulkModal] = useState(false);
-    const [search, setSearch] = useState('');
-    const [userFilter, setUserFilter] = useState<number | string>('');
-    const [regionFilter, setRegionFilter] = useState<number | string>('');
-    const [ownerFilter, setOwnerFilter] = useState<number | string>('');
-    const [categoryFilter, setCategoryFilter] = useState<number | string>('');
-    const [sourceFilter, setSourceFilter] = useState<string>('');
-    const [sortBy, setSortBy] = useState<keyof Geojson>('source_name');
-    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState<number | 'all'>(10);
+    const [search, setSearch] = useState(filters.search || '');
+    const [userFilter, setUserFilter] = useState<number | string>(filters.user_filter || '');
+    const [regionFilter, setRegionFilter] = useState<number | string>(filters.region_filter || '');
+    const [ownerFilter, setOwnerFilter] = useState<number | string>(filters.owner_filter || '');
+    const [categoryFilter, setCategoryFilter] = useState<number | string>(filters.category_filter || '');
+    const [sourceFilter, setSourceFilter] = useState<string>(filters.source_filter || '');
+    const [sortBy, setSortBy] = useState<keyof Geojson>(filters.sort_by as keyof Geojson || 'source_name');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(filters.sort_direction as 'asc' | 'desc' || 'asc');
+    const [pageSize, setPageSize] = useState<number | 'all'>(
+        typeof filters.per_page === 'string' && filters.per_page === 'all' 
+            ? 'all' 
+            : typeof filters.per_page === 'number' 
+                ? filters.per_page 
+                : 10
+    );
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedGeojson, setSelectedGeojson] = useState<Geojson | null>(null);
@@ -67,77 +99,39 @@ export default function GeojsonIndex() {
     // State for showing detail kategori popup
     const [detailKategoriId, setDetailKategoriId] = useState<number | null>(null);
 
-    // Apply all filters, and search also matches user, region, owner
-    const filtered = useMemo(() => {
-        return geojsons
-            .filter((g) => {
-                // 1. Filter by source_name dropdown
-                if (sourceFilter && g.source_name !== sourceFilter) {
-                    return false;
-                }
+    // Server-side navigation function
+    const navigateWithFilters = (additionalParams: Record<string, any> = {}) => {
+        const params: Record<string, any> = {
+            search,
+            user_filter: userFilter,
+            region_filter: regionFilter,
+            owner_filter: ownerFilter,
+            category_filter: categoryFilter,
+            source_filter: sourceFilter,
+            sort_by: sortBy,
+            sort_direction: sortDirection,
+            per_page: pageSize,
+            ...additionalParams,
+        };
 
-                // 2. Cari relasi lain
-                const user = users.find((u) => u.id === g.id_user);
-                const region = regions.find((r) => r.id_region === g.id_region);
-                const owner = owners.find((o) => o.id_owner === g.id_owner);
-                const kategoriObj = kategoris.find((k) => k.id_kategori === g.id_kategori);
+        // Remove empty values
+        Object.keys(params).forEach((key: string) => {
+            if (params[key] === '' || params[key] === null || params[key] === undefined) {
+                delete params[key];
+            }
+        });
 
-                // 3. Gabungkan orde kategori
-                const kategoriString = [kategoriObj?.orde0, kategoriObj?.orde1, kategoriObj?.orde2, kategoriObj?.orde3, kategoriObj?.orde4]
-                    .filter(Boolean)
-                    .join(' ')
-                    .toLowerCase();
+        router.get('/dashboard/geojson', params, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
-                // 4. Pencarian text
-                const s = search.toLowerCase();
-                const matchesSearch =
-                    !search ||
-                    g.source_name.toLowerCase().includes(s) ||
-                    g.orde0?.toLowerCase().includes(s) ||
-                    user?.name.toLowerCase().includes(s) ||
-                    region?.name.toLowerCase().includes(s) ||
-                    owner?.name.toLowerCase().includes(s) ||
-                    kategoriString.includes(s);
-
-                // 5. Gabungkan semua filter
-                return (
-                    matchesSearch &&
-                    (!userFilter || g.id_user === +userFilter) &&
-                    (!regionFilter || g.id_region === +regionFilter) &&
-                    (!ownerFilter || g.id_owner === +ownerFilter) &&
-                    (!categoryFilter || g.id_kategori === +categoryFilter)
-                );
-            })
-            .sort((a, b) => {
-                const aVal = (a[sortBy] ?? '').toString().toLowerCase();
-                const bVal = (b[sortBy] ?? '').toString().toLowerCase();
-                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
-    }, [
-        geojsons,
-        sourceFilter, // ← tambahkan di deps
-        users,
-        regions,
-        owners,
-        kategoris,
-        search,
-        userFilter,
-        regionFilter,
-        ownerFilter,
-        categoryFilter,
-        sortBy,
-        sortDirection,
-    ]);
-
-    const pages = pageSize === 'all' ? 1 : Math.ceil(filtered.length / pageSize);
-
-    const displayed = useMemo(() => {
-        if (pageSize === 'all') return filtered;
-        const start = (currentPage - 1) * pageSize;
-        return filtered.slice(start, start + pageSize);
-    }, [filtered, currentPage, pageSize]);
+    // Get current data from paginated response
+    const currentData = geojsons.data;
+    const currentPage = geojsons.current_page;
+    const lastPage = geojsons.last_page;
+    const total = geojsons.total;
 
     const handleView = (g: Geojson) => {
         setSelectedGeojson(g);
@@ -153,18 +147,26 @@ export default function GeojsonIndex() {
     };
 
     const toggleSort = (col: keyof Geojson) => {
-        if (sortBy === col) setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
-        else {
-            setSortBy(col);
-            setSortDirection('asc');
+        let newDirection: 'asc' | 'desc' = 'asc';
+        if (sortBy === col) {
+            newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
         }
+        setSortBy(col);
+        setSortDirection(newDirection);
+        navigateWithFilters({ 
+            sort_by: col, 
+            sort_direction: newDirection,
+            page: 1 
+        });
     };
 
     const maxButtons = 5;
-    const goToPage = (p: number) => setCurrentPage(p);
+    const goToPage = (p: number) => {
+        navigateWithFilters({ page: p });
+    };
 
     const visiblePages = useMemo(() => {
-        const total = pages;
+        const total = lastPage;
         let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
         let end = start + maxButtons - 1;
 
@@ -173,10 +175,34 @@ export default function GeojsonIndex() {
             start = Math.max(1, end - maxButtons + 1);
         }
         return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-    }, [currentPage, pages]);
+    }, [currentPage, lastPage]);
 
     // State untuk menyimpan ID geojson yang dipilih
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+    // Debounced search
+    const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+    
+    useEffect(() => {
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        
+        searchTimeoutRef.current = setTimeout(() => {
+            if (search !== filters.search) {
+                navigateWithFilters({ 
+                    search: search,
+                    page: 1 
+                });
+            }
+        }, 500);
+
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, [search, filters.search, navigateWithFilters]);
 
     // Toggle single checkbox
     const toggleSelect = (id: number) => {
@@ -197,12 +223,31 @@ export default function GeojsonIndex() {
         Promise.all(selectedIds.map((id) => router.delete(`/dashboard/geojson/${id}`, { preserveScroll: true }))).then(() => {
             toast.success('Items terhapus');
             setSelectedIds([]);
-            setCurrentPage(1);
+            navigateWithFilters({ page: 1 });
             setShowBulkModal(false);
         });
     };
 
-    const sourceOptions = Array.from(new Set(geojsons.map((g) => g.source_name))).map((src) => ({
+    // Clear all filters function
+    const clearAllFilters = () => {
+        setSearch('');
+        setUserFilter('');
+        setRegionFilter('');
+        setOwnerFilter('');
+        setCategoryFilter('');
+        setSourceFilter('');
+        setSortBy('source_name');
+        setSortDirection('asc');
+        setPageSize(10);
+        
+        // Navigate with cleared filters
+        router.get('/dashboard/geojson', {}, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const sourceOptions = sourceNames.map((src) => ({
         value: src,
         label: src,
     }));
@@ -277,129 +322,193 @@ export default function GeojsonIndex() {
                     </button>
                 </div>
 
-                {/* filters */}
-                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                    {/* search */}
-                    <input
-                        type="text"
-                        placeholder="Cari..."
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="w-full max-w-md rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                    />
-                    <Select
-                        options={sourceOptions}
-                        className="w-full max-w-xs rounded" // cukup, biar nggak duplikat styling
-                        styles={{
-                            control: (base, state) => ({
-                                ...base,
-                                backgroundColor: isDark ? '#374151' : '#fff',
-                                color: isDark ? '#f3f4f6' : '#111827',
-                                borderColor: isDark ? '#4b5563' : '#d1d5db',
-                                boxShadow: state.isFocused ? '0 0 0 2px #2563eb22' : base.boxShadow,
-                            }),
-                            menu: (base) => ({
-                                ...base,
-                                backgroundColor: isDark ? '#374151' : '#fff',
-                                color: isDark ? '#f3f4f6' : '#111827',
-                                zIndex: 99,
-                            }),
-                            option: (base, state) => ({
-                                ...base,
-                                backgroundColor: state.isSelected
-                                    ? isDark
-                                        ? '#2563eb'
-                                        : '#93c5fd'
-                                    : state.isFocused
-                                      ? isDark
-                                          ? '#4b5563'
-                                          : '#f3f4f6'
-                                      : isDark
-                                        ? '#374151'
-                                        : '#fff',
-                                color: isDark ? '#f3f4f6' : '#111827',
-                                cursor: 'pointer',
-                            }),
-                            singleValue: (base) => ({
-                                ...base,
-                                color: isDark ? '#f3f4f6' : '#111827',
-                            }),
-                            input: (base) => ({
-                                ...base,
-                                color: isDark ? '#f3f4f6' : '#111827',
-                            }),
-                            placeholder: (base) => ({
-                                ...base,
-                                color: isDark ? '#9ca3af' : '#6b7280',
-                            }),
-                            menuPortal: (base) => ({
-                                ...base,
-                                zIndex: 9999,
-                            }),
-                        }}
-                        value={sourceOptions.find((option) => option.value === sourceFilter) || null}
-                        onChange={(selectedOption) => {
-                            setSourceFilter(selectedOption ? selectedOption.value : '');
-                            setCurrentPage(1);
-                        }}
-                        isClearable
-                        placeholder="Pilih source..."
-                        menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
-                    />
+                {/* Search and Filter Section */}
+                <div className="mb-6 space-y-4">
+                    {/* Search Bar */}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
+                            <input
+                                type="text"
+                                placeholder="Cari GeoJSON..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full max-w-md rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-blue-400"
+                            />
+                        </div>
+                        
+                        {/* Clear Filter Button */}
+                        <button
+                            onClick={clearAllFilters}
+                            className="inline-flex items-center gap-2 rounded-lg bg-gray-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500/20 dark:bg-gray-600 dark:hover:bg-gray-700"
+                            title="Hapus semua filter"
+                        >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Clear Filters
+                        </button>
+                    </div>
 
-                    {/* user */}
-                    <select
-                        value={userFilter}
-                        onChange={(e) => {
-                            setUserFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="w-full max-w-xs rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                    >
-                        <option value="">Semua User</option>
-                        {users.map((u) => (
-                            <option key={u.id} value={u.id}>
-                                {u.name}
-                            </option>
-                        ))}
-                    </select>
+                    {/* Filter Controls */}
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
+                        <div className="mb-3">
+                            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter Data</h3>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                            {/* Source Filter */}
+                            <div className="space-y-1">
+                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                    Source
+                                </label>
+                                <Select
+                                    options={sourceOptions}
+                                    className="w-full"
+                                    styles={{
+                                        control: (base, state) => ({
+                                            ...base,
+                                            backgroundColor: isDark ? '#374151' : '#fff',
+                                            color: isDark ? '#f3f4f6' : '#111827',
+                                            borderColor: isDark ? '#4b5563' : '#d1d5db',
+                                            borderRadius: '0.5rem',
+                                            minHeight: '38px',
+                                            boxShadow: state.isFocused ? '0 0 0 2px #2563eb22' : base.boxShadow,
+                                            '&:hover': {
+                                                borderColor: isDark ? '#6b7280' : '#9ca3af',
+                                            },
+                                        }),
+                                        menu: (base) => ({
+                                            ...base,
+                                            backgroundColor: isDark ? '#374151' : '#fff',
+                                            color: isDark ? '#f3f4f6' : '#111827',
+                                            zIndex: 99,
+                                            borderRadius: '0.5rem',
+                                            border: `1px solid ${isDark ? '#4b5563' : '#d1d5db'}`,
+                                        }),
+                                        option: (base, state) => ({
+                                            ...base,
+                                            backgroundColor: state.isSelected
+                                                ? isDark ? '#2563eb' : '#3b82f6'
+                                                : state.isFocused
+                                                  ? isDark ? '#4b5563' : '#f3f4f6'
+                                                  : isDark ? '#374151' : '#fff',
+                                            color: state.isSelected 
+                                                ? '#fff' 
+                                                : isDark ? '#f3f4f6' : '#111827',
+                                            cursor: 'pointer',
+                                            padding: '8px 12px',
+                                        }),
+                                        singleValue: (base) => ({
+                                            ...base,
+                                            color: isDark ? '#f3f4f6' : '#111827',
+                                        }),
+                                        input: (base) => ({
+                                            ...base,
+                                            color: isDark ? '#f3f4f6' : '#111827',
+                                        }),
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            color: isDark ? '#9ca3af' : '#6b7280',
+                                        }),
+                                        menuPortal: (base) => ({
+                                            ...base,
+                                            zIndex: 9999,
+                                        }),
+                                    }}
+                                    value={sourceOptions.find((option) => option.value === sourceFilter) || null}
+                                    onChange={(selectedOption) => {
+                                        const value = selectedOption ? selectedOption.value : '';
+                                        setSourceFilter(value);
+                                        navigateWithFilters({ 
+                                            source_filter: value,
+                                            page: 1 
+                                        });
+                                    }}
+                                    isClearable
+                                    placeholder="Pilih source..."
+                                    menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
+                                />
+                            </div>
 
-                    {/* region */}
-                    <select
-                        value={regionFilter}
-                        onChange={(e) => {
-                            setRegionFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="w-full max-w-xs rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                    >
-                        <option value="">Semua Region</option>
-                        {regions.map((r) => (
-                            <option key={r.id_region} value={r.id_region}>
-                                {r.name}
-                            </option>
-                        ))}
-                    </select>
+                            {/* User Filter */}
+                            <div className="space-y-1">
+                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                    User
+                                </label>
+                                <select
+                                    value={userFilter}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setUserFilter(value);
+                                        navigateWithFilters({ 
+                                            user_filter: value,
+                                            page: 1 
+                                        });
+                                    }}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-blue-400"
+                                >
+                                    <option value="">Semua User</option>
+                                    {users.map((u) => (
+                                        <option key={u.id} value={u.id}>
+                                            {u.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                    {/* owner */}
-                    <select
-                        value={ownerFilter}
-                        onChange={(e) => {
-                            setOwnerFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="w-full max-w-xs rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                    >
-                        <option value="">Semua Owner</option>
-                        {owners.map((o) => (
-                            <option key={o.id_owner} value={o.id_owner}>
-                                {o.name}
-                            </option>
-                        ))}
-                    </select>
+                            {/* Region Filter */}
+                            <div className="space-y-1">
+                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                    Region
+                                </label>
+                                <select
+                                    value={regionFilter}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setRegionFilter(value);
+                                        navigateWithFilters({ 
+                                            region_filter: value,
+                                            page: 1 
+                                        });
+                                    }}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-blue-400"
+                                >
+                                    <option value="">Semua Region</option>
+                                    {regions.map((r) => (
+                                        <option key={r.id_region} value={r.id_region}>
+                                            {r.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Owner Filter */}
+                            <div className="space-y-1">
+                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                    Owner
+                                </label>
+                                <select
+                                    value={ownerFilter}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setOwnerFilter(value);
+                                        navigateWithFilters({ 
+                                            owner_filter: value,
+                                            page: 1 
+                                        });
+                                    }}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-blue-400"
+                                >
+                                    <option value="">Semua Owner</option>
+                                    {owners.map((o) => (
+                                        <option key={o.id_owner} value={o.id_owner}>
+                                            {o.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* table */}
@@ -412,11 +521,11 @@ export default function GeojsonIndex() {
                                     <label className="flex items-center gap-1">
                                         <input
                                             type="checkbox"
-                                            checked={displayed.length > 0 && displayed.every((g) => selectedIds.includes(g.id_geojson))}
+                                            checked={currentData.length > 0 && currentData.every((g) => selectedIds.includes(g.id_geojson))}
                                             onChange={(e) =>
                                                 toggleSelectAll(
                                                     e.target.checked,
-                                                    displayed.map((g) => g.id_geojson),
+                                                    currentData.map((g) => g.id_geojson),
                                                 )
                                             }
                                         />
@@ -427,7 +536,10 @@ export default function GeojsonIndex() {
                                         onChange={(e) => {
                                             const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
                                             setPageSize(val);
-                                            setCurrentPage(1);
+                                            navigateWithFilters({ 
+                                                per_page: val,
+                                                page: 1 
+                                            });
                                         }}
                                         className="w-full max-w-xs rounded border bg-white px-3 py-2 text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100"
                                     >
@@ -450,7 +562,7 @@ export default function GeojsonIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {displayed.map((g, i) => {
+                            {currentData.map((g, i) => {
                                 // Find kategori detail from the categories array
                                 const kategori = kategoris.find((k) => k.id_kategori === g.id_kategori);
 
@@ -464,7 +576,7 @@ export default function GeojsonIndex() {
                                                     onChange={() => toggleSelect(g.id_geojson)}
                                                 />
                                                 <span className="mx-auto">
-                                                    {(currentPage - 1) * (pageSize === 'all' ? filtered.length : pageSize) + i + 1}
+                                                    {geojsons.from + i}
                                                 </span>
                                             </div>
                                         </td>
@@ -529,7 +641,7 @@ export default function GeojsonIndex() {
                 {/* Popup for detail */}
                 {detailKategoriId !== null &&
                     (() => {
-                        const g = displayed.find((item) => item.id_geojson === detailKategoriId);
+                        const g = currentData.find((item) => item.id_geojson === detailKategoriId);
                         const kategori = kategoris.find((k) => k.id_kategori === g?.id_kategori);
                         return (
                             <div
@@ -614,7 +726,7 @@ export default function GeojsonIndex() {
                     {/* Next */}
                     <button
                         onClick={() => goToPage(currentPage + 1)}
-                        disabled={currentPage === pages}
+                        disabled={currentPage === lastPage}
                         className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
                     >
                         Next ›
@@ -622,12 +734,17 @@ export default function GeojsonIndex() {
 
                     {/* Last */}
                     <button
-                        onClick={() => goToPage(pages)}
-                        disabled={currentPage === pages}
+                        onClick={() => goToPage(lastPage)}
+                        disabled={currentPage === lastPage}
                         className="rounded border px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:hover:bg-gray-700"
                     >
                         Last »
                     </button>
+                </div>
+
+                {/* Pagination Info */}
+                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                    Showing {geojsons.from || 0} to {geojsons.to || 0} of {total} results
                 </div>
                 {showBulkModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowBulkModal(false)}>
@@ -653,10 +770,10 @@ export default function GeojsonIndex() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filtered
-                                            .filter((g) => selectedIds.includes(g.id_geojson))
+                                        {currentData
+                                            .filter((g: Geojson) => selectedIds.includes(g.id_geojson))
                                             .map((g: Geojson) => {
-                                                const nomor = filtered.findIndex((item) => item.id_geojson === g.id_geojson) + 1;
+                                                const nomor = currentData.findIndex((item: Geojson) => item.id_geojson === g.id_geojson) + 1;
                                                 const kategori = kategoris.find((k) => k.id_kategori === g.id_kategori);
                                                 return (
                                                     <tr key={g.id_geojson}>

@@ -13,13 +13,93 @@ use App\Models\Kategori;
 
 class GeojsonController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $geojsons = Geojson::all();
+        // Get pagination parameters
+        $perPage = $request->input('per_page', 10);
+        if ($perPage === 'all') {
+            $perPage = Geojson::count();
+        }
+
+        // Get filter parameters
+        $search = $request->input('search', '');
+        $userFilter = $request->input('user_filter', '');
+        $regionFilter = $request->input('region_filter', '');
+        $ownerFilter = $request->input('owner_filter', '');
+        $categoryFilter = $request->input('category_filter', '');
+        $sourceFilter = $request->input('source_filter', '');
+
+        // Get sorting parameters
+        $sortBy = $request->input('sort_by', 'source_name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+
+        // Build query with relationships
+        $query = Geojson::with(['region', 'owner'])
+            ->leftJoin('users', 'geojson.id_user', '=', 'users.id')
+            ->leftJoin('region', 'geojson.id_region', '=', 'region.id_region')
+            ->leftJoin('owner', 'geojson.id_owner', '=', 'owner.id_owner')
+            ->leftJoin('kategori', 'geojson.id_kategori', '=', 'kategori.id_kategori')
+            ->select('geojson.*');
+
+        // Apply filters
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('geojson.source_name', 'like', "%{$search}%")
+                  ->orWhere('users.name', 'like', "%{$search}%")
+                  ->orWhere('region.name', 'like', "%{$search}%")
+                  ->orWhere('owner.name', 'like', "%{$search}%")
+                  ->orWhere('kategori.orde0', 'like', "%{$search}%")
+                  ->orWhere('kategori.orde1', 'like', "%{$search}%")
+                  ->orWhere('kategori.orde2', 'like', "%{$search}%")
+                  ->orWhere('kategori.orde3', 'like', "%{$search}%")
+                  ->orWhere('kategori.orde4', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($userFilter)) {
+            $query->where('geojson.id_user', $userFilter);
+        }
+
+        if (!empty($regionFilter)) {
+            $query->where('geojson.id_region', $regionFilter);
+        }
+
+        if (!empty($ownerFilter)) {
+            $query->where('geojson.id_owner', $ownerFilter);
+        }
+
+        if (!empty($categoryFilter)) {
+            $query->where('geojson.id_kategori', $categoryFilter);
+        }
+
+        if (!empty($sourceFilter)) {
+            $query->where('geojson.source_name', $sourceFilter);
+        }
+
+        // Apply sorting
+        $allowedSortFields = ['source_name', 'created_at', 'updated_at'];
+        if (in_array($sortBy, $allowedSortFields)) {
+            $query->orderBy("geojson.{$sortBy}", $sortDirection);
+        } else {
+            $query->orderBy('geojson.source_name', 'asc');
+        }
+
+        // Get paginated results
+        $geojsons = $query->paginate($perPage)
+            ->appends($request->except('page'));
+
+        // Get all data for filters
         $regions = Region::all();
         $users = User::all();
         $owners = Owner::all();
-        $kategoris  = Kategori::all();
+        $kategoris = Kategori::all();
+
+        // Get unique source names for filter dropdown
+        $sourceNames = Geojson::select('source_name')
+            ->distinct()
+            ->whereNotNull('source_name')
+            ->orderBy('source_name')
+            ->pluck('source_name');
 
         return Inertia::render('geojson/index', [
             'geojsons' => $geojsons,
@@ -27,6 +107,18 @@ class GeojsonController extends Controller
             'users' => $users,
             'owners' => $owners,
             'kategoris' => $kategoris,
+            'sourceNames' => $sourceNames,
+            'filters' => [
+                'search' => $search,
+                'user_filter' => $userFilter,
+                'region_filter' => $regionFilter,
+                'owner_filter' => $ownerFilter,
+                'category_filter' => $categoryFilter,
+                'source_filter' => $sourceFilter,
+                'sort_by' => $sortBy,
+                'sort_direction' => $sortDirection,
+                'per_page' => $request->input('per_page', 10),
+            ],
         ]);
     }
 
@@ -204,6 +296,7 @@ class GeojsonController extends Controller
             'id_region'     => 'nullable|exists:region,id_region',
             'id_owner'      => 'nullable|exists:owner,id_owner',
             'id_kategori'   => 'nullable|exists:kategori,id_kategori',
+            'source_name'   => 'nullable|string|max:255',
         ]);
 
         // 1) Decode either uploaded file or raw JSON
@@ -232,7 +325,10 @@ class GeojsonController extends Controller
             'id_kategori' => $validated['id_kategori'] ?? null,
         ];
 
-        if (isset($raw['fileName']) && is_string($raw['fileName'])) {
+        // 5) Handle source_name - prioritize form data over fileName from GeoJSON
+        if (!empty($validated['source_name'])) {
+            $data['source_name'] = $validated['source_name'];
+        } elseif (isset($raw['fileName']) && is_string($raw['fileName'])) {
             $data['source_name'] = $raw['fileName'];
         }
 

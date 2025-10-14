@@ -1,9 +1,53 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
+import OwnerSearchInput from '@/components/OwnerSearchInput';
+import RegionSearchInput from '@/components/RegionSearchInput';
+import { saveAs } from 'file-saver';
+import shp from 'shpjs';
+
+// Custom styles for React Select to support dark/light mode
+const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+    
+const selectStyles = {
+    control: (provided: any, state: any) => ({
+        ...provided,
+        backgroundColor: isDark ? '#374151' : '#ffffff',
+        borderColor: state.isFocused ? (isDark ? '#4b5563' : '#d1d5db') : (isDark ? '#4b5563' : '#d1d5db'),
+        color: isDark ? '#f3f4f6' : '#111827',
+        '&:hover': {
+            borderColor: isDark ? '#4b5563' : '#d1d5db',
+        },
+    }),
+    menu: (provided: any) => ({
+        ...provided,
+        backgroundColor: isDark ? '#374151' : '#ffffff',
+    }),
+    option: (provided: any, state: any) => ({
+        ...provided,
+        backgroundColor: state.isSelected 
+            ? (isDark ? '#4b5563' : '#f3f4f6') 
+            : state.isFocused 
+                ? (isDark ? '#4b5563' : '#f3f4f6') 
+                : (isDark ? '#374151' : '#ffffff'),
+        color: isDark ? '#f3f4f6' : '#111827',
+    }),
+    singleValue: (provided: any) => ({
+        ...provided,
+        color: isDark ? '#f3f4f6' : '#111827',
+    }),
+    placeholder: (provided: any) => ({
+        ...provided,
+        color: isDark ? '#9ca3af' : '#6b7280',
+    }),
+    input: (provided: any) => ({
+        ...provided,
+        color: isDark ? '#f3f4f6' : '#111827',
+    }),
+};
 
 interface Kategori {
     id_kategori: number;
@@ -33,21 +77,38 @@ interface PageProps extends Record<string, any> {
         id_region?: number;
         id_owner?: number;
         id_kategori?: number;
+        source_name?: string;
     };
     user_name: string;
     user_id: number;
-    regions: Region[];
-    owner: Owner[];
+    regions: { 
+        id_region: number; 
+        name: string;
+        provinsi?: string;
+        kabupaten?: string;
+        kecamatan?: string;
+        desa?: string;
+        detail?: string;
+        link?: string;
+    }[];
+    owner: { 
+        id_owner: number; 
+        name: string; 
+        wali?: string; 
+        type?: string; 
+        no_hp?: string; 
+    }[];
     kategoris: Kategori[];
-    flash?: { success?: string; error?: string };
+    flash?: { success?: string; error?: string; upload_errors?: string[] };
 }
 
 interface FormValues {
     geojson: string;
-    geojson_file: FileList;
+    geojson_file?: FileList;
     id_region: string;
     id_owner: string;
     id_kategori: string;
+    source_name: string;
     orde1?: string;
     orde2?: string;
     orde3?: string;
@@ -56,10 +117,21 @@ interface FormValues {
 
 export default function GeojsonEdit() {
     const { geojson, user_name, user_id, regions, owner, kategoris, flash } = usePage<PageProps>().props;
+    const [fileList, setFileList] = useState<File[]>([]);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    
+    // SHP to GeoJSON states
+    const [shpGeojson, setShpGeojson] = useState<any>(null);
+    const [previewGeojsons, setPreviewGeojsons] = useState<any[]>([]);
+    const [convertedFilename, setConvertedFilename] = useState<string>('converted.geojson');
+    const [isConverting, setIsConverting] = useState<boolean>(false);
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
+        if (flash?.upload_errors) {
+            flash.upload_errors.forEach((msg) => toast.error(msg));
+        }
     }, [flash]);
 
     const {
@@ -67,6 +139,7 @@ export default function GeojsonEdit() {
         handleSubmit,
         setValue,
         control,
+        watch,
         formState: { errors, isSubmitting },
     } = useForm<FormValues>({
         defaultValues: {
@@ -74,6 +147,7 @@ export default function GeojsonEdit() {
             id_region: geojson.id_region?.toString() || '',
             id_owner: geojson.id_owner?.toString() || '',
             id_kategori: geojson.id_kategori?.toString() || '',
+            source_name: geojson.source_name || '',
         },
     });
 
@@ -97,6 +171,222 @@ export default function GeojsonEdit() {
         return () => {};
     }, [register]);
 
+    // Always get file from react-hook-form
+    const files = watch('geojson_file');
+
+    // Sync fileList state for UI, always after file input changes
+    useEffect(() => {
+        if (files && files.length > 0) {
+            setFileList(Array.from(files));
+        } else {
+            setFileList([]);
+        }
+    }, [files]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setValue('geojson_file', e.target.files);
+            // state fileList diatur otomatis oleh useEffect di atas
+        }
+    };
+
+    const handleRemoveFile = (idx: number) => {
+        if (!files) return;
+        const fileArr = Array.from(files);
+        fileArr.splice(idx, 1);
+        // update file input via DataTransfer
+        const dataTransfer = new DataTransfer();
+        fileArr.forEach((file) => dataTransfer.items.add(file));
+        if (inputRef.current) inputRef.current.files = dataTransfer.files;
+        setValue('geojson_file', dataTransfer.files.length ? dataTransfer.files : undefined);
+        // fileList diupdate otomatis oleh useEffect di atas
+    };
+
+    const handleRemoveAll = () => {
+        if (inputRef.current) inputRef.current.value = '';
+        setValue('geojson_file', undefined);
+        // fileList diupdate otomatis oleh useEffect di atas
+    };
+
+    // Helper function to group SHP files by basename
+    const groupShpFiles = (files: FileList) => {
+        const groups: { [key: string]: { [ext: string]: File } } = {};
+        
+        Array.from(files).forEach(file => {
+            const name = file.name;
+            const lastDot = name.lastIndexOf('.');
+            const basename = lastDot > 0 ? name.substring(0, lastDot) : name;
+            const extension = lastDot > 0 ? name.substring(lastDot + 1).toLowerCase() : '';
+            
+            if (!groups[basename]) {
+                groups[basename] = {};
+            }
+            groups[basename][extension] = file;
+        });
+        
+        return groups;
+    };
+
+    // Helper function to validate SHP file group
+    const validateShpGroup = (group: { [ext: string]: File }) => {
+        const hasShp = 'shp' in group;
+        const hasDbf = 'dbf' in group;
+        const hasShx = 'shx' in group;
+        
+        return {
+            isValid: hasShp && hasDbf,
+            hasShp,
+            hasDbf,
+            hasShx,
+            hasPrj: 'prj' in group,
+            hasCpg: 'cpg' in group
+        };
+    };
+
+    // Helper function to create ArrayBuffer from individual SHP files
+    const createShpArrayBuffer = async (group: { [ext: string]: File }) => {
+        const shpBuffer = await group.shp.arrayBuffer();
+        const dbfBuffer = await group.dbf.arrayBuffer();
+        const shxBuffer = group.shx ? await group.shx.arrayBuffer() : null;
+        const prjBuffer = group.prj ? await group.prj.arrayBuffer() : null;
+        
+        // Create a simple object structure that shpjs can understand
+        const shpData: any = {
+            shp: shpBuffer,
+            dbf: dbfBuffer
+        };
+        
+        if (shxBuffer) shpData.shx = shxBuffer;
+        if (prjBuffer) shpData.prj = prjBuffer;
+        
+        return shpData;
+    };
+
+    // SHP to GeoJSON conversion functions
+    const handleShpUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files?.length) return;
+
+        setIsConverting(true);
+        try {
+            // Check if it's a ZIP file
+            if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
+                // Handle ZIP file (existing logic)
+                const arrayBuffer = await files[0].arrayBuffer();
+                const result = await shp(arrayBuffer);
+
+                // Multiple parts case
+                if (Array.isArray(result) && result.length > 1) {
+                    const previewData = result.map((fc: any) => {
+                        const name = fc.fileName
+                            ? `${fc.fileName.replace(/\.[^/.]+$/, '')}.geojson`
+                            : `${files[0].name.replace(/\.[^/.]+$/, '')}_part.geojson`;
+
+                        return {
+                            filename: name,
+                            data: fc,
+                        };
+                    });
+                    setPreviewGeojsons(previewData);
+                    setShpGeojson(null);
+                    toast.success(`Berhasil mengkonversi ${previewData.length} file GeoJSON dari ZIP`);
+                }
+                // Single file case
+                else {
+                    const fc = Array.isArray(result) ? result[0] : result;
+                    setShpGeojson(fc);
+                    const name = fc.fileName 
+                        ? `${fc.fileName.replace(/\.[^/.]+$/, '')}.geojson` 
+                        : `${files[0].name.replace(/\.[^/.]+$/, '')}.geojson`;
+                    setConvertedFilename(name);
+                    setPreviewGeojsons([]);
+                    toast.success('Berhasil mengkonversi SHP ke GeoJSON dari ZIP');
+                }
+            } else {
+                // Handle individual SHP files
+                const groups = groupShpFiles(files!);
+                const validGroups: Array<{ basename: string; group: { [ext: string]: File } }> = [];
+                const invalidGroups: string[] = [];
+
+                // Validate each group
+                for (const [basename, group] of Object.entries(groups)) {
+                    const validation = validateShpGroup(group);
+                    if (validation.isValid) {
+                        validGroups.push({ basename, group });
+                    } else {
+                        const missing = [];
+                        if (!validation.hasShp) missing.push('.shp');
+                        if (!validation.hasDbf) missing.push('.dbf');
+                        invalidGroups.push(`${basename} (missing: ${missing.join(', ')})`);
+                    }
+                }
+
+                if (invalidGroups.length > 0) {
+                    toast.error(`File tidak lengkap: ${invalidGroups.join(', ')}`);
+                    return;
+                }
+
+                if (validGroups.length === 0) {
+                    toast.error('Tidak ada file SHP yang valid ditemukan');
+                    return;
+                }
+
+                // Convert valid groups
+                const results = [];
+                for (const { basename, group } of validGroups) {
+                    try {
+                        const shpData = await createShpArrayBuffer(group);
+                        const result = await shp(shpData);
+                        
+                        const fc = Array.isArray(result) ? result[0] : result;
+                        // Add fileName property for consistency with ZIP file processing
+                        fc.fileName = basename;
+                        results.push({
+                            filename: `${basename}.geojson`,
+                            data: fc
+                        });
+                    } catch (err) {
+                        toast.error(`Gagal mengkonversi ${basename}: ${err}`);
+                    }
+                }
+
+                if (results.length === 1) {
+                    // Single result
+                    setShpGeojson(results[0].data);
+                    setConvertedFilename(results[0].filename);
+                    setPreviewGeojsons([]);
+                    toast.success(`Berhasil mengkonversi ${results[0].filename}`);
+                } else if (results.length > 1) {
+                    // Multiple results
+                    setPreviewGeojsons(results);
+                    setShpGeojson(null);
+                    toast.success(`Berhasil mengkonversi ${results.length} file GeoJSON`);
+                }
+            }
+        } catch (err) {
+            toast.error('Gagal mengkonversi file: ' + err);
+        } finally {
+            setIsConverting(false);
+        }
+    };
+
+    const handleUseConvertedGeoJSON = (geojsonData: any, filename: string) => {
+        // Convert GeoJSON object to string and set it to the form
+        setValue('geojson', JSON.stringify(geojsonData, null, 2));
+        toast.success(`GeoJSON "${filename}" siap untuk disimpan`);
+    };
+
+    const handleDownloadGeoJSON = (geojsonData: any, filename: string) => {
+        const blob = new Blob([JSON.stringify(geojsonData, null, 2)], { type: 'application/json' });
+        saveAs(blob, filename);
+    };
+
+    const handleClearConversion = () => {
+        setShpGeojson(null);
+        setPreviewGeojsons([]);
+        setConvertedFilename('converted.geojson');
+    };
+
     const onSubmit = (data: FormValues) => {
         const formData = new FormData();
         if (data.geojson_file?.length) {
@@ -114,6 +404,7 @@ export default function GeojsonEdit() {
         if (data.id_region) formData.append('id_region', data.id_region);
         if (data.id_owner) formData.append('id_owner', data.id_owner);
         if (data.id_kategori) formData.append('id_kategori', data.id_kategori);
+        if (data.source_name) formData.append('source_name', data.source_name);
 
         router.post(`/dashboard/geojson/${geojson.id_geojson}`, formData, {
             onSuccess: () => toast.success('GeoJSON diperbarui!'),
@@ -191,45 +482,176 @@ export default function GeojsonEdit() {
                         />
                     </div>
 
+                    {/* Source Name */}
+                    <div>
+                        <label htmlFor="source_name" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Source Name
+                        </label>
+                        <input
+                            id="source_name"
+                            type="text"
+                            {...register('source_name')}
+                            placeholder="Masukkan nama sumber data"
+                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                        />
+                        {errors.source_name && <p className="mt-1 text-sm text-red-500">{errors.source_name.message}</p>}
+                    </div>
+
                     {/* Region */}
                     <div>
-                        <label htmlFor="id_region" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Region
-                        </label>
-                        <select
-                            id="id_region"
-                            {...register('id_region')}
-                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        >
-                            <option value="">— Tidak Memilih —</option>
-                            {regions.map((r) => (
-                                <option key={r.id_region} value={r.id_region}>
-                                    {r.name}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.id_region && <p className="mt-1 text-sm text-red-500">{errors.id_region.message}</p>}
+                        <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Region</label>
+                        <Controller
+                            name="id_region"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <RegionSearchInput
+                                    regions={regions}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={fieldState.error?.message}
+                                    placeholder="Cari atau pilih region..."
+                                />
+                            )}
+                        />
                     </div>
 
                     {/* Owner */}
                     <div>
-                        <label htmlFor="id_owner" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Owner
-                        </label>
-                        <select
-                            id="id_owner"
-                            {...register('id_owner')}
-                            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        >
-                            <option value="">— Tidak Memilih —</option>
-                            {owner.map((o) => (
-                                <option key={o.id_owner} value={o.id_owner}>
-                                    {o.name}
-                                </option>
-                            ))}
-                        </select>
-                        {/* Category with live-preview (pakai Controller) */}
-                        <div>
+                        <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Owner</label>
+                        <Controller
+                            name="id_owner"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <OwnerSearchInput
+                                    owners={owner}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={fieldState.error?.message}
+                                    placeholder="Cari atau pilih owner..."
+                                />
+                            )}
+                        />
+                    </div>
+
+                    {/* SHP to GeoJSON Converter */}
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                        <h3 className="mb-3 text-lg font-semibold text-gray-800 dark:text-gray-200">
+                            SHP to GeoJSON Converter
+                        </h3>
+                        <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                            Upload file ZIP yang berisi SHP atau file-file SHP individual untuk dikonversi ke GeoJSON dan langsung digunakan dalam form ini.
+                        </p>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="shpUpload" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Upload File SHP
+                                </label>
+                                <input
+                                    id="shpUpload"
+                                    type="file"
+                                    accept=".zip,.shp,.dbf,.shx,.prj,.cpg"
+                                    multiple
+                                    onChange={handleShpUpload}
+                                    disabled={isConverting}
+                                    className="mt-2 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm file:mr-4 file:rounded file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700 focus:outline-none disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                />
+                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    Format: <code>.zip</code> berisi SHP files, atau upload file individual <code>.shp</code>, <code>.dbf</code>, <code>.shx</code>, <code>.prj</code>, <code>.cpg</code>
+                                </p>
+                            </div>
+
+                            {isConverting && (
+                                <div className="flex items-center space-x-2 text-blue-600">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                                    <span className="text-sm">Mengkonversi file...</span>
+                                </div>
+                            )}
+
+                            {/* Single GeoJSON Result */}
+                            {shpGeojson && (
+                                <div className="rounded border border-green-200 bg-green-50 p-3 dark:border-green-700 dark:bg-green-900">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                                            {convertedFilename}
+                                        </span>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleUseConvertedGeoJSON(shpGeojson, convertedFilename)}
+                                                className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
+                                            >
+                                                Gunakan
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDownloadGeoJSON(shpGeojson, convertedFilename)}
+                                                className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                            >
+                                                Download
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Multiple GeoJSON Results */}
+                            {previewGeojsons.length > 0 && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {previewGeojsons.length} file GeoJSON berhasil dikonversi:
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={handleClearConversion}
+                                            className="rounded bg-gray-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-gray-600"
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                    {previewGeojsons.map((file, index) => (
+                                        <div key={index} className="rounded border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                                    {file.filename}
+                                                </span>
+                                                <div className="flex space-x-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleUseConvertedGeoJSON(file.data, file.filename)}
+                                                        className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
+                                                    >
+                                                        Gunakan
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDownloadGeoJSON(file.data, file.filename)}
+                                                        className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                                    >
+                                                        Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {(shpGeojson || previewGeojsons.length > 0) && (
+                                <button
+                                    type="button"
+                                    onClick={handleClearConversion}
+                                    className="w-full rounded bg-gray-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                                >
+                                    Clear Semua Konversi
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Category with live-preview (pakai Controller) */}
+                    <div>
                             <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Category</label>
                             <Controller
                                 name="id_kategori"
@@ -267,7 +689,6 @@ export default function GeojsonEdit() {
                                 </div>
                             )}
                         </div>
-                    </div>
 
                     {/* Actions */}
                     <div className="flex justify-end gap-2 pt-4">
