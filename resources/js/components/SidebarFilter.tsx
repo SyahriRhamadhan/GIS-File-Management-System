@@ -219,6 +219,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                     </div>
 
                     <div>
+                        <small >*click checkbox 2x jika tak tampil</small>
                         {filteredCategories.map((category) => (
                             <div key={category} className="mb-4">
                                 {/* Category Level */}
