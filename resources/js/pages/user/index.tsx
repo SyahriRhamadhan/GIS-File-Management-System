@@ -213,6 +213,9 @@ export default function UserIndex({ users, roles, filters }: Props) {
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
                         <p className="text-gray-600">Kelola pengguna sistem</p>
+                        <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-600">
+                            <p>⚠️ Kebijakan: Anda tidak dapat menghapus akun sendiri atau menghapus superadmin jika menyisakan kurang dari 3 akun superadmin.</p>
+                        </div>
                     </div>
                     <Link href={route('dashboard.users.create')}>
                         <Button>
@@ -432,9 +435,17 @@ export default function UserIndex({ users, roles, filters }: Props) {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Hapus User</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Apakah Anda yakin ingin menghapus user "{userToDelete?.name}"? 
-                            Tindakan ini tidak dapat dibatalkan.
+                        <AlertDialogDescription className="space-y-2">
+                            <p>Apakah Anda yakin ingin menghapus user "{userToDelete?.name}"?</p>
+                            <p>Tindakan ini tidak dapat dibatalkan.</p>
+                            {userToDelete?.role === 'superadmin' && (
+                                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                                    <p className="text-amber-800 text-sm font-medium">
+                                        ⚠️ Catatan: Sistem harus memiliki minimal 3 akun superadmin.
+                                        Penghapusan akan ditolak jika menyisakan kurang dari 3 superadmin.
+                                    </p>
+                                </div>
+                            )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -451,9 +462,15 @@ export default function UserIndex({ users, roles, filters }: Props) {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Hapus User Terpilih</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Apakah Anda yakin ingin menghapus {selectedUsers.length} user yang dipilih? 
-                            Tindakan ini tidak dapat dibatalkan.
+                        <AlertDialogDescription className="space-y-2">
+                            <p>Apakah Anda yakin ingin menghapus {selectedUsers.length} user yang dipilih?</p>
+                            <p>Tindakan ini tidak dapat dibatalkan.</p>
+                            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                <p className="text-blue-800 text-sm font-medium">
+                                    ℹ️ Catatan: Akun Anda sendiri dan akun yang akan menyisakan kurang dari 3 superadmin
+                                    akan otomatis dikecualikan dari penghapusan.
+                                </p>
+                            </div>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

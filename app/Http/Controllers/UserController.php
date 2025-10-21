@@ -151,10 +151,13 @@ class UserController extends Controller
                 ->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
 
-        // Prevent deleting superadmin accounts
+        // Prevent deleting if it would leave less than 3 superadmins
         if ($user->role === 'superadmin') {
-            return redirect()->route('dashboard.users.index')
-                ->with('error', 'Akun superadmin tidak dapat dihapus.');
+            $superadminCount = User::where('role', 'superadmin')->count();
+            if ($superadminCount <= 3) {
+                return redirect()->route('dashboard.users.index')
+                    ->with('error', 'Tidak dapat menghapus superadmin. Sistem harus memiliki minimal 3 akun superadmin.');
+            }
         }
 
         $user->delete();
@@ -181,16 +184,36 @@ class UserController extends Controller
 
         $currentUser = Auth::user();
         $currentUserId = $currentUser ? $currentUser->id : null;
-        
-        // Filter out current user and superadmin accounts
-        $idsToDelete = collect($validated['ids'])->filter(function ($id) use ($currentUserId) {
+
+        // Count current superadmins and superadmins in deletion list
+        $totalSuperadmins = User::where('role', 'superadmin')->count();
+        $superadminsToDelete = User::whereIn('id', $validated['ids'])
+            ->where('role', 'superadmin')
+            ->count();
+
+        // Calculate remaining superadmins after deletion
+        $remainingSuperadmins = $totalSuperadmins - $superadminsToDelete;
+
+        // Filter out current user
+        $idsToDelete = collect($validated['ids'])->filter(function ($id) use ($currentUserId, $remainingSuperadmins) {
             $user = User::find($id);
-            return $id != $currentUserId && $user && $user->role !== 'superadmin';
+
+            // Cannot delete current user
+            if ($id == $currentUserId) {
+                return false;
+            }
+
+            // Cannot delete superadmin if it would leave less than 3
+            if ($user && $user->role === 'superadmin' && $remainingSuperadmins < 3) {
+                return false;
+            }
+
+            return $user !== null;
         });
 
         if ($idsToDelete->isEmpty()) {
             return redirect()->route('dashboard.users.index')
-                ->with('error', 'Tidak ada user yang dapat dihapus.');
+                ->with('error', 'Tidak ada user yang dapat dihapus. Sistem harus memiliki minimal 3 akun superadmin.');
         }
 
         $deletedCount = User::whereIn('id', $idsToDelete)->delete();
@@ -215,7 +238,7 @@ class UserController extends Controller
      */
     public function forceDelete(User $user)
     {
-        
+
         // Prevent force deleting the current user
         $currentUser = Auth::user();
         if ($currentUser && $user->id === $currentUser->id) {
@@ -223,10 +246,13 @@ class UserController extends Controller
                 ->with('error', 'Anda tidak dapat menghapus akun sendiri secara permanen.');
         }
 
-        // Prevent force deleting superadmin accounts
+        // Prevent force deleting if it would leave less than 3 superadmins
         if ($user->role === 'superadmin') {
-            return redirect()->route('dashboard.users.index')
-                ->with('error', 'Akun superadmin tidak dapat dihapus secara permanen.');
+            $superadminCount = User::where('role', 'superadmin')->count();
+            if ($superadminCount <= 3) {
+                return redirect()->route('dashboard.users.index')
+                    ->with('error', 'Tidak dapat menghapus superadmin secara permanen. Sistem harus memiliki minimal 3 akun superadmin.');
+            }
         }
 
         $user->forceDelete();

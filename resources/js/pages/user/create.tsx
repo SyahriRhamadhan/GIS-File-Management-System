@@ -2,14 +2,13 @@ import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 
-interface UserFormData {
+type UserFormData = {
     name: string;
     email: string;
     password: string;
     password_confirmation: string;
     role: string;
-    [key: string]: any;
-}
+};
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
 
 export default function UserCreate() {
-    const { data, setData, post, processing, errors } = useForm<Required<UserFormData>>({
+    const { data, setData, post, processing, errors } = useForm<UserFormData>({
         name: '',
         email: '',
         password: '',
@@ -133,18 +132,18 @@ export default function UserCreate() {
                                             <SelectValue placeholder="Pilih role" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="admin">Admin</SelectItem>
+                                            {/* <SelectItem value="admin">Admin</SelectItem> */}
                                             <SelectItem value="superadmin">Superadmin</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     {errors.role && (
                                         <p className="text-sm text-red-600">{errors.role}</p>
                                     )}
-                                    <div className="text-sm text-gray-500 space-y-1">
+                                    {/* <div className="text-sm text-gray-500 space-y-1">
                                         <p><strong>User:</strong> Akses terbatas untuk melihat dan mengelola data sendiri</p>
                                         <p><strong>Moderator:</strong> Akses untuk mengelola konten dan data</p>
                                         <p><strong>Admin:</strong> Akses penuh ke semua fitur sistem</p>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
 
