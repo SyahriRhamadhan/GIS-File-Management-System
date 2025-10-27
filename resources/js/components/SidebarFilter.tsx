@@ -145,7 +145,9 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             {sidebarOpen && (
                 <>
                     <div className="mb-2 flex items-center gap-2">
-                        <h2 className="font-semibold text-gray-800 dark:text-gray-100">Filter Layers</h2>
+                        <h2 className="font-semibold text-gray-800 dark:text-gray-100">Filter Layers
+                             RTWR RTRW, KKPR, GANTI RUGI
+                        </h2>
                         {isLoading && (
                             <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
                         )}
