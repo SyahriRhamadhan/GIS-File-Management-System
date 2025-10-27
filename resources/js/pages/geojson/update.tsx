@@ -78,6 +78,7 @@ interface PageProps extends Record<string, any> {
         id_owner?: number;
         id_kategori?: number;
         source_name?: string;
+        main_category?: string;
     };
     user_name: string;
     user_id: number;
@@ -109,6 +110,7 @@ interface FormValues {
     id_owner: string;
     id_kategori: string;
     source_name: string;
+    main_category: string;
     orde1?: string;
     orde2?: string;
     orde3?: string;
@@ -148,6 +150,7 @@ export default function GeojsonEdit() {
             id_owner: geojson.id_owner?.toString() || '',
             id_kategori: geojson.id_kategori?.toString() || '',
             source_name: geojson.source_name || '',
+            main_category: geojson.main_category || '',
         },
     });
 
@@ -405,6 +408,7 @@ export default function GeojsonEdit() {
         if (data.id_owner) formData.append('id_owner', data.id_owner);
         if (data.id_kategori) formData.append('id_kategori', data.id_kategori);
         if (data.source_name) formData.append('source_name', data.source_name);
+        if (data.main_category) formData.append('main_category', data.main_category);
 
         router.post(`/dashboard/geojson/${geojson.id_geojson}`, formData, {
             onSuccess: () => toast.success('GeoJSON diperbarui!'),
@@ -689,6 +693,38 @@ export default function GeojsonEdit() {
                                 </div>
                             )}
                         </div>
+
+                    {/* Main Category */}
+                    <div>
+                        <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Main Category</label>
+                        <Controller
+                            name="main_category"
+                            control={control}
+                            defaultValue=""
+                            render={({ field }) => (
+                                <Select
+                                    {...field}
+                                    options={[
+                                        { value: 'RDTR', label: 'RDTR (Rencana Detail Tata Ruang)' },
+                                        { value: 'RTRW', label: 'RTRW (Rencana Tata Ruang Wilayah)' },
+                                        { value: 'KKPR', label: 'KKPR (Kawasan Konservasi dan Perlindungan)' },
+                                        { value: 'GANTI RUGI', label: 'GANTI RUGI' },
+                                    ]}
+                                    value={
+                                        field.value
+                                            ? { value: field.value, label: field.value === 'RDTR' ? 'RDTR (Rencana Detail Tata Ruang)' : field.value === 'RTRW' ? 'RTRW (Rencana Tata Ruang Wilayah)' : field.value === 'KKPR' ? 'KKPR (Kawasan Konservasi dan Perlindungan)' : 'GANTI RUGI' }
+                                            : null
+                                    }
+                                    onChange={(opt) => field.onChange(opt?.value ?? '')}
+                                    placeholder="— Select Main Category —"
+                                    styles={selectStyles}
+                                    isClearable
+                                    className="react-select-container"
+                                    classNamePrefix="react-select"
+                                />
+                            )}
+                        />
+                    </div>
 
                     {/* Actions */}
                     <div className="flex justify-end gap-2 pt-4">

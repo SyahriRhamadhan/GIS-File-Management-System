@@ -22,6 +22,7 @@ interface MapViewProps {
             properties: Record<string, any>;
         };
         kode_warna: string;
+        main_category?: string | null;
         kategori?: {
             layer_order: number;
             orde0?: string;
@@ -75,29 +76,59 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         return groups;
     }, [sortedData]);
 
-    // Grouped children per category > parent > child
+    // Grouped children per 3-level hierarchy with flattened key: "main_category › category" > parent > child
     const groupedByCategory = useMemo(() => {
         const groups: Record<string, Record<string, Array<{ id: string; label: string }>>> = {};
-        
+
+        // Define the order of main categories
+        const mainCategoryOrder = ['RDTR', 'RTRW', 'KKPR', 'GANTI RUGI', 'Uncategorized'];
+
         geojsonData.forEach((item) => {
-            const categoryName = item.kategori?.orde0 || 'Uncategorized';
+            // Level 1: Main Category (langsung dari geojson.main_category)
+            const mainCategory = item.main_category || 'Uncategorized';
+
+            // Level 2: Category dari kategori (orde0)
+            const categoryName = item.kategori?.orde0 || 'Tanpa Kategori';
+
+            // Combine main_category and categoryName for flattened 3-level structure
+            const flattenedCategory = `${mainCategory} › ${categoryName}`;
+
+            // Level 2: Parent (source_name)
             const parent = item.source_name || 'Unknown';
-            
+
+            // Level 3: Individual GeoJSON items
             const propEntries = Object.entries(item.geojson.properties || {})
                 .filter(([k]) => k !== 'id_geojson')
                 .map(([k, v]) => `${k}: ${v}`);
-            // Label fallback ke id jika tidak ada property lain
             const label = propEntries.length > 0 ? propEntries.join(', ') : String(item.id_geojson || 'Unknown');
             const id = String(item.id_geojson || label);
 
-            if (!groups[categoryName]) groups[categoryName] = {};
-            if (!groups[categoryName][parent]) groups[categoryName][parent] = [];
-            if (!groups[categoryName][parent].find((c) => c.id === id)) {
-                groups[categoryName][parent].push({ id, label });
+            // Build hierarchy
+            if (!groups[flattenedCategory]) groups[flattenedCategory] = {};
+            if (!groups[flattenedCategory][parent]) groups[flattenedCategory][parent] = [];
+            if (!groups[flattenedCategory][parent].find((c) => c.id === id)) {
+                groups[flattenedCategory][parent].push({ id, label });
             }
         });
-        
-        return groups;
+
+        // Sort groups by predefined main category order
+        const sortedGroups: typeof groups = {};
+        const sortedKeys = Object.keys(groups).sort((a, b) => {
+            const aMain = a.split(' › ')[0];
+            const bMain = b.split(' › ')[0];
+            const aIndex = mainCategoryOrder.indexOf(aMain);
+            const bIndex = mainCategoryOrder.indexOf(bMain);
+            if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+            if (aIndex !== -1) return -1;
+            if (bIndex !== -1) return 1;
+            return a.localeCompare(b);
+        });
+
+        sortedKeys.forEach(key => {
+            sortedGroups[key] = groups[key];
+        });
+
+        return sortedGroups;
     }, [geojsonData]);
 
     // Create category to unique code mapping for better performance
@@ -455,30 +486,41 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
 
     // Handler for View (fly to location) - updated for three-level hierarchy
     const handleViewLocation = (category: string, parent: string, childId: string) => {
-        const item = geojsonData.find((i) => {
-            const itemCategory = i.kategori?.orde0 || 'Uncategorized';
-            return String(i.id_geojson) === String(childId) && 
-                   i.source_name === parent && 
-                   itemCategory === category;
-        });
+        // category di Sidebar adalah key gabungan: "<main_category> f <orde0>"
+        const [mainPartRaw, orde0Raw] = (category || '').split(' f ').map((s) => s?.trim());
+        const mainPart = mainPartRaw || 'Uncategorized';
+        const orde0 = orde0Raw || 'Tanpa Kategori';
+
+        // Cari item terutama berdasarkan id (paling andal). Parent dipakai sebagai verifikasi tambahan.
+        const item =
+            geojsonData.find(
+                (i) => String(i.id_geojson) === String(childId) && (!parent || i.source_name === parent)
+            ) || geojsonData.find((i) => String(i.id_geojson) === String(childId));
+
         if (!item || !mapRef.current) return;
 
-        const geometry = item.geojson.geometry;
+        const geometry = item.geojson.geometry as any;
+        // Posisikan peta ke geometri terkait
         if (geometry.type === 'Point') {
-            const [lng, lat] = geometry.coordinates;
+            const [lng, lat] = geometry.coordinates as [number, number];
             mapRef.current.flyTo([lat, lng], 15);
-        } else if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+        } else if (
+            geometry.type === 'Polygon' ||
+            geometry.type === 'MultiPolygon' ||
+            geometry.type === 'LineString' ||
+            geometry.type === 'MultiLineString'
+        ) {
             const bounds = L.geoJSON(geometry).getBounds();
             mapRef.current.fitBounds(bounds);
         }
 
-        // Open popup for the specific item
+        // Buka popup berdasarkan refKey yang disusun saat render
         const refKey = `${category}-${parent}-${childId}`;
         const geoJsonLayer = geoJsonRefs.current[refKey];
         if (geoJsonLayer) {
             setTimeout(() => {
                 geoJsonLayer.openPopup();
-            }, 500);
+            }, 300);
         }
     };
     const handleSearchCoordinate = (x: string, y: string) => {
@@ -507,22 +549,26 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                         <BaseLayers />
                     </LayersControl>
 
-                    {/* Render GeoJSON using three-level hierarchy */}
+                    {/* Render GeoJSON using flattened 3-level hierarchy */}
                     {groupedBySourceName &&
                         Object.entries(groupedBySourceName).map(([sourceName, items]) => {
                             return items.map((item) => {
-                                const itemCategory = item.kategori?.orde0 || 'Uncategorized';
+                                // Build flattened category key
+                                const mainCategory = item.main_category || 'Uncategorized';
+                                const categoryName = item.kategori?.orde0 || 'Tanpa Kategori';
+                                const flattenedCategory = `${mainCategory} › ${categoryName}`;
+
                                 const parent = item.source_name || 'Unknown';
                                 const childId = String(item.id_geojson);
-                                
-                                // Check if this item should be visible based on three-level filters
-                                const isVisible = activeCategoryFilters[itemCategory] && 
-                                                activeParentFilters[itemCategory]?.[parent] && 
-                                                activeChildFilters[itemCategory]?.[parent]?.[childId];
-                                
+
+                                // Check visibility with flattened category
+                                const isVisible = activeCategoryFilters[flattenedCategory] &&
+                                                activeParentFilters[flattenedCategory]?.[parent] &&
+                                                activeChildFilters[flattenedCategory]?.[parent]?.[childId];
+
                                 if (!isVisible) return null;
 
-                                const refKey = `${itemCategory}-${parent}-${childId}`;
+                                const refKey = `${flattenedCategory}-${parent}-${childId}`;
                                 return (
                                     <GeoJSON
                                         key={`${item.id_geojson}-${sourceName}`}

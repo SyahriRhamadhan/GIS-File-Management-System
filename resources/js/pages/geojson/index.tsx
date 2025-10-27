@@ -13,6 +13,7 @@ interface Geojson {
     id_region?: number;
     id_owner?: number;
     id_kategori?: number;
+    main_category?: string;
     kode_warna?: string;
     orde0?: string;
     ket_warna?: string;
@@ -554,6 +555,7 @@ export default function GeojsonIndex() {
                                 <th className="cursor-pointer border px-4 py-2" onClick={() => toggleSort('source_name')}>
                                     Source {sortBy === 'source_name' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
                                 </th>
+                                <th className="border px-4 py-2">Main Category</th>
                                 <th className="border px-4 py-2">Kategori</th>
                                 <th className="border px-4 py-2">User</th>
                                 <th className="border px-4 py-2">Region</th>
@@ -581,6 +583,21 @@ export default function GeojsonIndex() {
                                             </div>
                                         </td>
                                         <td className="border px-4 py-2">{g.source_name}</td>
+                                        <td className="border px-4 py-2">
+                                            {g.main_category ? (
+                                                <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                                                    g.main_category === 'RDTR' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                                    g.main_category === 'RTRW' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                                    g.main_category === 'KKPR' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                                                    g.main_category === 'GANTI RUGI' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                                                    'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                                                }`}>
+                                                    {g.main_category}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </td>
                                         <td className="border px-4 py-2">
                                             <div className="flex items-center gap-2">
                                                 <span className="h-4 w-4 flex-shrink-0 rounded" style={{ backgroundColor: g.kode_warna ?? '#000' }} />

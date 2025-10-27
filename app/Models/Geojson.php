@@ -19,6 +19,7 @@ class Geojson extends Model
         'id_region',
         'id_owner',
         'source_name',
+        'main_category',
         'id_kategori',
     ];
 

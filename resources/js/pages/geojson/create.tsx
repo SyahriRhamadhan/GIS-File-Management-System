@@ -87,6 +87,7 @@ interface FormValues {
     id_region?: string;
     id_owner?: string;
     id_kategori?: string;
+    main_category?: string;
 }
 
 export default function GeojsonCreate({ user_name, user_id, regions, owner, kategoris }: GeojsonFormProps) {
@@ -354,6 +355,7 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         if (data.id_region) formData.append('id_region', data.id_region);
         if (data.id_owner) formData.append('id_owner', data.id_owner);
         if (data.id_kategori) formData.append('id_kategori', data.id_kategori);
+        if (data.main_category) formData.append('main_category', data.main_category);
 
         router.post('/dashboard/geojson', formData);
     };
@@ -645,6 +647,38 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                                 </div>
                             </div>
                         )}
+                    </div>
+
+                    {/* Main Category */}
+                    <div>
+                        <label className="mb-1 block font-medium text-gray-700 dark:text-gray-300">Main Category</label>
+                        <Controller
+                            name="main_category"
+                            control={control}
+                            defaultValue=""
+                            render={({ field }) => (
+                                <Select
+                                    {...field}
+                                    options={[
+                                        { value: 'RDTR', label: 'RDTR (Rencana Detail Tata Ruang)' },
+                                        { value: 'RTRW', label: 'RTRW (Rencana Tata Ruang Wilayah)' },
+                                        { value: 'KKPR', label: 'KKPR (Kawasan Konservasi dan Perlindungan)' },
+                                        { value: 'GANTI RUGI', label: 'GANTI RUGI' },
+                                    ]}
+                                    value={
+                                        field.value
+                                            ? { value: field.value, label: field.value === 'RDTR' ? 'RDTR (Rencana Detail Tata Ruang)' : field.value === 'RTRW' ? 'RTRW (Rencana Tata Ruang Wilayah)' : field.value === 'KKPR' ? 'KKPR (Kawasan Konservasi dan Perlindungan)' : 'GANTI RUGI' }
+                                            : null
+                                    }
+                                    onChange={(opt) => field.onChange(opt?.value ?? '')}
+                                    placeholder="— Select Main Category —"
+                                    styles={selectStyles}
+                                    isClearable
+                                    className="react-select-container"
+                                    classNamePrefix="react-select"
+                                />
+                            )}
+                        />
                     </div>
 
                     {/* Buttons */}

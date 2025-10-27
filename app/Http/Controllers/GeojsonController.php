@@ -30,8 +30,8 @@ class GeojsonController extends Controller
         $sourceFilter = $request->input('source_filter', '');
 
         // Get sorting parameters
-        $sortBy = $request->input('sort_by', 'source_name');
-        $sortDirection = $request->input('sort_direction', 'asc');
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDirection = $request->input('sort_direction', 'desc'); // biasanya terbaru di atas
 
         // Build query with relationships
         $query = Geojson::with(['region', 'owner'])
@@ -168,16 +168,18 @@ class GeojsonController extends Controller
                 'file',
                 'mimetypes:application/json,application/geo+json,text/plain,application/octet-stream',
             ],
-            'id_user'      => 'required|exists:users,id',
-            'id_region'    => 'nullable|exists:region,id_region',
-            'id_owner'     => 'nullable|exists:owner,id_owner',
-            'id_kategori'  => 'nullable|exists:kategori,id_kategori',
+            'id_user'        => 'required|exists:users,id',
+            'id_region'      => 'nullable|exists:region,id_region',
+            'id_owner'       => 'nullable|exists:owner,id_owner',
+            'id_kategori'    => 'nullable|exists:kategori,id_kategori',
+            'main_category'  => 'nullable|in:RDTR,RTRW,KKPR,GANTI RUGI',
         ]);
 
-        $idUser     = $validated['id_user'];
-        $idRegion   = $validated['id_region']   ?? null;
-        $idOwner    = $validated['id_owner']    ?? null;
-        $idKategori = $validated['id_kategori'] ?? null;
+        $idUser        = $validated['id_user'];
+        $idRegion      = $validated['id_region']      ?? null;
+        $idOwner       = $validated['id_owner']       ?? null;
+        $idKategori    = $validated['id_kategori']    ?? null;
+        $mainCategory  = $validated['main_category']  ?? null;
 
         $uploadErrors = [];
 
@@ -197,15 +199,16 @@ class GeojsonController extends Controller
                     try {
                         $this->processCoordinates($feature);
                         Geojson::create([
-                            'geojson'     => $feature,
-                            'source_name' => $sourceName,
-                            'id_user'     => $idUser,
-                            'id_region'   => $idRegion,
-                            'id_owner'    => $idOwner,
-                            'id_kategori' => $idKategori,
+                            'geojson'        => $feature,
+                            'source_name'    => $sourceName,
+                            'id_user'        => $idUser,
+                            'id_region'      => $idRegion,
+                            'id_owner'       => $idOwner,
+                            'id_kategori'    => $idKategori,
+                            'main_category'  => $mainCategory,
                         ]);
                     } catch (\Throwable $e) {
-                        $uploadErrors[] = "Gagal menyimpan fitur di “{$fileName}”: " . $e->getMessage();
+                        $uploadErrors[] = "Gagal menyimpan fitur di \"{$fileName}\": " . $e->getMessage();
                     }
                 }
             }
@@ -225,12 +228,13 @@ class GeojsonController extends Controller
                 try {
                     $this->processCoordinates($feature);
                     Geojson::create([
-                        'geojson'     => $feature,
-                        'source_name' => $sourceName,
-                        'id_user'     => $idUser,
-                        'id_region'   => $idRegion,
-                        'id_owner'    => $idOwner,
-                        'id_kategori' => $idKategori,
+                        'geojson'        => $feature,
+                        'source_name'    => $sourceName,
+                        'id_user'        => $idUser,
+                        'id_region'      => $idRegion,
+                        'id_owner'       => $idOwner,
+                        'id_kategori'    => $idKategori,
+                        'main_category'  => $mainCategory,
                     ]);
                 } catch (\Throwable $e) {
                     $uploadErrors[] = "Gagal fitur ke-" . ($i + 1) . ": " . $e->getMessage();
@@ -297,6 +301,7 @@ class GeojsonController extends Controller
             'id_owner'      => 'nullable|exists:owner,id_owner',
             'id_kategori'   => 'nullable|exists:kategori,id_kategori',
             'source_name'   => 'nullable|string|max:255',
+            'main_category' => 'nullable|in:RDTR,RTRW,KKPR,GANTI RUGI',
         ]);
 
         // 1) Decode either uploaded file or raw JSON
@@ -318,11 +323,12 @@ class GeojsonController extends Controller
 
         // 4) Build up the data array
         $data = [
-            'geojson'     => $feature,
-            'id_user'     => $validated['id_user'],
-            'id_region'   => $validated['id_region']   ?? null,
-            'id_owner'    => $validated['id_owner']    ?? null,
-            'id_kategori' => $validated['id_kategori'] ?? null,
+            'geojson'        => $feature,
+            'id_user'        => $validated['id_user'],
+            'id_region'      => $validated['id_region']      ?? null,
+            'id_owner'       => $validated['id_owner']       ?? null,
+            'id_kategori'    => $validated['id_kategori']    ?? null,
+            'main_category'  => $validated['main_category']  ?? null,
         ];
 
         // 5) Handle source_name - prioritize form data over fileName from GeoJSON
