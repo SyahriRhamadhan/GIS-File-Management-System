@@ -311,7 +311,17 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                 {/* Parent Level */}
                                 {expandedCategories[category] && groupedByCategory[category] && (
                                     <div className="ml-6 mt-2">
-                                        {Object.entries(groupedByCategory[category]).map(([parent, children]) => (
+                                        {Object.entries(groupedByCategory[category]).map(([parent, children]) => {
+                                            const q = search.toLowerCase();
+                                            const filteredChildren = (children || []).filter(
+                                                (child) =>
+                                                    child.label.toLowerCase().includes(q) ||
+                                                    parent.toLowerCase().includes(q) ||
+                                                    category.toLowerCase().includes(q),
+                                            );
+                                            const showParent = !search.trim() || filteredChildren.length > 0 || parent.toLowerCase().includes(q) || category.toLowerCase().includes(q);
+                                            if (!showParent) return null;
+                                            return (
                                             <div key={`${category}-${parent}`} className="mb-3">
                                                 <div className="group flex cursor-pointer items-center">
                                                     <input
@@ -329,7 +339,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                 </div>
 
                                                 {/* Children Level */}
-                                                {expandedParents[category]?.[parent] && children?.length > 0 && (
+                                                {expandedParents[category]?.[parent] && filteredChildren.length > 0 && (
                                                     <div className="ml-6 mt-2">
                                                         <table className="min-w-full rounded border bg-gray-50 text-xs dark:border-[#393e41] dark:bg-[#232329]">
                                                             <thead>
@@ -340,45 +350,39 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                {children
-                                                                    .filter(
-                                                                        (child) =>
-                                                                            child.label.toLowerCase().includes(search.toLowerCase()) ||
-                                                                            parent.toLowerCase().includes(search.toLowerCase()) ||
-                                                                            category.toLowerCase().includes(search.toLowerCase()),
-                                                                    )
-                                                                    .map((child) => (
-                                                                        <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
-                                                                            <td className="p-1">
-                                                                                <input
-                                                                                    type="checkbox"
-                                                                                    id={`child-${category}-${parent}-${child.id}`}
-                                                                                    checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
-                                                                                    onChange={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        toggleChildFilter(category, parent, child.id);
-                                                                                    }}
-                                                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                                                />
-                                                                            </td>
-                                                                            <td className="p-1">
-                                                                                <button
-                                                                                    type="button"
-                                                                                    className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
-                                                                                    onClick={() => onView(category, parent, child.id)}
-                                                                                >
-                                                                                    View
-                                                                                </button>
-                                                                            </td>
-                                                                            <td className="p-1 text-gray-700 dark:text-gray-200">{child.label}</td>
-                                                                        </tr>
+                                                                {filteredChildren.map((child) => (
+                                                                    <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
+                                                                        <td className="p-1">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                id={`child-${category}-${parent}-${child.id}`}
+                                                                                checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
+                                                                                onChange={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    toggleChildFilter(category, parent, child.id);
+                                                                                }}
+                                                                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                            />
+                                                                        </td>
+                                                                        <td className="p-1">
+                                                                            <button
+                                                                                type="button"
+                                                                                className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
+                                                                                onClick={() => onView(category, parent, child.id)}
+                                                                            >
+                                                                                View
+                                                                            </button>
+                                                                        </td>
+                                                                        <td className="p-1 text-gray-700 dark:text-gray-200">{child.label}</td>
+                                                                    </tr>
                                                                     ))}
                                                             </tbody>
                                                         </table>
                                                     </div>
                                                 )}
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
