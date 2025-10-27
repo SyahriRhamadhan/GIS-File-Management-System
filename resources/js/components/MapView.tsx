@@ -51,6 +51,80 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     // Untuk simpan ref tiap fitur
     const geoJsonRefs = useRef<Record<string, L.GeoJSON>>({});
 
+    // State for inline editing in Popup
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editValues, setEditValues] = useState<Record<string, any>>({});
+    // Cache perubahan properti per id agar tidak perlu reload
+    const [updatedProps, setUpdatedProps] = useState<Record<string, Record<string, any>>>({});
+    const startEdit = (item: (typeof geojsonData)[0]) => {
+        setEditingId(String(item.id_geojson));
+        const props = { ...(item.geojson?.properties || {}) } as Record<string, any>;
+        delete props['id_geojson'];
+        setEditValues(props);
+    };
+    const cancelEdit = () => {
+        setEditingId(null);
+        setEditValues({});
+    };
+    const saveEdit = async (id: string | number) => {
+        try {
+            const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
+            const res = await fetch(`/dashboard/geojson/${id}/properties`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'X-CSRF-TOKEN': token } : {}),
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({ properties: editValues }),
+            });
+            if (!res.ok) throw new Error('Gagal menyimpan properti');
+            // Tanpa reload: simpan perubahan ke cache lokal dan tetap buka popup
+            setUpdatedProps((prev) => ({ ...prev, [String(id)]: { ...editValues } }));
+            setEditingId(null);
+        } catch (e) {
+            alert((e as Error).message);
+        }
+    };
+
+    // Helper row to add new property in edit mode
+    const AddPropertyRow: React.FC<{ onAdd: (key: string, value: string) => void }> = ({ onAdd }) => {
+        const [k, setK] = useState('');
+        const [v, setV] = useState('');
+        return (
+            <div className="grid grid-cols-2 gap-2 items-center" onMouseDown={(e) => e.stopPropagation()}>
+                <input
+                    className="border rounded px-2 py-1 text-sm"
+                    placeholder="Nama properti"
+                    value={k}
+                    onChange={(e) => setK(e.target.value)}
+                />
+                <div className="flex gap-2">
+                    <input
+                        className="border rounded px-2 py-1 text-sm flex-1"
+                        placeholder="Nilai"
+                        value={v}
+                        onChange={(e) => setV(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        className="rounded bg-green-600 text-white px-2"
+                        disabled={!k}
+                        onClick={() => {
+                            onAdd(k, v);
+                            setK('');
+                            setV('');
+                        }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                    >
+                        Tambah
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
     // Sort & Group data
     const sortedData = useMemo(() => {
         return [...geojsonData].sort((a, b) => {
@@ -440,49 +514,106 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     };
 
     // Overlay visibility per child
-    const renderPopupContent = (item: (typeof geojsonData)[0]) => (
-        <div className="font-sans text-sm">
-            {Object.entries(item.geojson.properties || {})
-                .filter(([k]) => k !== 'id_geojson')
-                .map(([k, v]) => (
-                    <p key={k}>
-                        <strong>{k}:</strong> {v}
-                    </p>
-                ))}
-            <div className="mt-2 space-x-2 text-right">
-                <a
-                    href={`/dashboard/geojson/${item.id_geojson}/add`}
-                    className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    title="Add"
+    const renderPopupContent = (item: (typeof geojsonData)[0]) => {
+        const isEditing = editingId === String(item.id_geojson);
+        if (isEditing) {
+            const entries = Object.entries(editValues);
+            return (
+                <div
+                    className="font-sans text-sm w-[420px] max-w-[90vw] min-w-[300px]"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
                 >
-                    <IoAddCircleOutline className="mr-1" />
-                    Add
-                </a>
-                <a
-                    href={`/dashboard/geojson/${item.id_geojson}/view`}
-                    className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    title="View"
-                >
-                    <FaFilePdf className="mr-1" />
-                    View
-                </a>
-                <a
-                    href={`/dashboard/geojson/${item.id_geojson}/edit`}
-                    className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    title="Edit"
-                >
-                    <FaMapMarkedAlt className="mr-1" />
-                    Edit
-                </a>
+                    <div className="space-y-2">
+                        {entries.length === 0 && (
+                            <p className="text-gray-500">Tidak ada properti. Tambahkan pasangan kunci-nilai.</p>
+                        )}
+                        {entries.map(([k, v]) => (
+                            <div key={k} className="grid grid-cols-2 gap-2 items-center">
+                                <label className="font-semibold mr-2">{k}</label>
+                                <input
+                                    className="border rounded px-2 py-1 text-sm"
+                                    value={String(v ?? '')}
+                                    onChange={(e) => setEditValues((prev) => ({ ...prev, [k]: e.target.value }))}
+                                />
+                            </div>
+                        ))}
+                        <AddPropertyRow onAdd={(key, value) => setEditValues((p) => ({ ...p, [key]: value }))} />
+                    </div>
+                    <div className="mt-3 flex justify-end gap-2">
+                        <button className="rounded bg-gray-200 px-3 py-1" onClick={cancelEdit}>Batal</button>
+                        <button className="rounded bg-blue-600 text-white px-3 py-1" onClick={() => saveEdit(item.id_geojson)}>Simpan</button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Merge properti asli dengan yang sudah diperbarui (tanpa reload)
+        const mergedProps = {
+            ...(item.geojson.properties || {}),
+            ...(updatedProps[String(item.id_geojson)] || {}),
+        } as Record<string, any>;
+
+        return (
+            <div
+                className="font-sans text-sm w-[420px] max-w-[90vw] min-w-[300px]"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {Object.entries(mergedProps)
+                    .filter(([k]) => k !== 'id_geojson')
+                    .map(([k, v]) => (
+                        <p key={k}>
+                            <strong>{k}:</strong> {String(v)}
+                        </p>
+                    ))}
+                <div className="mt-2 flex flex-wrap items-center gap-2 justify-end">
+                    <a
+                        href={`/dashboard/geojson/${item.id_geojson}/add`}
+                        className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        title="Add PDF"
+                        onMouseDown={(e) => e.stopPropagation()}
+                    >
+                        <IoAddCircleOutline className="mr-1" />
+                        Add PDF
+                    </a>
+                    <a
+                        href={`/dashboard/geojson/${item.id_geojson}/view`}
+                        className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        title="View list PDF"
+                        onMouseDown={(e) => e.stopPropagation()}
+                    >
+                        <FaFilePdf className="mr-1" />
+                        View PDFs
+                    </a>
+                    <a
+                        href={`/dashboard/geojson/${item.id_geojson}/edit`}
+                        className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        title="Edit GeoJSON"
+                        onMouseDown={(e) => e.stopPropagation()}
+                    >
+                        <FaMapMarkedAlt className="mr-1" />
+                        Edit GeoJSON
+                    </a>
+                    <button
+                        type="button"
+                        className="inline-flex items-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all"
+                        title="Edit properties"
+                        onClick={() => startEdit(item)}
+                        onMouseDown={(e) => e.stopPropagation()}
+                    >
+                        Edit Properties
+                    </button>
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     // Handler for View (fly to location) - updated for three-level hierarchy
     const handleViewLocation = (category: string, parent: string, childId: string) => {
@@ -584,7 +715,16 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                                             fillOpacity: 0.5,
                                         })}
                                     >
-                                        <Popup>{renderPopupContent(item)}</Popup>
+                                        <Popup
+                                            closeOnClick={false}
+                                            keepInView
+                                            maxWidth={520}
+                                            minWidth={300}
+                                            autoPanPadding={[24, 24] as any}
+                                            className="leaflet-custom-popup"
+                                        >
+                                            {renderPopupContent(item)}
+                                        </Popup>
                                     </GeoJSON>
                                 );
                             });

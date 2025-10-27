@@ -355,4 +355,45 @@ class GeojsonController extends Controller
             ->route('dashboard.geojson.index')
             ->with('success', 'GeoJSON berhasil dihapus.');
     }
+
+    /**
+     * Update only the properties object inside stored GeoJSON.
+     * Accepts: { properties: { key: value, ... } }
+     * Returns JSON on API calls, or redirects back with flash on web calls.
+     */
+    public function updateProperties(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'properties' => 'required|array',
+        ]);
+
+        $geo = Geojson::findOrFail($id);
+
+        $feature = $geo->geojson;
+        if (is_string($feature)) {
+            $feature = json_decode($feature, true) ?: [];
+        }
+        if (!is_array($feature)) {
+            $feature = [];
+        }
+
+        $currentProps = $feature['properties'] ?? [];
+        if (!is_array($currentProps)) {
+            $currentProps = [];
+        }
+        // Merge, overwrite existing keys with incoming values
+        $feature['properties'] = array_replace($currentProps, $validated['properties']);
+
+        $geo->geojson = $feature;
+        $geo->save();
+
+        if ($request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'message' => 'Properties updated',
+                'geojson' => $geo,
+            ]);
+        }
+
+        return back()->with('success', 'Properties berhasil diperbarui.');
+    }
 }

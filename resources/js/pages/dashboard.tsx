@@ -125,7 +125,7 @@ const Dashboard = ({
                         {/* Statistics Cards */}
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
                                     <CardTitle className="text-sm font-medium">Total Map SHP</CardTitle>
                                     <Map className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
@@ -136,7 +136,7 @@ const Dashboard = ({
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
                                     <CardTitle className="text-sm font-medium">Total Kategori</CardTitle>
                                     <Layers className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
@@ -147,7 +147,7 @@ const Dashboard = ({
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
                                     <CardTitle className="text-sm font-medium">Total Wilayah</CardTitle>
                                     <FolderTree className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
@@ -158,7 +158,7 @@ const Dashboard = ({
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
                                     <CardTitle className="text-sm font-medium">Total Laporan PDF</CardTitle>
                                     <FileText className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
@@ -169,7 +169,7 @@ const Dashboard = ({
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
                                     <CardTitle className="text-sm font-medium">Total Pemilik</CardTitle>
                                     <Building2 className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
@@ -180,7 +180,7 @@ const Dashboard = ({
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
                                     <CardTitle className="text-sm font-medium">Total Pengguna</CardTitle>
                                     <Users className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
@@ -194,7 +194,7 @@ const Dashboard = ({
                         {/* Charts Row 1 */}
                         <div className="grid gap-4 md:grid-cols-2">
                             {/* Category Distribution */}
-                            <Card>
+                            <Card className='p-3'>
                                 <CardHeader>
                                     <CardTitle>GeoJSON per Kategori</CardTitle>
                                     <CardDescription>Distribusi fitur berdasarkan kategori</CardDescription>
@@ -224,7 +224,7 @@ const Dashboard = ({
                             </Card>
 
                             {/* Regional Distribution */}
-                            <Card>
+                            <Card className='p-3'>
                                 <CardHeader>
                                     <CardTitle>GeoJSON per Wilayah</CardTitle>
                                     <CardDescription>10 wilayah teratas berdasarkan jumlah fitur</CardDescription>
@@ -246,7 +246,7 @@ const Dashboard = ({
                         {/* Charts Row 2 */}
                         <div className="grid gap-4 md:grid-cols-2">
                             {/* Owner Type Distribution */}
-                            <Card>
+                            <Card className='p-3'>
                                 <CardHeader>
                                     <CardTitle>GeoJSON per Tipe Pemilik</CardTitle>
                                     <CardDescription>Distribusi berdasarkan kategori kepemilikan</CardDescription>
@@ -270,7 +270,7 @@ const Dashboard = ({
 
                             {/* Report by Sifat */}
                             {sifatData.length > 0 && (
-                                <Card>
+                                <Card className='p-3'>
                                     <CardHeader>
                                         <CardTitle>Laporan per Prioritas</CardTitle>
                                         <CardDescription>Distribusi dokumen berdasarkan tingkat urgensi</CardDescription>
@@ -303,7 +303,7 @@ const Dashboard = ({
 
                         {/* Timeline Chart */}
                         {timeline.length > 0 && (
-                            <Card>
+                            <Card className='p-3'>
                                 <CardHeader>
                                     <CardTitle>Tren Pembuatan GeoJSON</CardTitle>
                                     <CardDescription>Fitur yang dibuat dalam 30 hari terakhir</CardDescription>
@@ -326,7 +326,7 @@ const Dashboard = ({
                         <div className="grid gap-4 md:grid-cols-2">
                             {/* Top Users */}
                             {topUsers.length > 0 && (
-                                <Card>
+                                <Card className='p-3'>
                                     <CardHeader>
                                         <CardTitle>10 Kontributor Teratas</CardTitle>
                                         <CardDescription>Pengguna dengan fitur GeoJSON terbanyak</CardDescription>
@@ -350,7 +350,7 @@ const Dashboard = ({
                             )}
 
                             {/* Recent GeoJSON */}
-                            <Card>
+                            <Card className='p-3'>
                                 <CardHeader>
                                     <CardTitle>GeoJSON Terbaru</CardTitle>
                                     <CardDescription>10 fitur terakhir yang ditambahkan</CardDescription>
