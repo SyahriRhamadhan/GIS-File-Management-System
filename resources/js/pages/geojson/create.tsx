@@ -8,6 +8,8 @@ import OwnerSearchInput from '@/components/OwnerSearchInput';
 import RegionSearchInput from '@/components/RegionSearchInput';
 import { saveAs } from 'file-saver';
 import shp from 'shpjs';
+import JSZip from 'jszip';
+import * as toGeoJSON from '@tmcw/togeojson';
 
 // Custom styles for React Select to support dark/light mode
 const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -95,7 +97,7 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
     const [fileList, setFileList] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
     
-    // SHP to GeoJSON states
+    // SHP/KML/KMZ to GeoJSON states
     const [shpGeojson, setShpGeojson] = useState<any>(null);
     const [previewGeojsons, setPreviewGeojsons] = useState<any[]>([]);
     const [convertedFilename, setConvertedFilename] = useState<string>('converted.geojson');
@@ -209,6 +211,97 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         if (prjBuffer) shpData.prj = prjBuffer;
         
         return shpData;
+    };
+
+    // Normalize: convert closed LineString/MultiLineString to Polygon/MultiPolygon
+    const normalizeClosedLinesToPolygons = (geojson: any) => {
+        const isClosed = (coords: number[][]) => {
+            if (!coords || coords.length < 4) return false;
+            const a = coords[0];
+            const b = coords[coords.length - 1];
+            const dx = Math.abs((a?.[0] ?? 0) - (b?.[0] ?? 0));
+            const dy = Math.abs((a?.[1] ?? 0) - (b?.[1] ?? 0));
+            return dx < 1e-7 && dy < 1e-7;
+        };
+        const stripZ = (coords: any): any => Array.isArray(coords)
+            ? coords.map((c: any) => Array.isArray(c) && typeof c[0] === 'number' ? [c[0], c[1]] : stripZ(c))
+            : coords;
+
+        const convert = (f: any) => {
+            if (!f?.geometry) return f;
+            const g = f.geometry;
+            if (g.type === 'LineString' && isClosed(g.coordinates)) {
+                return { ...f, geometry: { type: 'Polygon', coordinates: [stripZ(g.coordinates)] } };
+            }
+            if (g.type === 'MultiLineString') {
+                const rings = (g.coordinates || []).filter((r: any) => isClosed(r));
+                if (rings.length === (g.coordinates?.length || 0) && rings.length > 0) {
+                    if (rings.length === 1) {
+                        return { ...f, geometry: { type: 'Polygon', coordinates: [stripZ(rings[0])] } };
+                    }
+                    return { ...f, geometry: { type: 'MultiPolygon', coordinates: rings.map((r: any) => [stripZ(r)]) } };
+                }
+            }
+            // also strip Z for polygons
+            if (g.type === 'Polygon') {
+                return { ...f, geometry: { type: 'Polygon', coordinates: stripZ(g.coordinates) } };
+            }
+            if (g.type === 'MultiPolygon') {
+                return { ...f, geometry: { type: 'MultiPolygon', coordinates: stripZ(g.coordinates) } };
+            }
+            return f;
+        };
+
+        if (geojson?.type === 'FeatureCollection') {
+            return { ...geojson, features: geojson.features.map(convert) };
+        }
+        if (geojson?.type === 'Feature') {
+            return convert(geojson);
+        }
+        return geojson;
+    };
+
+    // KML/KMZ to GeoJSON conversion helpers
+    const parseKmlTextToGeoJSON = (kmlText: string) => {
+        const dom = new DOMParser().parseFromString(kmlText, 'text/xml');
+        const gj = toGeoJSON.kml(dom);
+        return gj;
+    };
+
+    const handleKmlKmzUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files?.length) return;
+        setIsConverting(true);
+        try {
+            const file = files[0];
+            const lower = file.name.toLowerCase();
+            if (lower.endsWith('.kml')) {
+                const text = await file.text();
+                const gj = normalizeClosedLinesToPolygons(parseKmlTextToGeoJSON(text));
+                setShpGeojson(gj);
+                setPreviewGeojsons([]);
+                setConvertedFilename(`${file.name.replace(/\.[^/.]+$/, '')}.geojson`);
+                toast.success('Berhasil mengkonversi KML ke GeoJSON');
+            } else if (lower.endsWith('.kmz')) {
+                const buf = await file.arrayBuffer();
+                const zip = await JSZip.loadAsync(buf);
+                const kmlEntry = zip.file(/doc\.kml$/i)[0] || zip.file(/\.kml$/i)[0];
+                if (!kmlEntry) throw new Error('KMZ tidak berisi file KML');
+                const kmlText = await kmlEntry.async('text');
+                const gj = normalizeClosedLinesToPolygons(parseKmlTextToGeoJSON(kmlText));
+                setShpGeojson(gj);
+                setPreviewGeojsons([]);
+                setConvertedFilename(`${file.name.replace(/\.[^/.]+$/, '')}.geojson`);
+                toast.success('Berhasil mengkonversi KMZ ke GeoJSON');
+            } else {
+                toast.error('Format tidak dikenali. Pilih file .kml atau .kmz');
+            }
+        } catch (err: any) {
+            toast.error(`Gagal mengkonversi KML/KMZ: ${err?.message || err}`);
+        } finally {
+            setIsConverting(false);
+            if (inputRef.current) inputRef.current.value = '';
+        }
     };
 
     // SHP to GeoJSON conversion functions
@@ -443,6 +536,20 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     Format: <code>.zip</code> berisi SHP files, atau upload file individual <code>.shp</code>, <code>.dbf</code>, <code>.shx</code>, <code>.prj</code>, <code>.cpg</code>
                                 </p>
+                            </div>
+
+                            {/* KML/KMZ to GeoJSON */}
+                            <div className="mt-6">
+                                <h4 className="mb-2 text-md font-semibold text-gray-800 dark:text-gray-200">KML/KMZ to GeoJSON</h4>
+                                <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">Unggah file .kml atau .kmz untuk dikonversi.</p>
+                                <input
+                                    id="kmlKmzUpload"
+                                    type="file"
+                                    accept=".kml,.kmz"
+                                    onChange={handleKmlKmzUpload}
+                                    disabled={isConverting}
+                                    className="mt-2 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                />
                             </div>
 
                             {isConverting && (

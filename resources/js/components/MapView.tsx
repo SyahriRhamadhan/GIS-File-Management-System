@@ -54,13 +54,19 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     // State for inline editing in Popup
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValues, setEditValues] = useState<Record<string, any>>({});
+    const [baseValues, setBaseValues] = useState<Record<string, any>>({});
+    const [hasPendingNewKV, setHasPendingNewKV] = useState<boolean>(false);
     // Cache perubahan properti per id agar tidak perlu reload
     const [updatedProps, setUpdatedProps] = useState<Record<string, Record<string, any>>>({});
     const startEdit = (item: (typeof geojsonData)[0]) => {
         setEditingId(String(item.id_geojson));
         const props = { ...(item.geojson?.properties || {}) } as Record<string, any>;
         delete props['id_geojson'];
-        setEditValues(props);
+        // merge dengan perubahan lokal jika ada
+        const merged = { ...props, ...(updatedProps[String(item.id_geojson)] || {}) };
+        setBaseValues(merged);
+        setEditValues(merged);
+        setHasPendingNewKV(false);
     };
     const cancelEdit = () => {
         setEditingId(null);
@@ -88,10 +94,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         }
     };
 
-    // Helper row to add new property in edit mode
-    const AddPropertyRow: React.FC<{ onAdd: (key: string, value: string) => void }> = ({ onAdd }) => {
+    // Top-level component for adding a new property row (keeps state stable)
+    const PopupAddPropertyRow: React.FC<{ onAdd: (key: string, value: string) => void; onPendingChange?: (p: boolean) => void }>
+        = ({ onAdd, onPendingChange }) => {
         const [k, setK] = useState('');
         const [v, setV] = useState('');
+        useEffect(() => {
+            onPendingChange?.(Boolean(k.trim() || v.trim()));
+        }, [k, v]);
         return (
             <div className="grid grid-cols-2 gap-2 items-center" onMouseDown={(e) => e.stopPropagation()}>
                 <input
@@ -109,13 +119,9 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                     />
                     <button
                         type="button"
-                        className="rounded bg-green-600 text-white px-2"
-                        disabled={!k}
-                        onClick={() => {
-                            onAdd(k, v);
-                            setK('');
-                            setV('');
-                        }}
+                        className="rounded bg-green-600 text-white px-2 disabled:bg-green-300"
+                        disabled={!k.trim() || !v.trim()}
+                        onClick={() => { onAdd(k.trim(), v.trim()); setK(''); setV(''); }}
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         Tambah
@@ -518,31 +524,66 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         const isEditing = editingId === String(item.id_geojson);
         if (isEditing) {
             const entries = Object.entries(editValues);
+            const norm = (o: Record<string, any>) =>
+                Object.keys(o || {})
+                    .sort()
+                    .reduce((acc: Record<string, any>, k: string) => {
+                        acc[k] = String(o[k] ?? '');
+                        return acc;
+                    }, {});
+            const hasChanges = JSON.stringify(norm(editValues)) !== JSON.stringify(norm(baseValues));
+            // Hanya blokir jika nilai yang DIUBAH menjadi kosong, bukan yang memang kosong sejak awal
+            const hasEmpty = Object.entries(editValues).some(([key, v]) => {
+                const now = String(v ?? '').trim();
+                const before = String((baseValues as any)[key] ?? '').trim();
+                return now === '' && now !== before; // baru dikosongkan
+            });
             return (
                 <div
                     className="font-sans text-sm w-[420px] max-w-[90vw] min-w-[300px]"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => e.stopPropagation()}
                 >
-                    <div className="space-y-2">
+                    <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
                         {entries.length === 0 && (
                             <p className="text-gray-500">Tidak ada properti. Tambahkan pasangan kunci-nilai.</p>
                         )}
-                        {entries.map(([k, v]) => (
-                            <div key={k} className="grid grid-cols-2 gap-2 items-center">
+                        {entries.map(([k, v]: [string, any]) => (
+                            <div key={k} className="grid grid-cols-[auto,1fr,auto] gap-2 items-center">
                                 <label className="font-semibold mr-2">{k}</label>
                                 <input
-                                    className="border rounded px-2 py-1 text-sm"
+                                    className="border rounded px-2 py-1 text-sm w-full"
                                     value={String(v ?? '')}
                                     onChange={(e) => setEditValues((prev) => ({ ...prev, [k]: e.target.value }))}
+                                    onMouseDown={(e) => e.stopPropagation()}
                                 />
+                                <button
+                                    type="button"
+                                    title={`Hapus ${k}`}
+                                    className="rounded bg-red-600 text-white px-2 py-1 text-xs hover:bg-red-700"
+                                    onClick={() => setEditValues((prev) => { const copy = { ...prev } as Record<string, any>; delete copy[k as string]; return copy; })}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                >
+                                    Hapus
+                                </button>
                             </div>
                         ))}
-                        <AddPropertyRow onAdd={(key, value) => setEditValues((p) => ({ ...p, [key]: value }))} />
+                        <PopupAddPropertyRow
+                            onAdd={(key: string, value: string) => setEditValues((p) => ({ ...p, [key]: value }))}
+                            onPendingChange={setHasPendingNewKV}
+                        />
                     </div>
                     <div className="mt-3 flex justify-end gap-2">
                         <button className="rounded bg-gray-200 px-3 py-1" onClick={cancelEdit}>Batal</button>
-                        <button className="rounded bg-blue-600 text-white px-3 py-1" onClick={() => saveEdit(item.id_geojson)}>Simpan</button>
+                        <button
+                            className="rounded bg-blue-600 text-white px-3 py-1 disabled:bg-blue-300"
+                            onClick={() => saveEdit(item.id_geojson)}
+                            disabled={!hasChanges || hasPendingNewKV || hasEmpty}
+                            title={!hasChanges ? 'Tidak ada perubahan' : hasPendingNewKV ? 'Klik Tambah dulu' : hasEmpty ? 'Nilai tidak boleh kosong' : ''}
+                        >
+                            Simpan
+                        </button>
                     </div>
                 </div>
             );

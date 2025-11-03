@@ -1,0 +1,91 @@
+Pengembangan Aplikasi RDTR DKPZ, DBPZ & JSON
+Deskripsi:
+• Pengembangan aplikasi web filtering ketentuan kegiatan dan penggunaan lahan berbasis Remix Framework dengan React dan TypeScript , menyediakan sistem filtering berdasarkan zona dan kode regulasi untuk mendukung koordinasi penataan ruang Kabupaten Bintan Selatan (BSB) dan Trikora dengan kemampuan konversi data JSON terintegrasi.
+• Aplikasi terdiri dari beberapa komponen utama : `KepsusFilter.tsx` untuk filtering ketentuan khusus DKPZ dengan fitur preview dan copy JSON, `IntensitasFilter.tsx` untuk filtering intensitas pemanfaatan ruang DBPZ dengan sistem export multi-format, FilterSidebar untuk kontrol filter, ActivityList untuk menampilkan hasil, WelcomeScreen untuk halaman awal, dan SearchAndSortBar untuk pencarian dan pengurutan data.
+• Setiap komponen dikembangkan secara modular untuk memudahkan pemeliharaan dan pengembangan lebih lanjut dengan dukungan multi-sumber data (Trikora dan BSB) serta sistem konversi data JSON otomatis menggunakan script `convert-bsb-to-json.js` dan `convert-trikora-to-json.js` .
+Langkah-langkah:
+• Implementasi sistem konversi data JSON otomatis :
+- Script konversi BSB dengan mapping 243 baris kode untuk transformasi data zona ke format JSON terstruktur
+- Script konversi Trikora dengan normalisasi nama zona dan handling multiple permissions (I, T1-T3, B1-B3)
+- Kategorisasi otomatis kegiatan berdasarkan permission: iznktg (diizinkan), tbtktg (terbatas), bstktg (bersyarat), tbsktg (terbatas bersyarat)
+- Debugging dan tracking sistem untuk memastikan akurasi mapping zona dan aktivitas
+• Implementasi komponen KepsusFilter untuk DKPZ :
+- Filtering ketentuan khusus kawasan dengan dukungan multi-select regulations
+- Fitur preview JSON dengan modal display untuk validasi data sebelum export
+- Sistem copy to clipboard terintegrasi dengan feedback visual success indicator
+- Error handling dan loading states untuk pengalaman pengguna yang optimal
+• Implementasi komponen IntensitasFilter untuk DBPZ :
+- Filtering intensitas pemanfaatan ruang dengan 2,847 baris kode komprehensif
+- Sistem export multi-format: CSV, Excel, dan formatted text dengan struktur data kompleks
+- Handling data persil dengan pembagian geografis (barat/timur jalan Nasional)
+- Format output terstruktur untuk KDB, KLB, KDH, ketinggian bangunan, dan garis sempadan bangunan
+- Dukungan multiple jenis dengan format output yang adaptif
+• Integrasi data JSON multi-sumber :
+- intensitas-data-merged-bsb.json dan intensitas-data-merged.json untuk data intensitas
+- kepsus-bsb-data.json dan kepsus-data.json untuk ketentuan khusus
+- bsb-data.json dan rdtr-data.json untuk data aktivitas zona
+- Sistem switching data source dinamis antara Trikora dan BSB
+• Implementasi desain responsif dengan Tailwind CSS agar tampilan optimal di desktop dan mobile dengan navigation links terintegrasi dan komponen UI yang konsisten.
+• Implementasi URL parameters untuk bookmarking dan sharing filter yang diterapkan dengan dukungan multi-select regulations dan state management yang persistent.
+• Implementasi export functionality komprehensif untuk format text terstruktur, CSV, dan Excel pada hasil filtering dengan formatting khusus untuk dokumen teknis penataan ruang.
+
+2) Uji Titik Trikora dan Bandar Seri Bentan
+Deskripsi:
+•	Perbaikan File DKBZ, DBPZ & JSON merupakan tahapan kritis dalam proses validasi dan koreksi data spasial yang dikembangkan menggunakan teknologi web modern. Aplikasi ini dibangun dengan framework Remix dan React menggunakan TypeScript , menyediakan antarmuka yang intuitif untuk melakukan perbaikan dan validasi data RDTR (Rencana Detail Tata Ruang) secara sistematis dan akurat sesuai dengan peraturan perundang-undangan yang berlaku.
+Langkah-langkah:
+1. Akses Halaman Utama
+•	Buka aplikasi melalui browser
+•	Pada halaman utama, Anda akan melihat dashboard RDTR Filter dengan navigasi ke berbagai modul
+•	Pilih sumber data (Trikora atau BSB) menggunakan toggle di bagian kanan atas
+•	Gunakan menu navigasi untuk mengakses modul yang dibutuhkan:
+o	Filter Intensitas untuk data DBPZ
+o	Ketentuan Khusus untuk data DKBZ
+o	HTML Parser untuk konversi data
+2. Perbaikan Data DKBZ (Ketentuan Khusus)
+•	Klik menu "Ketentuan Khusus" untuk mengakses modul DKBZ
+•	Pilih sumber data (Trikora/BSB) sesuai kebutuhan
+•	Gunakan filter pencarian untuk menemukan kawasan spesifik:
+o	Filter Kawasan: Pilih jenis kawasan (Cagar Budaya, Pariwisata, dll.)
+o	Filter Kode SWP: Pilih kode Sub Wilayah Perencanaan
+o	Filter Kode Blok: Pilih blok spesifik
+o	Filter Sub Zona: Pilih sub zona yang akan diperbaiki
+•	Periksa ketentuan yang ditampilkan dan bandingkan dengan peraturan yang berlaku
+•	Gunakan fitur "Preview JSON" untuk melihat format data yang akan dihasilkan
+•	Klik "Copy Format" untuk menyalin data dalam format yang sesuai dengan peraturan
+3. Perbaikan Data DBPZ (Intensitas Pemanfaatan)
+•	Akses menu "Filter Intensitas" untuk modul DBPZ
+•	Pilih sumber data yang sesuai (Trikora/BSB)
+•	Gunakan filter untuk mencari data yang perlu diperbaiki:
+o	Filter Zona: Pilih zona pemanfaatan ruang
+o	Filter Sub Zona: Pilih sub zona spesifik
+o	Filter Jenis: Pilih jenis kegiatan khusus
+•	Periksa parameter intensitas yang ditampilkan:
+o	KDB (Koefisien Dasar Bangunan)
+o	KLB (Koefisien Lantai Bangunan)
+o	KDH (Koefisien Dasar Hijau)
+o	Ketinggian Bangunan
+o	Garis Sempadan Bangunan
+•	Gunakan fitur "Generate Copy Text" untuk mendapatkan format teks sesuai peraturan
+•	Klik "Export CSV" untuk mengunduh data dalam format spreadsheet
+4. Validasi dan Koreksi JSON
+•	Gunakan fitur "Preview JSON" pada setiap modul untuk memeriksa struktur data
+•	Bandingkan data yang ditampilkan dengan dokumen peraturan resmi
+•	Identifikasi ketidaksesuaian antara data aplikasi dengan perbub/perda
+•	Gunakan fitur pencarian untuk menemukan data spesifik yang perlu dikoreksi
+•	Manfaatkan filter kombinasi untuk analisis data yang lebih detail
+5. Export dan Dokumentasi
+•	Setelah melakukan koreksi, gunakan fitur export untuk menyimpan data:
+o	Format CSV: Untuk analisis lebih lanjut di spreadsheet
+o	Format JSON: Untuk integrasi dengan sistem lain
+o	Format Teks: Untuk dokumentasi dan laporan
+•	Simpan hasil koreksi dengan penamaan file yang sistematis
+•	Dokumentasikan perubahan yang dilakukan untuk audit trail
+6. Verifikasi Akhir
+•	Lakukan pengecekan ulang menggunakan fitur pencarian
+•	Pastikan semua data telah sesuai dengan peraturan yang berlaku
+•	Gunakan fitur sorting untuk memverifikasi konsistensi data
+•	Bandingkan hasil export dengan dokumen referensi peraturan
+Fitur Validasi Otomatis:
+•	Pengecekan Konsistensi: Sistem otomatis mendeteksi inkonsistensi data
+•	Format Standardisasi: Otomatis memformat data sesuai standar peraturan
+•	Validasi Referensi: Memastikan data mengacu pada peraturan yang benar

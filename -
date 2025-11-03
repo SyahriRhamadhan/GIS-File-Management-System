@@ -1,0 +1,200 @@
+﻿{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            104.5141448056821,
+            0.9947187402525464,
+            -0.1005000000004657
+          ],
+          [
+            104.5141447947586,
+            0.9947186128609806,
+            -0.1005000000004657
+          ],
+          [
+            104.5141447622741,
+            0.9947184892473809,
+            -0.1005000000004657
+          ],
+          [
+            104.5141447091928,
+            0.9947183730808998,
+            -0.1005000000004657
+          ],
+          [
+            104.5141446370903,
+            0.994718267809641,
+            -0.1005000000004657
+          ],
+          [
+            104.5141445481067,
+            0.9947181765583113,
+            -0.1005000000004657
+          ],
+          [
+            104.5141444448834,
+            0.9947181020354718,
+            -0.1005000000004657
+          ],
+          [
+            104.5141443304843,
+            0.994718046453142,
+            -0.1005000000004657
+          ],
+          [
+            104.5141442083049,
+            0.9947180114611408,
+            -0.1005000000004657
+          ],
+          [
+            104.5141440819718,
+            0.9947179980981148,
+            -0.1005000000004657
+          ],
+          [
+            104.5141439552351,
+            0.9947180067607125,
+            -0.1005000000004657
+          ],
+          [
+            104.5141438318564,
+            0.9947180371918061,
+            -0.1005000000004657
+          ],
+          [
+            104.514143715498,
+            0.9947180884881269,
+            -0.1005000000004657
+          ],
+          [
+            104.5141436096137,
+            0.9947181591270752,
+            -0.1005000000004657
+          ],
+          [
+            104.5141435173463,
+            0.9947182470119157,
+            -0.1005000000004657
+          ],
+          [
+            104.5141434414347,
+            0.9947183495340123,
+            -0.1005000000004657
+          ],
+          [
+            104.5141433841319,
+            0.9947184636502598,
+            -0.1005000000004657
+          ],
+          [
+            104.5141433471391,
+            0.9947185859734107,
+            -0.1005000000004657
+          ],
+          [
+            104.514143331554,
+            0.9947187128726166,
+            -0.1005000000004657
+          ],
+          [
+            104.5141433378395,
+            0.9947188405812001,
+            -0.1005000000004657
+          ],
+          [
+            104.5141433658088,
+            0.99471896530846,
+            -0.1005000000004657
+          ]
+        ]
+      },
+      "properties": {
+        "name": " ",
+        "description": {
+          "@type": "html",
+          "value": "<html xmlns:fo=\"http://www.w3.org/1999/XSL/Format\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\">\n\n<head>\n\n<META http-equiv=\"Content-Type\" content=\"text/html\">\n\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n\n</head>\n\n<body style=\"margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;\">\n\n<table style=\"font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px\">\n\n<tr style=\"text-align:center;font-weight:bold;background:#9CBCE2\">\n\n<td> </td>\n\n</tr>\n\n<tr>\n\n<td>\n\n<table style=\"font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px\">\n\n<tr>\n\n<td>FID</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>FID_Polyli</td>\n\n<td>32</td>\n\n</tr>\n\n<tr>\n\n<td>Entity</td>\n\n<td>Circle</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>Handle</td>\n\n<td>47E</td>\n\n</tr>\n\n<tr>\n\n<td>Layer</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>LyrFrzn</td>\n\n<td>0</td>\n\n</tr>\n\n<tr>\n\n<td>LyrLock</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>LyrOn</td>\n\n<td>1</td>\n\n</tr>\n\n<tr>\n\n<td>LyrVPFrzn</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>LyrHandle</td>\n\n<td>10</td>\n\n</tr>\n\n<tr>\n\n<td>Color</td>\n\n<td>1</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>EntColor</td>\n\n<td>1</td>\n\n</tr>\n\n<tr>\n\n<td>LyrColor</td>\n\n<td>7</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>BlkColor</td>\n\n<td>0</td>\n\n</tr>\n\n<tr>\n\n<td>Linetype</td>\n\n<td>Continuous</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>EntLinetyp</td>\n\n<td>Continuous</td>\n\n</tr>\n\n<tr>\n\n<td>LyrLnType</td>\n\n<td>Continuous</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>BlkLinetyp</td>\n\n<td></td>\n\n</tr>\n\n<tr>\n\n<td>Elevation</td>\n\n<td>-0,100465</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>Thickness</td>\n\n<td>0</td>\n\n</tr>\n\n<tr>\n\n<td>LineWt</td>\n\n<td>25</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>EntLineWt</td>\n\n<td>-1</td>\n\n</tr>\n\n<tr>\n\n<td>LyrLineWt</td>\n\n<td>-3</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>BlkLineWt</td>\n\n<td>-1</td>\n\n</tr>\n\n<tr>\n\n<td>RefName</td>\n\n<td></td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>LTScale</td>\n\n<td>1</td>\n\n</tr>\n\n<tr>\n\n<td>ExtX</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>ExtY</td>\n\n<td>0</td>\n\n</tr>\n\n<tr>\n\n<td>ExtZ</td>\n\n<td>1</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>DocName</td>\n\n<td>Instansi Vertikal_Ceruk Ijuk.dwg</td>\n\n</tr>\n\n<tr>\n\n<td>DocPath</td>\n\n<td>G:\\Kantor PUPR P Bintan\\2024\\Lahan Instansi Vertikal\\Instansi Vertikal_Ceruk Ijuk.dwg</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>DocType</td>\n\n<td>DWG</td>\n\n</tr>\n\n<tr>\n\n<td>DocVer</td>\n\n<td>AC1027</td>\n\n</tr>\n\n</table>\n\n</td>\n\n</tr>\n\n</table>\n\n</body>\n\n</html>\n\n"
+        },
+        "styleUrl": "#LineStyle00",
+        "fill-opacity": 0,
+        "fill": "#000000",
+        "stroke-opacity": 1,
+        "stroke": "#ff0000",
+        "stroke-width": 2,
+        "label-opacity": 0,
+        "label-color": "#000000",
+        "label-scale": 0
+      },
+      "id": "ID_00000"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            104.5141433658088,
+            0.99471896530846,
+            -0.1005000000004657
+          ],
+          [
+            104.5141434114394,
+            0.9947190768561552,
+            -0.1005000000004657
+          ],
+          [
+            104.5141434744492,
+            0.9947191794712791,
+            -0.1005000000004657
+          ],
+          [
+            104.5141435531675,
+            0.9947192704333102,
+            -0.1005000000004657
+          ],
+          [
+            104.5141436455075,
+            0.9947193473306718,
+            -0.1005000000004657
+          ],
+          [
+            104.514143749021,
+            0.9947194081246679,
+            -0.1005000000004657
+          ],
+          [
+            104.5141438609638,
+            0.9947194512035348,
+            -0.1005000000004657
+          ]
+        ]
+      },
+      "properties": {
+        "name": " ",
+        "description": {
+          "@type": "html",
+          "value": "<html xmlns:fo=\"http://www.w3.org/1999/XSL/Format\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\">\n\n<head>\n\n<META http-equiv=\"Content-Type\" content=\"text/html\">\n\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n\n</head>\n\n<body style=\"margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;\">\n\n<table style=\"font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px\">\n\n<tr style=\"text-align:center;font-weight:bold;background:#9CBCE2\">\n\n<td> </td>\n\n</tr>\n\n<tr>\n\n<td>\n\n<table style=\"font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px\">\n\n<tr>\n\n<td>FID</td>\n\n<td>1</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>FID_Polyli</td>\n\n<td>32</td>\n\n</tr>\n\n<tr>\n\n<td>Entity</td>\n\n<td>Circle</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>Handle</td>\n\n<td>47E</td>\n\n</tr>\n\n<tr>\n\n<td>Layer</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>LyrFrzn</td>\n\n<td>0</td>\n\n</tr>\n\n<tr>\n\n<td>LyrLock</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>LyrOn</td>\n\n<td>1</td>\n\n</tr>\n\n<tr>\n\n<td>LyrVPFrzn</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>LyrHandle</td>\n\n<td>10</td>\n\n</tr>\n\n<tr>\n\n<td>Color</td>\n\n<td>1</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>EntColor</td>\n\n<td>1</td>\n\n</tr>\n\n<tr>\n\n<td>LyrColor</td>\n\n<td>7</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>BlkColor</td>\n\n<td>0</td>\n\n</tr>\n\n<tr>\n\n<td>Linetype</td>\n\n<td>Continuous</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>EntLinetyp</td>\n\n<td>Continuous</td>\n\n</tr>\n\n<tr>\n\n<td>LyrLnType</td>\n\n<td>Continuous</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>BlkLinetyp</td>\n\n<td></td>\n\n</tr>\n\n<tr>\n\n<td>Elevation</td>\n\n<td>-0,100465</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>Thickness</td>\n\n<td>0</td>\n\n</tr>\n\n<tr>\n\n<td>LineWt</td>\n\n<td>25</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>EntLineWt</td>\n\n<td>-1</td>\n\n</tr>\n\n<tr>\n\n<td>LyrLineWt</td>\n\n<td>-3</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>BlkLineWt</td>\n\n<td>-1</td>\n\n</tr>\n\n<tr>\n\n<td>RefName</td>\n\n<td></td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>LTScale</td>\n\n<td>1</td>\n\n</tr>\n\n<tr>\n\n<td>ExtX</td>\n\n<td>0</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>ExtY</td>\n\n<td>0</td>\n\n</tr>\n\n<tr>\n\n<td>ExtZ</td>\n\n<td>1</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>DocName</td>\n\n<td>Instansi Vertikal_Ceruk Ijuk.dwg</td>\n\n</tr>\n\n<tr>\n\n<td>DocPath</td>\n\n<td>G:\\Kantor PUPR P Bintan\\2024\\Lahan Instansi Vertikal\\Instansi Vertikal_Ceruk Ijuk.dwg</td>\n\n</tr>\n\n<tr bgcolor=\"#D4E4F3\">\n\n<td>DocType</td>\n\n<td>DWG</td>\n\n</tr>\n\n<tr>\n\n<td>DocVer</td>\n\n<td>AC1027</td>\n\n</tr>\n\n</table>\n\n</td>\n\n</tr>\n\n</table>\n\n</body>\n\n</html>\n\n"
+        },
+        "styleUrl": "#LineStyle00",
+        "fill-opacity": 0,
+        "fill": "#000000",
+        "stroke-opacity": 1,
+        "stroke": "#ff0000",
+        "stroke-width": 2,
+        "label-opacity": 0,
+        "label-color": "#000000",
+        "label-scale": 0
+      },
+      "id": "ID_00001"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            104.5141438609638,
