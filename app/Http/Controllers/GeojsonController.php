@@ -196,11 +196,19 @@ class GeojsonController extends Controller
 
                 $sourceName = $raw['fileName'] ?? $fileName;
                 foreach ($raw['features'] as $feature) {
+                    $properties = is_array($feature['properties'] ?? null) ? $feature['properties'] : [];
+                    $featureSource =
+                        $properties['__source_filename'] ??
+                        $properties['source_name'] ??
+                        $sourceName;
+                    if (isset($feature['properties']) && is_array($feature['properties'])) {
+                        unset($feature['properties']['__source_filename'], $feature['properties']['source_name']);
+                    }
                     try {
                         $this->processCoordinates($feature);
                         Geojson::create([
                             'geojson'        => $feature,
-                            'source_name'    => $sourceName,
+                            'source_name'    => $featureSource,
                             'id_user'        => $idUser,
                             'id_region'      => $idRegion,
                             'id_owner'       => $idOwner,
@@ -225,11 +233,19 @@ class GeojsonController extends Controller
             }
 
             foreach ($raw['features'] as $i => $feature) {
+                $properties = is_array($feature['properties'] ?? null) ? $feature['properties'] : [];
+                $featureSource =
+                    $properties['__source_filename'] ??
+                    $properties['source_name'] ??
+                    $sourceName;
+                if (isset($feature['properties']) && is_array($feature['properties'])) {
+                    unset($feature['properties']['__source_filename'], $feature['properties']['source_name']);
+                }
                 try {
                     $this->processCoordinates($feature);
                     Geojson::create([
                         'geojson'        => $feature,
-                        'source_name'    => $sourceName,
+                        'source_name'    => $featureSource,
                         'id_user'        => $idUser,
                         'id_region'      => $idRegion,
                         'id_owner'       => $idOwner,

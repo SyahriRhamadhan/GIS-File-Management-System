@@ -102,6 +102,8 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
     const [previewGeojsons, setPreviewGeojsons] = useState<any[]>([]);
     const [convertedFilename, setConvertedFilename] = useState<string>('converted.geojson');
     const [isConverting, setIsConverting] = useState<boolean>(false);
+    const [isApplyingAll, setIsApplyingAll] = useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     useEffect(() => {
         if (flash?.upload_errors) {
@@ -261,6 +263,31 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         return geojson;
     };
 
+    const extractFeaturesFromGeoJSON = (geojson: any): any[] => {
+        if (!geojson) return [];
+
+        if (Array.isArray(geojson)) {
+            return geojson.reduce<any[]>((acc, item) => {
+                acc.push(...extractFeaturesFromGeoJSON(item));
+                return acc;
+            }, []);
+        }
+
+        if (geojson.type === 'FeatureCollection' && Array.isArray(geojson.features)) {
+            return geojson.features;
+        }
+
+        if (geojson.type === 'Feature') {
+            return [geojson];
+        }
+
+        if (Array.isArray(geojson.features)) {
+            return geojson.features;
+        }
+
+        return [];
+    };
+
     // KML/KMZ to GeoJSON conversion helpers
     const parseKmlTextToGeoJSON = (kmlText: string) => {
         const dom = new DOMParser().parseFromString(kmlText, 'text/xml');
@@ -413,9 +440,73 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
     };
 
     const handleUseConvertedGeoJSON = (geojsonData: any, filename: string) => {
-        // Convert GeoJSON object to string and set it to the form
-        setValue('geojson', JSON.stringify(geojsonData, null, 2));
+        const payload =
+            geojsonData && typeof geojsonData === 'object'
+                ? { ...geojsonData }
+                : geojsonData;
+
+        if (payload && typeof payload === 'object' && !payload.fileName) {
+            payload.fileName = filename;
+        }
+
+        setValue('geojson', JSON.stringify(payload, null, 2));
         toast.success(`GeoJSON "${filename}" siap untuk disimpan`);
+    };
+
+    const handleUseAllConvertedGeoJSON = async () => {
+        if (!previewGeojsons.length) {
+            toast.error('Tidak ada GeoJSON hasil konversi yang tersedia.');
+            return;
+        }
+
+        setIsApplyingAll(true);
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+
+        try {
+            const combinedFeatures: any[] = [];
+
+            previewGeojsons.forEach((file) => {
+                const items = extractFeaturesFromGeoJSON(file.data);
+                items.forEach((feature) => {
+                    const properties =
+                        feature && typeof feature === 'object' && feature.properties && typeof feature.properties === 'object'
+                            ? feature.properties
+                            : {};
+
+                    combinedFeatures.push({
+                        ...feature,
+                        properties: {
+                            ...properties,
+                            __source_filename: file.filename,
+                        },
+                    });
+                });
+            });
+
+            if (!combinedFeatures.length) {
+                toast.error('Tidak ada fitur GeoJSON valid dari hasil konversi.');
+                return;
+            }
+
+            const combinedCollection = {
+                type: 'FeatureCollection',
+                features: combinedFeatures,
+                fileName:
+                    previewGeojsons.length === 1
+                        ? previewGeojsons[0].filename
+                        : `${previewGeojsons.length}-files-batch.geojson`,
+            };
+
+            setValue('geojson', JSON.stringify(combinedCollection, null, 2));
+            toast.success(
+                `Semua GeoJSON (${previewGeojsons.length} file, ${combinedFeatures.length} fitur) siap untuk disimpan`
+            );
+        } catch (error) {
+            console.error(error);
+            toast.error('Terjadi kesalahan saat menggabungkan seluruh GeoJSON.');
+        } finally {
+            setIsApplyingAll(false);
+        }
     };
 
     const handleDownloadGeoJSON = (geojsonData: any, filename: string) => {
@@ -450,7 +541,10 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         if (data.id_kategori) formData.append('id_kategori', data.id_kategori);
         if (data.main_category) formData.append('main_category', data.main_category);
 
-        router.post('/dashboard/geojson', formData);
+        router.post('/dashboard/geojson', formData, {
+            onStart: () => setIsSubmitting(true),
+            onFinish: () => setIsSubmitting(false),
+        });
     };
 
     // Format for React Select
@@ -570,9 +664,14 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                                             <button
                                                 type="button"
                                                 onClick={() => handleUseConvertedGeoJSON(shpGeojson, convertedFilename)}
-                                                className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
+                                                disabled={isApplyingAll || isConverting || isSubmitting}
+                                                className={`rounded px-3 py-1 text-xs font-semibold text-white transition ${
+                                                    isApplyingAll || isConverting || isSubmitting
+                                                        ? 'bg-green-400 cursor-not-allowed opacity-70'
+                                                        : 'bg-green-600 hover:bg-green-700'
+                                                }`}
                                             >
-                                                Gunakan
+                                                {isApplyingAll ? 'Memproses...' : 'Gunakan'}
                                             </button>
                                             <button
                                                 type="button"
@@ -593,14 +692,41 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {previewGeojsons.length} file GeoJSON berhasil dikonversi:
                                         </span>
-                                        <button
-                                            type="button"
-                                            onClick={handleClearConversion}
-                                            className="rounded bg-gray-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-gray-600"
-                                        >
-                                            Clear
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleUseAllConvertedGeoJSON}
+                                                disabled={isApplyingAll || isConverting || isSubmitting}
+                                                className={`inline-flex items-center gap-2 rounded px-3 py-1 text-xs font-semibold text-white transition ${
+                                                    isApplyingAll || isConverting || isSubmitting
+                                                        ? 'bg-green-400 cursor-not-allowed opacity-70'
+                                                        : 'bg-green-600 hover:bg-green-700'
+                                                }`}
+                                            >
+                                                {isApplyingAll ? (
+                                                    <>
+                                                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                                                        Menggabungkan...
+                                                    </>
+                                                ) : (
+                                                    'Gunakan Semua'
+                                                )}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleClearConversion}
+                                                className="rounded bg-gray-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-gray-600"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
                                     </div>
+                                    {isApplyingAll && (
+                                        <div className="flex items-center gap-2 rounded border border-green-200 bg-green-50 p-3 text-xs font-medium text-green-700 dark:border-green-700 dark:bg-green-900 dark:text-green-200">
+                                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-green-600 border-t-transparent"></span>
+                                            <span>Menggabungkan semua data GeoJSON...</span>
+                                        </div>
+                                    )}
                                     {previewGeojsons.map((file, index) => (
                                         <div key={index} className="rounded border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900">
                                             <div className="flex items-center justify-between">
@@ -611,9 +737,14 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                                                     <button
                                                         type="button"
                                                         onClick={() => handleUseConvertedGeoJSON(file.data, file.filename)}
-                                                        className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
+                                                        disabled={isApplyingAll || isConverting || isSubmitting}
+                                                        className={`rounded px-3 py-1 text-xs font-semibold text-white transition ${
+                                                            isApplyingAll || isConverting || isSubmitting
+                                                                ? 'bg-green-400 cursor-not-allowed opacity-70'
+                                                                : 'bg-green-600 hover:bg-green-700'
+                                                        }`}
                                                     >
-                                                        Gunakan
+                                                        {isApplyingAll ? 'Memproses...' : 'Gunakan'}
                                                     </button>
                                                     <button
                                                         type="button"
@@ -797,8 +928,23 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                         >
                             Cancel
                         </button>
-                        <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-                            Save
+                        <button
+                            type="submit"
+                            disabled={isSubmitting || isConverting || isApplyingAll}
+                            className={`inline-flex items-center gap-2 rounded px-4 py-2 text-white transition ${
+                                isSubmitting || isConverting || isApplyingAll
+                                    ? 'bg-blue-400 cursor-not-allowed opacity-70'
+                                    : 'bg-blue-600 hover:bg-blue-700'
+                            }`}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                                    Menyimpan...
+                                </>
+                            ) : (
+                                'Save'
+                            )}
                         </button>
                     </div>
                 </form>

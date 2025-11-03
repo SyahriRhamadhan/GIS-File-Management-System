@@ -336,6 +336,12 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         });
     }, [groupedByCategory, uniqueCategoryNames, initialVisibleIds]);
 
+    const bringLayerToFront = useCallback((category: string, parent: string, childId: string) => {
+        const refKey = `${category}-${parent}-${childId}`;
+        const layer = geoJsonRefs.current[refKey];
+        layer?.bringToFront();
+    }, []);
+
     // Category toggle logic: toggle ALL parents and children in category
     const toggleCategoryFilter = (category: string) => {
         setActiveCategoryFilters((prev) => {
@@ -357,17 +363,25 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             setActiveChildFilters((prevChildren) => {
                 const updatedChildren = { ...prevChildren };
                 if (!updatedChildren[category]) updatedChildren[category] = {};
-                
+
                 for (const [parent, children] of Object.entries(groupedByCategory[category] || {})) {
                     if (!updatedChildren[category][parent]) updatedChildren[category][parent] = {};
                     for (const child of children) {
                         updatedChildren[category][parent][child.id] = newCategoryState;
                     }
                 }
-                
+
+                if (newCategoryState) {
+                    setTimeout(() => {
+                        Object.entries(groupedByCategory[category] || {}).forEach(([parentKey, children]) => {
+                            children.forEach((child) => bringLayerToFront(category, parentKey, child.id));
+                        });
+                    }, 0);
+                }
+
                 return updatedChildren;
             });
-            
+
             return updated;
         });
     };
@@ -405,8 +419,12 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                     const updatedCategories = { ...prevCategories, [category]: true };
                     return updatedCategories;
                 });
+                const children = groupedByCategory[category]?.[parent] || [];
+                setTimeout(() => {
+                    children.forEach((child) => bringLayerToFront(category, parent, child.id));
+                }, 0);
             }
-            
+
             return updated;
         });
     };
@@ -445,8 +463,11 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                     const updatedCategories = { ...prevCategories, [category]: true };
                     return updatedCategories;
                 });
+                setTimeout(() => {
+                    bringLayerToFront(category, parent, childId);
+                }, 0);
             }
-            
+
             return updated;
         });
     };
