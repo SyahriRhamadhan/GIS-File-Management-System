@@ -397,8 +397,20 @@ class GeojsonController extends Controller
         if (!is_array($currentProps)) {
             $currentProps = [];
         }
-        // Merge, overwrite existing keys with incoming values
-        $feature['properties'] = array_replace($currentProps, $validated['properties']);
+
+        $newProps = $validated['properties'];
+        if (!is_array($newProps)) {
+            $newProps = [];
+        }
+
+        // Preserve special keys that should never be edited (e.g. id_geojson) unless explicitly provided
+        foreach (['id_geojson'] as $protectedKey) {
+            if (array_key_exists($protectedKey, $currentProps) && !array_key_exists($protectedKey, $newProps)) {
+                $newProps[$protectedKey] = $currentProps[$protectedKey];
+            }
+        }
+
+        $feature['properties'] = $newProps;
 
         $geo->geojson = $feature;
         $geo->save();
