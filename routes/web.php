@@ -20,6 +20,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Dashboard API endpoints for lazy loading
+    Route::get('/api/dashboard/geojsons', [DashboardController::class, 'getGeojsons'])->name('api.dashboard.geojsons');
+    Route::get('/api/dashboard/categories', [DashboardController::class, 'getCategories'])->name('api.dashboard.categories');
+
     // Prefix: /dashboard
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
 

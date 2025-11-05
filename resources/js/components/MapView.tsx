@@ -6,6 +6,7 @@ import { Feature } from 'geojson';
 import L, { Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+// Tree-shakeable icon imports for better bundle size
 import { FaMapMarkedAlt } from 'react-icons/fa';
 import { FaFilePdf } from 'react-icons/fa6';
 import { IoAddCircleOutline } from 'react-icons/io5';
@@ -75,6 +76,24 @@ const persistStoredColors = (colors: Record<string, string>) => {
         /* ignore persist errors */
     }
 };
+
+// Helper function untuk build properties preview
+const buildPropertiesPreview = (properties: Record<string, any>): string => {
+    const entries = Object.entries(properties || {})
+        .filter(([k]) => k !== 'id_geojson')
+        .map(([k, v]) => `${k}: ${v}`)
+        .slice(0, 3); // Limit to first 3 properties for performance
+    return entries.length > 0 ? entries.join(', ') : '';
+};
+
+// Debounce helper
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout | null = null;
+    return function (this: any, ...args: Parameters<T>) {
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
 
 interface MapViewProps {
     geojsonData: Array<{
@@ -237,7 +256,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         return groups;
     }, [sortedData]);
 
-    // Grouped children per 3-level hierarchy with flattened key: "main_category â€º category" > parent > child
+    // Grouped children per 3-level hierarchy with flattened key: "main_category - category" > parent > child
     const groupedByCategory = useMemo(() => {
         const groups: Record<string, Record<string, Array<{ id: string; label: string }>>> = {};
 
@@ -252,16 +271,13 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             const categoryName = item.kategori?.orde0 || 'Tanpa Kategori';
 
             // Combine main_category and categoryName for flattened 3-level structure
-            const flattenedCategory = `${mainCategory} â€º ${categoryName}`;
+            const flattenedCategory = `${mainCategory} - ${categoryName}`;
 
             // Level 2: Parent (source_name)
             const parent = item.source_name || 'Unknown';
 
-            // Level 3: Individual GeoJSON items
-            const propEntries = Object.entries(item.geojson.properties || {})
-                .filter(([k]) => k !== 'id_geojson')
-                .map(([k, v]) => `${k}: ${v}`);
-            const label = propEntries.length > 0 ? propEntries.join(', ') : String(item.id_geojson || 'Unknown');
+            // Level 3: Individual GeoJSON items - use helper for performance
+            const label = buildPropertiesPreview(item.geojson.properties) || String(item.id_geojson || 'Unknown');
             const id = String(item.id_geojson || label);
 
             // Build hierarchy
@@ -275,8 +291,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         // Sort groups by predefined main category order
         const sortedGroups: typeof groups = {};
         const sortedKeys = Object.keys(groups).sort((a, b) => {
-            const aMain = a.split(' â€º ')[0];
-            const bMain = b.split(' â€º ')[0];
+            const aMain = a.split(' - ')[0];
+            const bMain = b.split(' - ')[0];
             const aIndex = mainCategoryOrder.indexOf(aMain);
             const bIndex = mainCategoryOrder.indexOf(bMain);
             if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
@@ -336,11 +352,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         const groups: Record<string, Array<{ id: string; label: string }>> = {};
         geojsonData.forEach((item) => {
             const parent = item.source_name;
-            const propEntries = Object.entries(item.geojson.properties || {})
-                .filter(([k]) => k !== 'id_geojson')
-                .map(([k, v]) => `${k}: ${v}`);
-            // Label fallback ke id jika tidak ada property lain
-            const label = propEntries.length > 0 ? propEntries.join(', ') : String(item.id_geojson || 'Unknown');
+            // Use helper for performance
+            const label = buildPropertiesPreview(item.geojson.properties) || String(item.id_geojson || 'Unknown');
             const id = String(item.id_geojson || label);
 
             if (!groups[parent]) groups[parent] = [];
@@ -438,15 +451,37 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         }
     }, []);
 
-    useEffect(() => {
-        Object.entries(layerDefaultColors.current).forEach(([key, defaultColor]) => {
-            const color = customColors[key] ?? defaultColor;
-            applyLayerColor(key, color);
-        });
-    }, [customColors, applyLayerColor]);
+    // Track previous customColors to only update changed layers
+    const prevCustomColorsRef = useRef<Record<string, string>>({});
+    const previewColorsRef = useRef<Record<string, string>>({});
 
     useEffect(() => {
-        persistStoredColors(customColors);
+        const prev = prevCustomColorsRef.current;
+        const changedKeys = Object.keys(customColors).filter(key => customColors[key] !== prev[key]);
+        const removedKeys = Object.keys(prev).filter(key => !(key in customColors));
+
+        // Only update layers that actually changed
+        changedKeys.forEach(key => {
+            const defaultColor = layerDefaultColors.current[key];
+            const color = customColors[key] ?? defaultColor;
+            if (color) applyLayerColor(key, color);
+        });
+
+        // Reset removed keys to default
+        removedKeys.forEach(key => {
+            const defaultColor = layerDefaultColors.current[key];
+            if (defaultColor) applyLayerColor(key, defaultColor);
+        });
+
+        prevCustomColorsRef.current = { ...customColors };
+    }, [customColors, applyLayerColor]);
+
+    // Debounce persist to avoid too many localStorage writes
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            persistStoredColors(customColors);
+        }, 500);
+        return () => clearTimeout(timeoutId);
     }, [customColors]);
 
     const closeLayerPopup = useCallback((key: string) => {
@@ -496,8 +531,27 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         setLayerOrder((prev) => prev.filter((key) => !toRemove.has(key)));
     }, []);
 
+    const previewLayerColor = useCallback(
+        (key: string, color: string | null) => {
+            if (!color || !isHexColor(color)) return;
+            previewColorsRef.current[key] = color;
+            applyLayerColor(key, color);
+        },
+        [applyLayerColor]
+    );
+
+    const revertPreviewColor = useCallback(
+        (key: string) => {
+            delete previewColorsRef.current[key];
+            const base = customColors[key] ?? layerDefaultColors.current[key] ?? '#3388ff';
+            applyLayerColor(key, base);
+        },
+        [customColors, applyLayerColor]
+    );
+
     const updateLayerColor = useCallback(
         (key: string, color: string | null, fallback?: string) => {
+            delete previewColorsRef.current[key];
             setCustomColors((prev) => {
                 const next = { ...prev };
                 if (color) {
@@ -526,9 +580,17 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         []
     );
 
+    // Debounce applyLayerOrder to batch multiple rapid changes
+    const debouncedApplyLayerOrder = useMemo(
+        () => debounce(applyLayerOrder, 100),
+        [applyLayerOrder]
+    );
+
     useEffect(() => {
-        applyLayerOrder(layerOrder);
-    }, [layerOrder, applyLayerOrder]);
+        if (layerOrder.length > 0) {
+            debouncedApplyLayerOrder(layerOrder);
+        }
+    }, [layerOrder, debouncedApplyLayerOrder]);
 
     // Category toggle logic: toggle ALL parents and children in category
     const toggleCategoryFilter = (category: string) => {
@@ -841,12 +903,21 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                         type="color"
                         value={currentPickerValue}
                         className="h-7 w-10 cursor-pointer rounded border border-gray-300 bg-white p-0"
+                        onInput={(e) => {
+                            e.stopPropagation();
+                            const newColor = (e.target as HTMLInputElement).value;
+                            previewLayerColor(refKey, newColor);
+                        }}
                         onChange={(e) => {
                             e.stopPropagation();
                             const newColor = e.target.value;
                             if (isHexColor(newColor)) {
                                 updateLayerColor(refKey, newColor, defaultColor);
                             }
+                        }}
+                        onBlur={(e) => {
+                            e.stopPropagation();
+                            revertPreviewColor(refKey);
                         }}
                         onMouseDown={(e) => e.stopPropagation()}
                         title="Pilih warna polygon"
@@ -1078,7 +1149,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                                 // Build flattened category key
                                 const mainCategory = item.main_category || 'Uncategorized';
                                 const categoryName = item.kategori?.orde0 || 'Tanpa Kategori';
-                                const flattenedCategory = `${mainCategory} â€º ${categoryName}`;
+                                const flattenedCategory = `${mainCategory} - ${categoryName}`;
 
                                 const parent = item.source_name || 'Unknown';
                                 const childId = String(item.id_geojson);
@@ -1097,6 +1168,16 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                                     '#3388ff';
                                 layerDefaultColors.current[refKey] = baseColor;
                                 const effectiveColor = customColors[refKey] ?? baseColor;
+
+                                // Memoize style object to prevent unnecessary re-renders
+                                const styleObj = {
+                                    color: effectiveColor,
+                                    weight: 2,
+                                    opacity: 0.8,
+                                    fillColor: effectiveColor,
+                                    fillOpacity: 0.5,
+                                };
+
                                 return (
                                     <GeoJSON
                                         key={`${item.id_geojson}-${sourceName}`}
@@ -1109,13 +1190,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                                             }
                                         }}
                                         data={item.geojson as Feature}
-                                        style={() => ({
-                                            color: effectiveColor,
-                                            weight: 2,
-                                            opacity: 0.8,
-                                            fillColor: effectiveColor,
-                                            fillOpacity: 0.5,
-                                        })}
+                                        style={styleObj}
                                     >
                                         <Popup
                                             closeOnClick={false}

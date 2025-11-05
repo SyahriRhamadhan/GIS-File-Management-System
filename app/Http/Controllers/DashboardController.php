@@ -20,6 +20,7 @@ class DashboardController extends Controller
         // Optional filter berdasarkan query param id atau ids (comma-separated)
         $idsParam = $request->query('ids');
         $idParam = $request->query('id');
+        $limit = $request->query('limit', null); // New: limit parameter for lazy loading
 
         $selectedIds = [];
         if ($idsParam) {
@@ -37,12 +38,32 @@ class DashboardController extends Controller
             $geojsonQuery->whereIn('id_geojson', $selectedIds);
         }
 
-        $geojsons = $geojsonQuery->get()->map(function ($geojson) {
-            if (is_string($geojson->geojson)) {
-                $geojson->geojson = json_decode($geojson->geojson, true);
-            }
-            return $geojson;
-        });
+        // Performance optimization: limit initial load
+        // Load only necessary fields to reduce payload size
+        if ($limit && empty($selectedIds)) {
+            // For initial dashboard load, don't send full GeoJSON data
+            // Frontend can lazy-load geometries when needed
+            $geojsons = collect([]); // Empty for now, load on-demand
+        } else {
+            $geojsons = $geojsonQuery
+                ->select([
+                    'geojson.id_geojson',
+                    'geojson.source_name',
+                    'geojson.main_category',
+                    'geojson.id_kategori',
+                    'geojson.geojson',
+                    'geojson.created_at'
+                ])
+                ->get()
+                ->map(function ($geojson) {
+                    if (is_string($geojson->geojson)) {
+                        $geojson->geojson = json_decode($geojson->geojson, true);
+                    }
+                    // Add kode_warna from kategori relation
+                    $geojson->kode_warna = $geojson->kategori->kode_warna ?? '#3388ff';
+                    return $geojson;
+                });
+        }
 
         $regions = Region::all();
         $user = Auth::user();
@@ -175,6 +196,104 @@ class DashboardController extends Controller
             'topUsers' => $topUsers,
             'reportBySifat' => $reportBySifat,
             'recentGeojsons' => $recentGeojsons,
+
+            // Performance: Add metadata for lazy loading
+            'hasMoreData' => !empty($selectedIds) ? false : ($geojsons->count() > 0),
         ]);
+    }
+
+    /**
+     * API endpoint for lazy loading GeoJSON data
+     * GET /api/dashboard/geojsons
+     */
+    public function getGeojsons(Request $request)
+    {
+        $perPage = $request->query('per_page', 50); // Load 50 at a time
+        $categoryFilter = $request->query('category');
+        $mainCategoryFilter = $request->query('main_category');
+
+        $query = Geojson::with('kategori')
+            ->select([
+                'geojson.id_geojson',
+                'geojson.source_name',
+                'geojson.main_category',
+                'geojson.id_kategori',
+                'geojson.geojson',
+                'geojson.created_at'
+            ]);
+
+        // Apply filters if provided
+        if ($mainCategoryFilter) {
+            $query->where('geojson.main_category', $mainCategoryFilter);
+        }
+
+        if ($categoryFilter) {
+            $query->whereHas('kategori', function ($q) use ($categoryFilter) {
+                $q->where('orde0', $categoryFilter);
+            });
+        }
+
+        $result = $query->paginate($perPage);
+
+        $geojsons = $result->map(function ($geojson) {
+            if (is_string($geojson->geojson)) {
+                $geojson->geojson = json_decode($geojson->geojson, true);
+            }
+            // Add kode_warna from kategori relation
+            $geojson->kode_warna = $geojson->kategori->kode_warna ?? '#3388ff';
+            return $geojson;
+        });
+
+        return response()->json([
+            'data' => $geojsons,
+            'meta' => [
+                'current_page' => $result->currentPage(),
+                'last_page' => $result->lastPage(),
+                'per_page' => $result->perPage(),
+                'total' => $result->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * API endpoint to get minimal category/hierarchy data
+     * GET /api/dashboard/categories
+     */
+    public function getCategories()
+    {
+        // Return only category structure without full GeoJSON
+        $categories = Geojson::with('kategori')
+            ->select([
+                'geojson.id_geojson',
+                'geojson.source_name',
+                'geojson.main_category',
+                'geojson.id_kategori',
+                DB::raw('geojson.geojson->\'$.properties\' as properties') // Only properties, not geometry
+            ])
+            ->get()
+            ->groupBy(function ($item) {
+                $mainCategory = $item->main_category ?? 'Uncategorized';
+                $categoryName = $item->kategori->orde0 ?? 'Tanpa Kategori';
+                return "{$mainCategory} › {$categoryName}";
+            })
+            ->map(function ($items, $key) {
+                return [
+                    'key' => $key,
+                    'count' => $items->count(),
+                    'items' => $items->map(function ($item) {
+                        $properties = $item->properties;
+                        if (is_string($properties)) {
+                            $properties = json_decode($properties, true);
+                        }
+                        return [
+                            'id' => $item->id_geojson,
+                            'source_name' => $item->source_name,
+                            'properties' => $properties,
+                        ];
+                    }),
+                ];
+            });
+
+        return response()->json($categories);
     }
 }
