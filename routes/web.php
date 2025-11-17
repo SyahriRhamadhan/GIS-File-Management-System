@@ -10,6 +10,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\PdfGeojson;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PewarnaanRdtrController;
 // Halaman utama
 Route::get('/', fn() => Inertia::render('welcome'))->name('home');
 
@@ -83,6 +84,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('geojson.add_pdf');
         Route::get('/geojson/{id}/view', [PdfGeojson::class, 'index'])
             ->name('geojson.list_pdf');
+
+        // --- PEWARNAAN RDTR ROUTES ---
+        Route::get('/pewarnaan-rdtr', [PewarnaanRdtrController::class, 'index'])->name('pewarnaan_rdtr.index');
+        Route::get('/pewarnaan-rdtr/create', [PewarnaanRdtrController::class, 'create'])->name('pewarnaan_rdtr.create');
+        Route::post('/pewarnaan-rdtr', [PewarnaanRdtrController::class, 'store'])->name('pewarnaan_rdtr.store');
+        Route::get('/pewarnaan-rdtr/{id}/edit', [PewarnaanRdtrController::class, 'edit'])->name('pewarnaan_rdtr.edit');
+        Route::put('/pewarnaan-rdtr/{id}', [PewarnaanRdtrController::class, 'update'])->name('pewarnaan_rdtr.update');
+        Route::delete('/pewarnaan-rdtr/{id}', [PewarnaanRdtrController::class, 'destroy'])->name('pewarnaan_rdtr.destroy');
     });
 });
 

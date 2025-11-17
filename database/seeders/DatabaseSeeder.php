@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             RegionSeeder::class,
             OwnerSeeder::class,
             KategoriSeeder::class,
+            PewarnaanRdtrSeeder::class,
         ]);
     }
 }

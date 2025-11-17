@@ -1,0 +1,576 @@
+[
+  {
+    "kode": "BA",
+    "cmyk": "41 14 5 0",
+    "rgb": "151 219 242",
+    "hsv": "195 38 95",
+    "sub_zona": "Badan Air"
+  },
+  {
+    "kode": "HL",
+    "cmyk": "80 63 84 0",
+    "rgb": "50 95 40",
+    "hsv": "109 57 37",
+    "sub_zona": "Hutan Lindung"
+  },
+  {
+    "kode": "LG",
+    "cmyk": "59 59 100 0",
+    "rgb": "105 105 0",
+    "hsv": "60 100 41",
+    "sub_zona": "Lindung Gambut"
+  },
+  {
+    "kode": "PS",
+    "cmyk": "98 16 16 0",
+    "rgb": "5 215 215",
+    "hsv": "180 98 84",
+    "sub_zona": "Perlindungan Setempat"
+  },
+  {
+    "kode": "RTH-1",
+    "cmyk": "78 67 96 0",
+    "rgb": "55 85 10",
+    "hsv": "84 88 33",
+    "sub_zona": "Rimba Kota"
+  },
+  {
+    "kode": "RTH-2",
+    "cmyk": "39 47 0 0",
+    "rgb": "65 105 0",
+    "hsv": "83 100 41",
+    "sub_zona": "Taman Kota"
+  },
+  {
+    "kode": "RTH-3",
+    "cmyk": "71 35 100 0",
+    "rgb": "70 135 0",
+    "hsv": "89 100 53",
+    "sub_zona": "Taman Kecamatan"
+  },
+  {
+    "kode": "RTH-4",
+    "cmyk": "75 59 100 0",
+    "rgb": "75 165 0",
+    "hsv": "93 100 65",
+    "sub_zona": "Taman Kelurahan"
+  },
+  {
+    "kode": "RTH-5",
+    "cmyk": "18 25 0 0",
+    "rgb": "80 195 0",
+    "hsv": "95 100 76",
+    "sub_zona": "Taman RW"
+  },
+  {
+    "kode": "RTH-6",
+    "cmyk": "69 24 100 0",
+    "rgb": "85 225 0",
+    "hsv": "97 100 88",
+    "sub_zona": "Taman RT"
+  },
+  {
+    "kode": "RTH-7",
+    "cmyk": "65 0 100 0",
+    "rgb": "90 255 0",
+    "hsv": "99 100 100",
+    "sub_zona": "Pemakaman"
+  },
+  {
+    "kode": "RTH-8",
+    "cmyk": "94 4 100 0",
+    "rgb": "15 145 0",
+    "hsv": "116 100 96",
+    "sub_zona": "Jalur Hijau"
+  },
+  {
+    "kode": "CA",
+    "cmyk": "73 73 35 0",
+    "rgb": "70 70 165",
+    "hsv": "240 58 65",
+    "sub_zona": "Cagar Alam"
+  },
+  {
+    "kode": "CAL",
+    "cmyk": "65 65 24 0",
+    "rgb": "90 90 195",
+    "hsv": "240 54 76",
+    "sub_zona": "Cagar Alam Laut"
+  },
+  {
+    "kode": "SM",
+    "cmyk": "57 57 12 0",
+    "rgb": "110 110 225",
+    "hsv": "240 51 88",
+    "sub_zona": "Suaka Margasatwa"
+  },
+  {
+    "kode": "SML",
+    "cmyk": "73 29 25 0",
+    "rgb": "130 130 255",
+    "hsv": "240 49 100",
+    "sub_zona": "Suaka Margasatwa Laut"
+  },
+  {
+    "kode": "TN",
+    "cmyk": "37 10 14 0",
+    "rgb": "155 135 255",
+    "hsv": "250 47 100",
+    "sub_zona": "Taman Nasional"
+  },
+  {
+    "kode": "THR",
+    "cmyk": "73 47 100 0",
+    "rgb": "185 165 255",
+    "hsv": "253 35 100",
+    "sub_zona": "Taman Hutan Raya"
+  },
+  {
+    "kode": "TWA",
+    "cmyk": "10 18 0 0",
+    "rgb": "210 190 255",
+    "hsv": "258 25 100",
+    "sub_zona": "Taman Wisata Alam"
+  },
+  {
+    "kode": "TWL",
+    "cmyk": "22 4 79 0",
+    "rgb": "230 210 255",
+    "hsv": "267 18 100",
+    "sub_zona": "Taman Wisata Alam Laut"
+  },
+  {
+    "kode": "TB",
+    "cmyk": "27 35 0 0",
+    "rgb": "70 150 255",
+    "hsv": "214 73 100",
+    "sub_zona": "Taman Buru"
+  },
+  {
+    "kode": "SPS",
+    "cmyk": "53 20 18 0",
+    "rgb": "70 180 190",
+    "hsv": "185 63 75",
+    "sub_zona": "Suaka Pesisir"
+  },
+  {
+    "kode": "SPK",
+    "cmyk": "73 41 0 0",
+    "rgb": "120 205 210",
+    "hsv": "183 43 82",
+    "sub_zona": "Suaka Pulau Kecil"
+  },
+  {
+    "kode": "TP",
+    "cmyk": "37 10 14 0",
+    "rgb": "160 230 220",
+    "hsv": "170 30 90",
+    "sub_zona": "Taman Pesisir"
+  },
+  {
+    "kode": "TPK",
+    "cmyk": "67 12 100 0",
+    "rgb": "200 240 230",
+    "hsv": "165 17 94",
+    "sub_zona": "Taman Pulau Kecil"
+  },
+  {
+    "kode": "PAM",
+    "cmyk": "88 27 51 0",
+    "rgb": "30 185 125",
+    "hsv": "157 84 73",
+    "sub_zona": "Perlindungan Adat Maritim"
+  },
+  {
+    "kode": "PBM",
+    "cmyk": "78 18 51 0",
+    "rgb": "55 210 125",
+    "hsv": "147 74 82",
+    "sub_zona": "Perlindungan Budaya Maritim"
+  },
+  {
+    "kode": "KPR",
+    "cmyk": "69 4 51 0",
+    "rgb": "80 245 125",
+    "hsv": "136 67 96",
+    "sub_zona": "Kawasan Konservasi Perairan"
+  },
+  {
+    "kode": "ADT",
+    "cmyk": "98 59 75 0",
+    "rgb": "5 105 65",
+    "hsv": "156 95 41",
+    "sub_zona": "Hutan Adat"
+  },
+  {
+    "kode": "LGE-1",
+    "cmyk": "41 47 41 0",
+    "rgb": "150 135 150",
+    "hsv": "300 10 59",
+    "sub_zona": "Keunikan Batuan dan Fosil"
+  },
+  {
+    "kode": "LGE-2",
+    "cmyk": "29 47 41 0",
+    "rgb": "180 135 150",
+    "hsv": "340 25 71",
+    "sub_zona": "Keunikan Bentang Alam"
+  },
+  {
+    "kode": "LGE-3",
+    "cmyk": "18 47 29 0",
+    "rgb": "210 135 180",
+    "hsv": "324 36 82",
+    "sub_zona": "Keunikan Proses Geologi"
+  },
+  {
+    "kode": "LGE-4",
+    "cmyk": "20 47 61 0",
+    "rgb": "205 135 100",
+    "hsv": "20 51 80",
+    "sub_zona": "Imbuhan Air Tanah"
+  },
+  {
+    "kode": "CB",
+    "cmyk": "0 78 20 0",
+    "rgb": "255 55 205",
+    "hsv": "315 78 100",
+    "sub_zona": "Cagar Budaya"
+  },
+  {
+    "kode": "EM",
+    "cmyk": "82 41 57 0",
+    "rgb": "45 150 110",
+    "hsv": "157 70 59",
+    "sub_zona": "Ekosistem Mangrove"
+  },
+  {
+    "kode": "BJ",
+    "cmyk": "8 88 88 0",
+    "rgb": "235 30 30",
+    "hsv": "0 87 92",
+    "sub_zona": "Badan Jalan"
+  },
+  {
+    "kode": "HPT",
+    "cmyk": "71 39 78 0",
+    "rgb": "75 155 55",
+    "hsv": "108 65 61",
+    "sub_zona": "Hutan Produksi Terbatas"
+  },
+  {
+    "kode": "HP",
+    "cmyk": "51 29 78 0",
+    "rgb": "125 180 55",
+    "hsv": "86 69 71",
+    "sub_zona": "Hutan Produksi Tetap"
+  },
+  {
+    "kode": "HPK",
+    "cmyk": "39 12 78 0",
+    "rgb": "155 225 55",
+    "hsv": "85 76 88",
+    "sub_zona": "Hutan Produksi yang dapat Dikonversi"
+  },
+  {
+    "kode": "KR",
+    "cmyk": "39 22 39 0",
+    "rgb": "155 200 155",
+    "hsv": "120 23 78",
+    "sub_zona": "Perkebunan Rakyat"
+  },
+  {
+    "kode": "P-1",
+    "cmyk": "22 4 73 0",
+    "rgb": "200 245 70",
+    "hsv": "75 71 96",
+    "sub_zona": "Tanaman Pangan"
+  },
+  {
+    "kode": "P-2",
+    "cmyk": "10 0 71 0",
+    "rgb": "230 255 75",
+    "hsv": "68 71 100",
+    "sub_zona": "Hortikultura"
+  },
+  {
+    "kode": "P-3",
+    "cmyk": "31 31 78 0",
+    "rgb": "175 175 55",
+    "hsv": "60 69 69",
+    "sub_zona": "Perkebunan"
+  },
+  {
+    "kode": "P-4",
+    "cmyk": "27 8 27 0",
+    "rgb": "185 235 185",
+    "hsv": "120 21 92",
+    "sub_zona": "Peternakan"
+  },
+  {
+    "kode": "IK-1",
+    "cmyk": "61 39 18 0",
+    "rgb": "100 155 210",
+    "hsv": "210 52 82",
+    "sub_zona": "Perikanan Tangkap"
+  },
+  {
+    "kode": "IK-2",
+    "cmyk": "49 27 18 0",
+    "rgb": "130 185 210",
+    "hsv": "199 38 82",
+    "sub_zona": "Perikanan Budi Daya"
+  },
+  {
+    "kode": "KEG",
+    "cmyk": "29 41 53 0",
+    "rgb": "180 150 120",
+    "hsv": "30 33 71",
+    "sub_zona": "Pregaraman"
+  },
+  {
+    "kode": "MRA",
+    "cmyk": "90 82 71 0",
+    "rgb": "25 45 75",
+    "hsv": "216 68 29",
+    "sub_zona": "Pertambangan Mineral Radioaktif"
+  },
+  {
+    "kode": "MLG",
+    "cmyk": "82 75 63 0",
+    "rgb": "45 65 95",
+    "hsv": "216 53 37",
+    "sub_zona": "Pertambangan Mineral Logam"
+  },
+  {
+    "kode": "MNL",
+    "cmyk": "75 67 55 0",
+    "rgb": "65 85 115",
+    "hsv": "216 43 45",
+    "sub_zona": "Pertambangan Mineral Bukan Logam"
+  },
+  {
+    "kode": "MBT",
+    "cmyk": "63 55 43 0",
+    "rgb": "95 115 145",
+    "hsv": "216 34 57",
+    "sub_zona": "Peruntukan Pertambangan Batuan"
+  },
+  {
+    "kode": "BR",
+    "cmyk": "51 43 31 0",
+    "rgb": "125 145 175",
+    "hsv": "216 29 69",
+    "sub_zona": "Pertambangan Batubara"
+  },
+  {
+    "kode": "MG",
+    "cmyk": "39 31 20 0",
+    "rgb": "155 175 205",
+    "hsv": "216 24 80",
+    "sub_zona": "Pertambangan Migas dan Gas Bumi"
+  },
+  {
+    "kode": "PB",
+    "cmyk": "20 100 100 0",
+    "rgb": "205 0 0",
+    "hsv": "0 100 80",
+    "sub_zona": "Panas Bumi"
+  },
+  {
+    "kode": "PTL",
+    "cmyk": "100 0 20 0",
+    "rgb": "0 255 205",
+    "hsv": "168 100 100",
+    "sub_zona": "Pembangkitan Tenaga Listrik"
+  },
+  {
+    "kode": "KPI",
+    "cmyk": "59 100 100 0",
+    "rgb": "105 0 0",
+    "hsv": "0 100 41",
+    "sub_zona": "Kawasan Peruntukan Industri"
+  },
+  {
+    "kode": "W",
+    "cmyk": "0 35 0 0",
+    "rgb": "255 165 255",
+    "hsv": "300 35 100",
+    "sub_zona": "Pariwisata"
+  },
+  {
+    "kode": "R-1",
+    "cmyk": "0 25 100 0",
+    "rgb": "255 190 0",
+    "hsv": "45 100 100",
+    "sub_zona": "Perumahan Kepadatan Sangat Tinggi"
+  },
+  {
+    "kode": "R-2",
+    "cmyk": "0 14 100 0",
+    "rgb": "255 220 0",
+    "hsv": "52 100 100",
+    "sub_zona": "Perumahan Kepadatan Tinggi"
+  },
+  {
+    "kode": "R-3",
+    "cmyk": "0 6 98 0",
+    "rgb": "255 240 5",
+    "hsv": "56 98 100",
+    "sub_zona": "Perumahan Kepadatan Sedang"
+  },
+  {
+    "kode": "R-4",
+    "cmyk": "0 2 71 0",
+    "rgb": "255 250 75",
+    "hsv": "58 71 100",
+    "sub_zona": "Perumahan Kepadatan Rendah"
+  },
+  {
+    "kode": "R-5",
+    "cmyk": "0 0 39 0",
+    "rgb": "255 255 155",
+    "hsv": "60 39 100",
+    "sub_zona": "Perumahan Kepadatan Sangat Rendah"
+  },
+  {
+    "kode": "SPU-1",
+    "cmyk": "51 90 51 0",
+    "rgb": "125 25 125",
+    "hsv": "300 80 49",
+    "sub_zona": "SPU Skala Kota"
+  },
+  {
+    "kode": "SPU-2",
+    "cmyk": "39 80 39 0",
+    "rgb": "155 50 155",
+    "hsv": "300 68 61",
+    "sub_zona": "SPU Skala Kecamatan"
+  },
+  {
+    "kode": "SPU-3",
+    "cmyk": "27 71 27 0",
+    "rgb": "185 75 185",
+    "hsv": "300 59 73",
+    "sub_zona": "SPU Skala Kelurahan"
+  },
+  {
+    "kode": "SPU-4",
+    "cmyk": "16 61 16 0",
+    "rgb": "215 100 215",
+    "hsv": "300 53 84",
+    "sub_zona": "SPU Skala RW"
+  },
+  {
+    "kode": "RTNH",
+    "cmyk": "100 59 59 0",
+    "rgb": "0 95 95",
+    "hsv": "180 100 41",
+    "sub_zona": "Ruang Terbuka Non Hijau"
+  },
+  {
+    "kode": "C-1",
+    "cmyk": "6 67 100 0",
+    "rgb": "240 85 0",
+    "hsv": "21 100 94",
+    "sub_zona": "Intensitas Tinggi"
+  },
+  {
+    "kode": "C-2",
+    "cmyk": "6 55 88 0",
+    "rgb": "240 115 30",
+    "hsv": "24 88 94",
+    "sub_zona": "Intensitas Menengah/Sedang"
+  },
+  {
+    "kode": "K-1",
+    "cmyk": "0 61 61 0",
+    "rgb": "255 100 100",
+    "hsv": "0 61 100",
+    "sub_zona": "Skala Kota"
+  },
+  {
+    "kode": "K-2",
+    "cmyk": "0 49 49 0",
+    "rgb": "255 130 130",
+    "hsv": "0 49 100",
+    "sub_zona": "Skala WP"
+  },
+  {
+    "kode": "K-3",
+    "cmyk": "0 35 35 0",
+    "rgb": "255 165 165",
+    "hsv": "0 35 100",
+    "sub_zona": "Skala SWP"
+  },
+  {
+    "kode": "KT",
+    "cmyk": "0 0 0 39",
+    "rgb": "155 155 155",
+    "hsv": "0 0 61",
+    "sub_zona": "Perkantoran"
+  },
+  {
+    "kode": "PL-1",
+    "cmyk": "0 59 39 0",
+    "rgb": "255 105 155",
+    "hsv": "340 59 100",
+    "sub_zona": "Tempat Evakuasi Sementara"
+  },
+  {
+    "kode": "PL-2",
+    "cmyk": "0 78 59 0",
+    "rgb": "255 55 105",
+    "hsv": "345 78 100",
+    "sub_zona": "Tempat Evakuasi Akhir"
+  },
+  {
+    "kode": "PL-3",
+    "cmyk": "0 22 59 0",
+    "rgb": "255 200 105",
+    "hsv": "38 59 100",
+    "sub_zona": "Instalasi Pengolahan Air Minum (IPAM)"
+  },
+  {
+    "kode": "PL-4",
+    "cmyk": "0 10 47 0",
+    "rgb": "255 230 135",
+    "hsv": "48 47 100",
+    "sub_zona": "Instalasi Pengolahan Air Limbah (IPAL)"
+  },
+  {
+    "kode": "PL-5",
+    "cmyk": "47 100 88 0",
+    "rgb": "135 0 30",
+    "hsv": "347 100 53",
+    "sub_zona": "Pengembangan Nuklir"
+  },
+  {
+    "kode": "PL-6",
+    "cmyk": "0 0 0 78",
+    "rgb": "55 55 55",
+    "hsv": "0 0 22",
+    "sub_zona": "Pergudangan"
+  },
+  {
+    "kode": "PP",
+    "cmyk": "16 39 78 0",
+    "rgb": "215 155 55",
+    "hsv": "37 74 84",
+    "sub_zona": "Pengelolaan Persampahan"
+  },
+  {
+    "kode": "TR",
+    "cmyk": "16 78 100 0",
+    "rgb": "215 55 0",
+    "hsv": "15 100 84",
+    "sub_zona": "Transportasi"
+  },
+  {
+    "kode": "HK",
+    "cmyk": "39 100 0 0",
+    "rgb": "155 0 255",
+    "hsv": "276 100 100",
+    "sub_zona": "Pertahanan dan Keamanan"
+  }
+]

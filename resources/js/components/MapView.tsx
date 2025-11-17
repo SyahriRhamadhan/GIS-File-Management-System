@@ -1,4 +1,4 @@
-﻿import BaseLayers from '@/components/BaseLayer';
+import BaseLayers from '@/components/BaseLayer';
 import SidebarFilter from '@/components/SidebarFilter';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
@@ -1044,13 +1044,35 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 onClick={(e) => e.stopPropagation()}
             >
                 {renderLayerControls()}
-                {Object.entries(mergedProps)
-                    .filter(([k]) => k !== 'id_geojson')
-                    .map(([k, v]) => (
-                        <p key={k}>
-                            <strong>{k}:</strong> {String(v)}
-                        </p>
-                    ))}
+                {(() => {
+                    const propEntries = Object.entries(mergedProps).filter(([k]) => k !== 'id_geojson');
+                    return (
+                        <div className="mt-2 border rounded">
+                            <div
+                                className="max-h-[200px] overflow-y-auto"
+                                onWheel={(e) => e.stopPropagation()}
+                                onMouseDown={(e) => e.stopPropagation()}
+                            >
+                                <table className="min-w-full text-sm">
+                                    <thead className="sticky top-0 bg-gray-50">
+                                        <tr>
+                                            <th className="border-b px-2 py-1 text-left">Properti</th>
+                                            <th className="border-b px-2 py-1 text-left">Nilai</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {propEntries.map(([k, v]) => (
+                                            <tr key={k} className="odd:bg-white even:bg-gray-50">
+                                                <td className="px-2 py-1 font-semibold whitespace-nowrap">{k}</td>
+                                                <td className="px-2 py-1 break-all">{String(v)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    );
+                })()}
                 <div className="mt-2 flex flex-wrap items-center gap-2 justify-end">
                     <a
                         href={`/dashboard/geojson/${item.id_geojson}/add`}
