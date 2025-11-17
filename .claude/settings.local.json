@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(node scripts/extractStyleSymbols.js:*)",
+      "Bash(node scripts/inspectBinaryData.js:*)",
+      "Bash(node scripts/findSymbolBlobs.js:*)"
     ],
     "deny": [],
     "ask": []

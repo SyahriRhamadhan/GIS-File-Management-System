@@ -1,0 +1,5321 @@
+{
+  "metadata": {
+    "source": "ArcGIS Style Tags",
+    "note": "Colors extracted from tag names, mapped to standard RGB values",
+    "colorCount": 30
+  },
+  "byType": {
+    "fill": [
+      {
+        "id": 1,
+        "name": "Badan Air",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Badan Jalan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Cagar Alam",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Cagar Alam Laut",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Cagar Budaya",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 6,
+        "name": "Campuran Intensitas Menengah/Sedang",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 7,
+        "name": "Campuran Intensitas Tinggi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 8,
+        "name": "Daerah Perlindungan Adat Maritim",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Daerah Perlindungan Budaya Maritim",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 10,
+        "name": "Ekosistem Mangrove",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 11,
+        "name": "Fungsi dan Daya Dukung Lingkungan Hidup",
+        "category": "Kawasan Strategis",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 12,
+        "name": "Holding Zone",
+        "category": "Ketentuan Tambahan",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 13,
+        "name": "Hortikultura",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 14,
+        "name": "Hutan Adat",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 16,
+        "name": "Hutan Produksi Terbatas",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 17,
+        "name": "Hutan Produksi Tetap",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 18,
+        "name": "Hutan Produksi yang dapat Dikonversi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 19,
+        "name": "Imbuhan Air Tanah",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 20,
+        "name": "Instalasi Pengolahan Air Limbah (IPAL)",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 21,
+        "name": "Instalasi Pengolahan Air Minum (IPAM)",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 22,
+        "name": "Jalur Hijau",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 23,
+        "name": "Kawasan Cagar Alam Geologi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 24,
+        "name": "Kawasan Cagar Budaya",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 25,
+        "name": "Kawasan Campuran",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 26,
+        "name": "Kawasan Ekosistem Mangrove",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 27,
+        "name": "Kawasan Fasilitas Umum dan Fasilitas Sosial",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 28,
+        "name": "Kawasan Hortikultura",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 29,
+        "name": "Kawasan Hutan Adat",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 31,
+        "name": "Kawasan Hutan Produksi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 32,
+        "name": "Kawasan Hutan Produksi Terbatas",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 33,
+        "name": "Kawasan Hutan Produksi Tetap",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 34,
+        "name": "Kawasan Hutan Produksi yang dapat Dikonversi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 35,
+        "name": "Kawasan Imbuhan Air Tanah",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 36,
+        "name": "Kawasan Infrastruktur Perkotaan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 37,
+        "name": "Kawasan IPPKH/PPKH",
+        "category": "Ketentuan Tambahan",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 38,
+        "name": "Kawasan Keunikan Batuan dan Fosil",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 40,
+        "name": "Kawasan Keunikan Proses Geologi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 41,
+        "name": "Kawasan Konservasi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 42,
+        "name": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 43,
+        "name": "Kawasan Konservasi Maritim",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 44,
+        "name": "Kawasan Konservasi Perairan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 45,
+        "name": "Kawasan Konservasi Pesisir dan Pulau-Pulau Kecil",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 46,
+        "name": "Kawasan Lindung Gambut",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 47,
+        "name": "Kawasan Lindung Geologi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 48,
+        "name": "Kawasan Panas Bumi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 49,
+        "name": "Kawasan Pariwisata",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 50,
+        "name": "Kawasan Pelestarian Alam",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 51,
+        "name": "Kawasan Pemanfaatan Air Laut selain Energi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 52,
+        "name": "Kawasan Pembangkitan Tenaga Listrik",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 53,
+        "name": "Kawasan Pembuangan Hasil Pengerukan di Laut",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 55,
+        "name": "Kawasan Perdagangan dan Jasa",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 56,
+        "name": "Kawasan Pergaraman",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 57,
+        "name": "Kawasan Perikanan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 58,
+        "name": "Kawasan Perikanan Budi Daya",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 59,
+        "name": "Kawasan Perikanan Tangkap",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 60,
+        "name": "Kawasan Perkantoran",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 61,
+        "name": "Kawasan Perkebunan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 62,
+        "name": "Kawasan Perkebunan Rakyat",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 63,
+        "name": "Kawasan Perlindungan Setempat",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 64,
+        "name": "Kawasan Permukiman",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 65,
+        "name": "Kawasan Permukiman Perdesaan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 66,
+        "name": "Kawasan Permukiman Perkotaan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 67,
+        "name": "Kawasan Pertahanan dan Keamanan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 69,
+        "name": "Kawasan Pertambangan dan Energi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 70,
+        "name": "Kawasan Pertambangan Mineral Bukan Logam",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 73,
+        "name": "Kawasan Pertambangan Minyak dan Gas Bumi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 74,
+        "name": "Kawasan Pertanian",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 75,
+        "name": "Kawasan Perumahan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 76,
+        "name": "Kawasan Peruntukan Industri",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 78,
+        "name": "Kawasan Peternakan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 79,
+        "name": "Kawasan Ruang Terbuka Non Hijau",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 80,
+        "name": "Kawasan Suaka Alam",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 81,
+        "name": "Kawasan Taman Buru",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 82,
+        "name": "Kawasan Tanaman Pangan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 83,
+        "name": "Kawasan Transportasi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 84,
+        "name": "Kawasan yang Memberikan Perlindungan terhadap Kawasan Bawahannya",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 85,
+        "name": "Keunikan Batuan dan Fosil",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 87,
+        "name": "Keunikan Proses Geologi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 88,
+        "name": "Lindung Gambut",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 92,
+        "name": "Overlay - Kawasan Ancangan Pendaratan dan Lepas Landas",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 93,
+        "name": "Overlay - Kawasan Berorientasi Transit",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 94,
+        "name": "Overlay - Kawasan Cagar Budaya",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 95,
+        "name": "Overlay - Kawasan di Bawah Permukaan Horizontal-Dalam",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 96,
+        "name": "Overlay - Kawasan di Bawah Permukaan Horizontal-Luar",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 97,
+        "name": "Overlay - Kawasan di Bawah Permukaan Kerucut",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 98,
+        "name": "Overlay - Kawasan di Bawah Permukaan Transisi",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 99,
+        "name": "Overlay - Kawasan Karst",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 100,
+        "name": "Overlay - Kawasan Kemungkinan Bahaya Kecelakaan",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 101,
+        "name": "Overlay - Kawasan Keselamatan Operasi Penerbangan",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 102,
+        "name": "Overlay - Kawasan Migrasi Satwa",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 103,
+        "name": "Overlay - Kawasan Perlindungan Ekosistem Laut",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 104,
+        "name": "Overlay - Kawasan Pertahanan dan Keamanan",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 105,
+        "name": "Overlay - Kawasan Pertambangan Mineral dan Batubara",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 106,
+        "name": "Overlay - Kawasan Pertanian Pangan Berkelanjutan",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 108,
+        "name": "Overlay - Kawasan Resapan Air",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 109,
+        "name": "Overlay - Lahan Cadangan Pertanian Pangan Berkelanjutan",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 110,
+        "name": "Overlay - Lahan Pertanian Pangan Berkelanjutan",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 111,
+        "name": "Overlay - Pusat Penelitian",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 112,
+        "name": "Overlay - Ruang Dalam Bumi",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 113,
+        "name": "Overlay - Sempadan Ketenagalistrikan",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 114,
+        "name": "Overlay - Sempadan Mata Air",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 115,
+        "name": "Overlay - Sempadan Pantai",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 116,
+        "name": "Overlay - Sempadan Pipa/Kabel",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 117,
+        "name": "Overlay - Sempadan Situ, Danau, Embung, dan Waduk",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 119,
+        "name": "Overlay - Tempat Evakuasi Akhir",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 120,
+        "name": "Overlay - Tempat Evakuasi Sementara",
+        "category": "Ketentuan Khusus",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 121,
+        "name": "Panas Bumi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 122,
+        "name": "Pariwisata",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 123,
+        "name": "Pemakaman",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 124,
+        "name": "Pembangkitan Tenaga Listrik",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 125,
+        "name": "Pendayagunaan Sumber Daya Alam dan/atau Teknologi Tinggi",
+        "category": "Kawasan Strategis",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 126,
+        "name": "Pengelolaan Persampahan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 127,
+        "name": "Pengembangan Nuklir",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 128,
+        "name": "Perdagangan dan Jasa Skala Kota",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 129,
+        "name": "Perdagangan dan Jasa Skala SWP",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 130,
+        "name": "Perdagangan dan Jasa Skala WP",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 131,
+        "name": "Pergaraman",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 132,
+        "name": "Pergudangan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 133,
+        "name": "Perikanan Budi Daya",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 134,
+        "name": "Perikanan Tangkap",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 135,
+        "name": "Perkantoran",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 136,
+        "name": "Perkebunan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 137,
+        "name": "Perkebunan Rakyat",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 138,
+        "name": "Perlindungan Setempat",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 139,
+        "name": "Pertahanan dan Keamanan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 141,
+        "name": "Pertambangan Mineral Bukan Logam",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 144,
+        "name": "Pertambangan Minyak dan Gas Bumi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 145,
+        "name": "Pertumbuhan Ekonomi",
+        "category": "Kawasan Strategis",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 146,
+        "name": "Perumahan Kepadatan Rendah",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 147,
+        "name": "Perumahan Kepadatan Sangat Rendah",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 148,
+        "name": "Perumahan Kepadatan Sangat Tinggi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 149,
+        "name": "Perumahan Kepadatan Sedang",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 150,
+        "name": "Perumahan Kepadatan Tinggi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 152,
+        "name": "Peternakan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 153,
+        "name": "Pos Lintas Batas Negara",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 154,
+        "name": "Rimba Kota",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 155,
+        "name": "Ruang Terbuka Hijau",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 156,
+        "name": "Ruang Terbuka Non Hijau",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 157,
+        "name": "Sosial dan Budaya",
+        "category": "Kawasan Strategis",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 158,
+        "name": "SPU Skala Kecamatan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 159,
+        "name": "SPU Skala Kelurahan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 160,
+        "name": "SPU Skala Kota",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 161,
+        "name": "SPU Skala RW",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 162,
+        "name": "Suaka Margasatwa",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 163,
+        "name": "Suaka Margasatwa Laut",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 164,
+        "name": "Suaka Pesisir",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 165,
+        "name": "Suaka Pulau Kecil",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 166,
+        "name": "Taman Buru",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 167,
+        "name": "Taman Hutan Raya",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 168,
+        "name": "Taman Kecamatan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 169,
+        "name": "Taman Kelurahan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 170,
+        "name": "Taman Kota",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 171,
+        "name": "Taman Nasional",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 172,
+        "name": "Taman Pesisir",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 173,
+        "name": "Taman Pulau Kecil",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 174,
+        "name": "Taman RT",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 175,
+        "name": "Taman RW",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 176,
+        "name": "Taman Wisata Alam",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 177,
+        "name": "Taman Wisata Alam Laut",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 178,
+        "name": "Tanaman Pangan",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 179,
+        "name": "Tempat Evakuasi Akhir",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 180,
+        "name": "Tempat Evakuasi Bencana",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 181,
+        "name": "Tempat Evakuasi Sementara",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 182,
+        "name": "Transportasi",
+        "category": "Pola Ruang",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      }
+    ],
+    "line": [
+      {
+        "id": 4,
+        "name": "Alur-Pelayaran Khusus",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Alur-Pelayaran Masuk Pelabuhan",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 6,
+        "name": "Alur-Pelayaran Sungai dan Alur-Pelayaran Danau",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 7,
+        "name": "Alur-Pelayaran Umum dan Perlintasan",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 8,
+        "name": "Garis Pantai Rencana",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Jalan Arteri Primer",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 10,
+        "name": "Jalan Arteri Sekunder",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 11,
+        "name": "Jalan Khusus",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 12,
+        "name": "Jalan Kolektor Primer",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 13,
+        "name": "Jalan Kolektor Sekunder",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 14,
+        "name": "Jalan Lingkungan Primer",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 15,
+        "name": "Jalan Lingkungan Sekunder",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 16,
+        "name": "Jalan Lokal Primer",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 17,
+        "name": "Jalan Lokal Sekunder",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 18,
+        "name": "Jalan Masuk dan Keluar Parkir",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 19,
+        "name": "Jalan Masuk dan Keluar Terminal Barang dan Penumpang",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 20,
+        "name": "Jalan Menuju Moda Transportasi Umum",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 21,
+        "name": "Jalan Tol",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 22,
+        "name": "Jalur Evakuasi Bencana",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 23,
+        "name": "Jalur Kereta Rel Listrik",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 24,
+        "name": "Jalur LRT",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 25,
+        "name": "Jalur Monorel",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 26,
+        "name": "Jalur MRT",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 28,
+        "name": "Jalur Sepeda",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 29,
+        "name": "Jaringan Air Baku",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 30,
+        "name": "Jaringan Distribusi Pembagi",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 31,
+        "name": "Jaringan Distribusi Tenaga Listrik",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 32,
+        "name": "Jaringan Drainase Lokal",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 33,
+        "name": "Jaringan Drainase Primer",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 34,
+        "name": "Jaringan Drainase Sekunder",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 35,
+        "name": "Jaringan Drainase Tersier",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 36,
+        "name": "Jaringan Irigasi Air Tanah",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 37,
+        "name": "Jaringan Irigasi Primer",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 38,
+        "name": "Jaringan Irigasi Sekunder",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 39,
+        "name": "Jaringan Irigasi Tersier",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 40,
+        "name": "Jaringan Jalur Kereta Api",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 41,
+        "name": "Jaringan Jalur Kereta Api Antarkota",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 42,
+        "name": "Jaringan Jalur Kereta Api Khusus",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 43,
+        "name": "Jaringan Jalur Kereta Api Perkotaan",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 45,
+        "name": "Jaringan Pejalan Kaki",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 46,
+        "name": "Jaringan Pengendalian Banjir",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 47,
+        "name": "Jaringan Pipa/Kabel Bawah Laut Penyaluran Tenaga Listrik",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 48,
+        "name": "Jaringan Produksi",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 49,
+        "name": "Jaringan Serat Optik",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 50,
+        "name": "Jaringan Sistem Pengelolaan Air Limbah (SPAL)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 51,
+        "name": "Jaringan Sistem Pengelolaan Air Limbah Domestik",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 52,
+        "name": "Jaringan Sistem Pengelolaan Air Limbah Non Domestik",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 53,
+        "name": "Jaringan Sistem Penyediaan Air Minum (SPAM)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 54,
+        "name": "Jaringan Tetap",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 55,
+        "name": "Jaringan Transmisi Air Baku",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 56,
+        "name": "Jaringan Transmisi Air Minum",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 57,
+        "name": "Jaringan Transmisi Tenaga Listrik Antarsistem",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 58,
+        "name": "Jaringan yang Menyalurkan Gas Bumi dari Fasilitas Produksi-Kilang Pengolahan",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 59,
+        "name": "Jaringan yang Menyalurkan Gas Bumi dari Fasilitas Produksi-Tempat Penyimpanan",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 60,
+        "name": "Jaringan yang Menyalurkan Gas Bumi dari Kilang Pengolahan-Konsumen",
+        "category": "Jaringan Energi ",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 61,
+        "name": "Jaringan yang Menyalurkan Minyak Bumi dari Fasilitas Produksi-Kilang Pengolahan",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 62,
+        "name": "Jaringan yang Menyalurkan Minyak Bumi dari Fasilitas Produksi-Tempat Penyimpanan",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 63,
+        "name": "Jaringan yang Menyalurkan Minyak dan Gas Bumi dari Fasilitas Produksi-Kilang Pengolahan",
+        "category": "Jaringan Energi ",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 64,
+        "name": "Jaringan yang Menyalurkan Minyak dan Gas Bumi dari Fasilitas Produksi-Tempat Penyimpanan",
+        "category": "Jaringan Energi ",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 65,
+        "name": "Kabel Bawah Tanah",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 66,
+        "name": "Lintas Penyeberangan Antarkabupaten/Kota dalam Provinsi",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 67,
+        "name": "Lintas Penyeberangan Antarnegara",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 68,
+        "name": "Lintas Penyeberangan Antarprovinsi",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 69,
+        "name": "Lintas Penyeberangan dalam Kabupaten",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 70,
+        "name": "Lintas Penyeberangan dalam Kota",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 71,
+        "name": "Pengaman Pantai",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 72,
+        "name": "Pipa Induk",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 73,
+        "name": "Pipa Non Tinja",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 74,
+        "name": "Pipa Persil",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 75,
+        "name": "Pipa Retikulasi",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 76,
+        "name": "Pipa Tinja",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 77,
+        "name": "Saluran Distribusi Lainnya",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 78,
+        "name": "Saluran Kabel Tegangan Menengah (SKTM)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 79,
+        "name": "Saluran Transmisi Lainnya",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 80,
+        "name": "Saluran Udara Tegangan Ekstra Tinggi (SUTET)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 81,
+        "name": "Saluran Udara Tegangan Menengah (SUTM)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 82,
+        "name": "Saluran Udara Tegangan Rendah (SUTR)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 83,
+        "name": "Saluran Udara Tegangan Tinggi (SUTT)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 84,
+        "name": "Saluran Udara Tegangan Tinggi Arus Searah (SUTTAS)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 85,
+        "name": "Saluran Udara Tegangan Ultra Tinggi (SUTUT)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 86,
+        "name": "Sistem Jaringan Air Bersih",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 87,
+        "name": "Sistem Jaringan Irigasi",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 88,
+        "name": "Tanggul Penahan Longsor",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 89,
+        "name": "Telepon Fixed Line",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 90,
+        "name": "Unit Distribusi",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      }
+    ],
+    "marker": [
+      {
+        "id": 1,
+        "name": "Bak Kontrol",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Bak Penampungan Air Hujan",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Bak Perangkap Lemak dan Minyak dari Dapur",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Bandar Udara Khusus",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Bandar Udara Pengumpan",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 6,
+        "name": "Bandar Udara Pengumpul",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 7,
+        "name": "Bandar Udara Pengumpul Skala Pelayanan Primer",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 8,
+        "name": "Bandar Udara Pengumpul Skala Pelayanan Sekunder",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Bandar Udara Pengumpul Skala Pelayanan Tersier",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 10,
+        "name": "Bangunan Pelengkap Drainase",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 11,
+        "name": "Bangunan Penampung Air",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 12,
+        "name": "Bangunan Penangkap Mata Air",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 13,
+        "name": "Bangunan Pengambil Air Baku",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 14,
+        "name": "Bangunan Pengendalian Banjir",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 15,
+        "name": "Bangunan Peresapan (Kolam Retensi)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 16,
+        "name": "Bangunan Sumber Daya Air",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 17,
+        "name": "Bangunan Tampungan (Polder)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 18,
+        "name": "Bendungan",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 19,
+        "name": "Gardu Distribusi",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 20,
+        "name": "Gardu Hubung",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 21,
+        "name": "Gardu Induk",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 22,
+        "name": "Gardu Listrik",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 23,
+        "name": "Halte",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 24,
+        "name": "Hidran Kebakaran",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 25,
+        "name": "Hidran Umum",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 26,
+        "name": "Infrastruktur Jaringan Mikro Digital",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 27,
+        "name": "Infrastruktur Jaringan Tetap",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 28,
+        "name": "Infrastruktur Minyak dan Gas Bumi",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 29,
+        "name": "Infrastruktur Pembangkitan Tenaga Listrik dan Sarana Pendukung",
+        "category": "Jaringan Energi ",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 30,
+        "name": "Infrastruktur Sistem Pengelolaan Air Limbah (SPAL)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 31,
+        "name": "Infrastruktur Sistem Pengelolaan Air Limbah Domestik",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 32,
+        "name": "Infrastruktur Sistem Pengelolaan Air Limbah Non Domestik",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 33,
+        "name": "Infrastruktur Sistem Penyediaan Air Minum (SPAM)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 34,
+        "name": "Instalasi Produksi",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 35,
+        "name": "IPAL Komunal Industri Rumah Tangga",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 36,
+        "name": "IPAL Kota",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 37,
+        "name": "IPAL Skala Kawasan Tertentu/Permukiman",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 38,
+        "name": "Jaringan Bergerak",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 39,
+        "name": "Jaringan Bergerak Satelit",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 40,
+        "name": "Jaringan Bergerak Seluler",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 41,
+        "name": "Jaringan Bergerak Terestrial",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 42,
+        "name": "Jaringan Peningkatan Pelayanan",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 43,
+        "name": "Jembatan",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 44,
+        "name": "Jembatan Timbang",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 45,
+        "name": "Kotak Pembagi",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 46,
+        "name": "Lubang Inspeksi",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 47,
+        "name": "Menara Base Transceiver Station (BTS)",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 48,
+        "name": "Pangkalan Pendaratan Ikan",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 49,
+        "name": "Pelabuhan Pengumpan",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 50,
+        "name": "Pelabuhan Pengumpan Lokal",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 51,
+        "name": "Pelabuhan Pengumpan Regional",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 52,
+        "name": "Pelabuhan Pengumpul",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 53,
+        "name": "Pelabuhan Penyeberangan",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 54,
+        "name": "Pelabuhan Penyeberangan Kelas I",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 55,
+        "name": "Pelabuhan Penyeberangan Kelas II",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 56,
+        "name": "Pelabuhan Penyeberangan Kelas III",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 57,
+        "name": "Pelabuhan Perikanan Nusantara",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 58,
+        "name": "Pelabuhan Perikanan Pantai",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 59,
+        "name": "Pelabuhan Perikanan Samudera",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 60,
+        "name": "Pelabuhan Sungai dan Danau",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 61,
+        "name": "Pelabuhan Sungai dan Danau Pengumpan",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 62,
+        "name": "Pelabuhan Sungai dan Danau Pengumpul",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 63,
+        "name": "Pelabuhan Sungai dan Danau Utama",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 64,
+        "name": "Pelabuhan Utama",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 65,
+        "name": "Pembangkit Listrik Lainnya",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 66,
+        "name": "Pembangkit Listrik Tenaga Air (PLTA)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 67,
+        "name": "Pembangkit Listrik Tenaga Bayu (PLTB)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#800080",
+          "rgb": {
+            "r": 128,
+            "g": 0,
+            "b": 128
+          },
+          "name": "purple"
+        }
+      },
+      {
+        "id": 68,
+        "name": "Pembangkit Listrik Tenaga Diesel (PLTD)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 69,
+        "name": "Pembangkit Listrik Tenaga Gas (PLTG)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 70,
+        "name": "Pembangkit Listrik Tenaga Mikro Hidro (PLTMH)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 71,
+        "name": "Pembangkit Listrik Tenaga Nuklir (PLTN)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 72,
+        "name": "Pembangkit Listrik Tenaga Panas Bumi (PLTP)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 73,
+        "name": "Pembangkit Listrik Tenaga Surya (PLTS)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 74,
+        "name": "Pembangkit Listrik Tenaga Uap (PLTU)",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 75,
+        "name": "Pintu Air",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 76,
+        "name": "Prasarana dan Sarana Pelengkap",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 77,
+        "name": "Prasarana Irigasi",
+        "category": "Jaringan Sumber Daya Air",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 78,
+        "name": "Pusat Kegiatan Lokal (PKL)",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#ffff00",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 0
+          },
+          "name": "yellow"
+        }
+      },
+      {
+        "id": 79,
+        "name": "Pusat Kegiatan Nasional (PKN)",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 80,
+        "name": "Pusat Kegiatan Strategis Nasional (PKSN)",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 81,
+        "name": "Pusat Kegiatan Wilayah (PKW)",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 82,
+        "name": "Pusat Lingkungan Kecamatan",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 83,
+        "name": "Pusat Lingkungan Kelurahan/Desa",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 84,
+        "name": "Pusat Otomasi Sambungan Telepon",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 85,
+        "name": "Pusat Pelayanan Kawasan",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 86,
+        "name": "Pusat Pelayanan Kota",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 87,
+        "name": "Pusat Pelayanan Kota/Kawasan Perkotaan",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 88,
+        "name": "Pusat Pelayanan Lingkungan",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 89,
+        "name": "Pusat Rukun Warga",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 90,
+        "name": "Rumah Kabel",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 91,
+        "name": "Sambungan Langsung",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 92,
+        "name": "Sarana Pengolahan Hasil Pembakaran",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 93,
+        "name": "Sarana Penyimpanan Bahan Bakar",
+        "category": "Jaringan Energi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 94,
+        "name": "Sentral Telepon Otomat (STO)",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 95,
+        "name": "Sistem Jaringan Persampahan",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 96,
+        "name": "Sistem Pengelolaan Limbah Bahan Berbahaya dan Beracun (B3)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 97,
+        "name": "Stasiun Barang",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 98,
+        "name": "Stasiun Bumi",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#00ff00",
+          "rgb": {
+            "r": 0,
+            "g": 255,
+            "b": 0
+          },
+          "name": "green"
+        }
+      },
+      {
+        "id": 99,
+        "name": "Stasiun Kereta Api",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 100,
+        "name": "Stasiun Operasi",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 101,
+        "name": "Stasiun Penumpang",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 102,
+        "name": "Stasiun Penumpang Besar",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 103,
+        "name": "Stasiun Penumpang Kecil",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 104,
+        "name": "Stasiun Penumpang Sedang",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#808080",
+          "rgb": {
+            "r": 128,
+            "g": 128,
+            "b": 128
+          },
+          "name": "gray"
+        }
+      },
+      {
+        "id": 105,
+        "name": "Stasiun Peralihan Antara (SPA)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 106,
+        "name": "Stasiun Transmisi (Sistem Televisi)",
+        "category": "Jaringan Telekomunikasi",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 107,
+        "name": "Sub Pusat Pelayanan Kota",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 108,
+        "name": "Sub Pusat Pelayanan Kota/Kawasan Perkotaan",
+        "category": "Sistem Pusat Permukiman",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 109,
+        "name": "Sub-sistem Pengolahan Lumpur Tinja",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 110,
+        "name": "Sub-sistem Pengolahan Setempat",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 111,
+        "name": "Sumur Dangkal",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 112,
+        "name": "Sumur Pompa",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 113,
+        "name": "Tempat Evakuasi Akhir",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 114,
+        "name": "Tempat Evakuasi Bencana",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 115,
+        "name": "Tempat Evakuasi Sementara",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 116,
+        "name": "Tempat Pemrosesan Akhir (TPA)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 117,
+        "name": "Tempat Penampungan Sementara (TPS)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 118,
+        "name": "Tempat Pengelolaan Sampah Reuse, Reduce, Recycle (TPS3R)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 119,
+        "name": "Tempat Pengolahan Sampah Terpadu (TPST)",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 120,
+        "name": "Terminal Air",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 121,
+        "name": "Terminal Barang",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 122,
+        "name": "Terminal Khusus",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#000000",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "name": "black"
+        }
+      },
+      {
+        "id": 123,
+        "name": "Terminal Penumpang Tipe A",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 124,
+        "name": "Terminal Penumpang Tipe B",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#ff0000",
+          "rgb": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+          },
+          "name": "red"
+        }
+      },
+      {
+        "id": 125,
+        "name": "Terminal Penumpang Tipe C",
+        "category": "Jaringan Transportasi",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 126,
+        "name": "Terminal Umum",
+        "category": "Jaringan Transportasi ",
+        "color": {
+          "hex": "#ffa500",
+          "rgb": {
+            "r": 255,
+            "g": 165,
+            "b": 0
+          },
+          "name": "orange"
+        }
+      },
+      {
+        "id": 127,
+        "name": "Titik Kumpul",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffc0cb",
+          "rgb": {
+            "r": 255,
+            "g": 192,
+            "b": 203
+          },
+          "name": "pink"
+        }
+      },
+      {
+        "id": 128,
+        "name": "Unit Air Baku",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      },
+      {
+        "id": 129,
+        "name": "Unit Pelayanan",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#ffffff",
+          "rgb": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "name": "white"
+        }
+      },
+      {
+        "id": 130,
+        "name": "Unit Produksi",
+        "category": "Jaringan Prasarana Lainnya",
+        "color": {
+          "hex": "#0000ff",
+          "rgb": {
+            "r": 0,
+            "g": 0,
+            "b": 255
+          },
+          "name": "blue"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,786 @@
+{
+  "table": "Marker Symbols",
+  "count": 130,
+  "items": [
+    {
+      "id": 1,
+      "name": "Bak Kontrol",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;yellow;character;ESRI Default Marker;black;orange"
+    },
+    {
+      "id": 2,
+      "name": "Bak Penampungan Air Hujan",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue;character;ESRI ArcPad;white;ESRI US Forestry 1;ESRI Default Marker"
+    },
+    {
+      "id": 3,
+      "name": "Bak Perangkap Lemak dan Minyak dari Dapur",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;black;character;ESRI Default Marker;orange;yellow"
+    },
+    {
+      "id": 4,
+      "name": "Bandar Udara Khusus",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;black;character;ESRI Default Marker"
+    },
+    {
+      "id": 5,
+      "name": "Bandar Udara Pengumpan",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;black"
+    },
+    {
+      "id": 6,
+      "name": "Bandar Udara Pengumpul",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;ESRI US Forestry 1;black"
+    },
+    {
+      "id": 7,
+      "name": "Bandar Udara Pengumpul Skala Pelayanan Primer",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;ESRI US Forestry 1;red"
+    },
+    {
+      "id": 8,
+      "name": "Bandar Udara Pengumpul Skala Pelayanan Sekunder",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;ESRI US Forestry 1;orange"
+    },
+    {
+      "id": 9,
+      "name": "Bandar Udara Pengumpul Skala Pelayanan Tersier",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;ESRI US Forestry 1;orange"
+    },
+    {
+      "id": 10,
+      "name": "Bangunan Pelengkap Drainase",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;ESRI Hazardous Materials;blue;ESRI US Forestry 1;white"
+    },
+    {
+      "id": 11,
+      "name": "Bangunan Penampung Air",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue;character;ESRI Climate & Precipitation;ESRI Hazardous Materials"
+    },
+    {
+      "id": 12,
+      "name": "Bangunan Penangkap Mata Air",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;ESRI Enviro Hazard Analysis;white"
+    },
+    {
+      "id": 13,
+      "name": "Bangunan Pengambil Air Baku",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;white;character;ESRI Enviro Hazard Analysis;ESRI Hazardous Materials;blue"
+    },
+    {
+      "id": 14,
+      "name": "Bangunan Pengendalian Banjir",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;white;character;ESRI Climate & Precipitation;blue;ESRI US Forestry 1;ESRI Default Marker"
+    },
+    {
+      "id": 15,
+      "name": "Bangunan Peresapan (Kolam Retensi)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "rgb;blue;character;ESRI Hazardous Materials"
+    },
+    {
+      "id": 16,
+      "name": "Bangunan Sumber Daya Air",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;white;character;blue;ESRI US Forestry 1;ESRI ERS Infrastructures S1"
+    },
+    {
+      "id": 17,
+      "name": "Bangunan Tampungan (Polder)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue;character;ESRI Hazardous Materials;white"
+    },
+    {
+      "id": 18,
+      "name": "Bendungan",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;blue;character;ESRI US Forestry 1;white;ESRI Default Marker"
+    },
+    {
+      "id": 19,
+      "name": "Gardu Distribusi",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;black;character;ESRI Business;white;orange;ESRI Default Marker"
+    },
+    {
+      "id": 20,
+      "name": "Gardu Hubung",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;black;character;ESRI Business;white;orange;ESRI Default Marker"
+    },
+    {
+      "id": 21,
+      "name": "Gardu Induk",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;black;character;ESRI Business;orange;ESRI Default Marker"
+    },
+    {
+      "id": 22,
+      "name": "Gardu Listrik",
+      "category": "Jaringan Energi",
+      "tags": "rgb;black;character;ESRI Business"
+    },
+    {
+      "id": 23,
+      "name": "Halte",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;white;character;ESRI Transportation & Civic;ESRI Default Marker;red"
+    },
+    {
+      "id": 24,
+      "name": "Hidran Kebakaran",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;red;character;ESRI US Forestry 1;ESRI Hazardous Materials"
+    },
+    {
+      "id": 25,
+      "name": "Hidran Umum",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue;character;ESRI US Forestry 1;ESRI Hazardous Materials"
+    },
+    {
+      "id": 26,
+      "name": "Infrastruktur Jaringan Mikro Digital",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;green;ESRI US Forestry 1;ESRI Arrowhead"
+    },
+    {
+      "id": 27,
+      "name": "Infrastruktur Jaringan Tetap",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;ESRI US Forestry 1;ESRI Telecom;green"
+    },
+    {
+      "id": 28,
+      "name": "Infrastruktur Minyak dan Gas Bumi",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange;character;ESRI Default Marker;ESRI NIMA City Graphic PT;white"
+    },
+    {
+      "id": 29,
+      "name": "Infrastruktur Pembangkitan Tenaga Listrik dan Sarana Pendukung",
+      "category": "Jaringan Energi ",
+      "tags": "rgb;character;ESRI Default Marker;black"
+    },
+    {
+      "id": 30,
+      "name": "Infrastruktur Sistem Pengelolaan Air Limbah (SPAL)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;white;orange"
+    },
+    {
+      "id": 31,
+      "name": "Infrastruktur Sistem Pengelolaan Air Limbah Domestik",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;white;gray"
+    },
+    {
+      "id": 32,
+      "name": "Infrastruktur Sistem Pengelolaan Air Limbah Non Domestik",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;gray;white"
+    },
+    {
+      "id": 33,
+      "name": "Infrastruktur Sistem Penyediaan Air Minum (SPAM)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;white;character;ESRI Enviro Hazard Analysis;blue;ESRI Hazardous Materials"
+    },
+    {
+      "id": 34,
+      "name": "Instalasi Produksi",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue;character;ESRI Enviro Hazard Incident"
+    },
+    {
+      "id": 35,
+      "name": "IPAL Komunal Industri Rumah Tangga",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;white;orange"
+    },
+    {
+      "id": 36,
+      "name": "IPAL Kota",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;white;orange"
+    },
+    {
+      "id": 37,
+      "name": "IPAL Skala Kawasan Tertentu/Permukiman",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;white;orange"
+    },
+    {
+      "id": 38,
+      "name": "Jaringan Bergerak",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;white;character;ESRI US Forestry 1;green;ESRI Default Marker"
+    },
+    {
+      "id": 39,
+      "name": "Jaringan Bergerak Satelit",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;white;character;ESRI US Forestry 1;green;ESRI Default Marker;ESRI Telecom"
+    },
+    {
+      "id": 40,
+      "name": "Jaringan Bergerak Seluler",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;ESRI US Forestry 1;ESRI Telecom;green"
+    },
+    {
+      "id": 41,
+      "name": "Jaringan Bergerak Terestrial",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;ESRI US Forestry 1;ESRI Telecom;green"
+    },
+    {
+      "id": 42,
+      "name": "Jaringan Peningkatan Pelayanan",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;green;ESRI Default Marker;ESRI US Forestry 1"
+    },
+    {
+      "id": 43,
+      "name": "Jembatan",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;black;character;multilayer;ESRI ArcPad;ESRI Default Marker"
+    },
+    {
+      "id": 44,
+      "name": "Jembatan Timbang",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;black;character;ESRI Transportation & Civic;white;ESRI Default Marker"
+    },
+    {
+      "id": 45,
+      "name": "Kotak Pembagi",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;ESRI Surveyor;green;ESRI US Forestry 1"
+    },
+    {
+      "id": 46,
+      "name": "Lubang Inspeksi",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;black;orange"
+    },
+    {
+      "id": 47,
+      "name": "Menara Base Transceiver Station (BTS)",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;white;character;ESRI US Forestry 1;green;ESRI Default Marker"
+    },
+    {
+      "id": 48,
+      "name": "Pangkalan Pendaratan Ikan",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;green;character;ESRI Environmental & Icons;ESRI Default Marker;white"
+    },
+    {
+      "id": 49,
+      "name": "Pelabuhan Pengumpan",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;character;ESRI Enviro Hazard Sites;white;ESRI Default Marker;blue"
+    },
+    {
+      "id": 50,
+      "name": "Pelabuhan Pengumpan Lokal",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;character;ESRI Enviro Hazard Sites;white;ESRI Default Marker;orange"
+    },
+    {
+      "id": 51,
+      "name": "Pelabuhan Pengumpan Regional",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;character;ESRI Enviro Hazard Sites;white;ESRI Default Marker;green"
+    },
+    {
+      "id": 52,
+      "name": "Pelabuhan Pengumpul",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;character;ESRI Enviro Hazard Sites;white;ESRI Default Marker;red"
+    },
+    {
+      "id": 53,
+      "name": "Pelabuhan Penyeberangan",
+      "category": "Jaringan Transportasi",
+      "tags": "character;ESRI Environmental & Icons;rgb;orange"
+    },
+    {
+      "id": 54,
+      "name": "Pelabuhan Penyeberangan Kelas I",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;cmyk;character;ESRI Environmental & Icons;Arial;blue"
+    },
+    {
+      "id": 55,
+      "name": "Pelabuhan Penyeberangan Kelas II",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;character;ESRI Environmental & Icons;Arial;red;rgb"
+    },
+    {
+      "id": 56,
+      "name": "Pelabuhan Penyeberangan Kelas III",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;cmyk;character;ESRI Environmental & Icons;Arial;blue"
+    },
+    {
+      "id": 57,
+      "name": "Pelabuhan Perikanan Nusantara",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;red;character;ESRI Environmental & Icons;ESRI Default Marker;white"
+    },
+    {
+      "id": 58,
+      "name": "Pelabuhan Perikanan Pantai",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;blue;character;ESRI Environmental & Icons;ESRI Default Marker;white"
+    },
+    {
+      "id": 59,
+      "name": "Pelabuhan Perikanan Samudera",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;blue;character;ESRI Environmental & Icons;ESRI Default Marker;white"
+    },
+    {
+      "id": 60,
+      "name": "Pelabuhan Sungai dan Danau",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;character;ESRI Environmental & Icons;ESRI Default Marker;white;orange"
+    },
+    {
+      "id": 61,
+      "name": "Pelabuhan Sungai dan Danau Pengumpan",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;character;ESRI Environmental & Icons;ESRI Default Marker;white;blue"
+    },
+    {
+      "id": 62,
+      "name": "Pelabuhan Sungai dan Danau Pengumpul",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;character;ESRI Environmental & Icons;ESRI Default Marker;white;red"
+    },
+    {
+      "id": 63,
+      "name": "Pelabuhan Sungai dan Danau Utama",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;blue;character;ESRI Environmental & Icons;ESRI Default Marker;white"
+    },
+    {
+      "id": 64,
+      "name": "Pelabuhan Utama",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;blue;character;ESRI Enviro Hazard Sites;white;ESRI Default Marker"
+    },
+    {
+      "id": 65,
+      "name": "Pembangkit Listrik Lainnya",
+      "category": "Jaringan Energi",
+      "tags": "rgb;gray;character;ESRI Default Marker"
+    },
+    {
+      "id": 66,
+      "name": "Pembangkit Listrik Tenaga Air (PLTA)",
+      "category": "Jaringan Energi",
+      "tags": "rgb;blue;character;ESRI Default Marker"
+    },
+    {
+      "id": 67,
+      "name": "Pembangkit Listrik Tenaga Bayu (PLTB)",
+      "category": "Jaringan Energi",
+      "tags": "hsv;purple;character;ESRI Default Marker"
+    },
+    {
+      "id": 68,
+      "name": "Pembangkit Listrik Tenaga Diesel (PLTD)",
+      "category": "Jaringan Energi",
+      "tags": "rgb;orange;character;ESRI Default Marker"
+    },
+    {
+      "id": 69,
+      "name": "Pembangkit Listrik Tenaga Gas (PLTG)",
+      "category": "Jaringan Energi",
+      "tags": "rgb;blue;character;ESRI Default Marker"
+    },
+    {
+      "id": 70,
+      "name": "Pembangkit Listrik Tenaga Mikro Hidro (PLTMH)",
+      "category": "Jaringan Energi",
+      "tags": "rgb;green;character;ESRI Default Marker"
+    },
+    {
+      "id": 71,
+      "name": "Pembangkit Listrik Tenaga Nuklir (PLTN)",
+      "category": "Jaringan Energi",
+      "tags": "rgb;yellow;character;ESRI Default Marker"
+    },
+    {
+      "id": 72,
+      "name": "Pembangkit Listrik Tenaga Panas Bumi (PLTP)",
+      "category": "Jaringan Energi",
+      "tags": "rgb;red;character;ESRI Default Marker"
+    },
+    {
+      "id": 73,
+      "name": "Pembangkit Listrik Tenaga Surya (PLTS)",
+      "category": "Jaringan Energi",
+      "tags": "rgb;orange;character;ESRI Default Marker"
+    },
+    {
+      "id": 74,
+      "name": "Pembangkit Listrik Tenaga Uap (PLTU)",
+      "category": "Jaringan Energi",
+      "tags": "rgb;blue;character;ESRI Default Marker"
+    },
+    {
+      "id": 75,
+      "name": "Pintu Air",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;blue;character;ESRI US Forestry 1;white;ESRI Default Marker"
+    },
+    {
+      "id": 76,
+      "name": "Prasarana dan Sarana Pelengkap",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;ESRI US Forestry 1;orange;ESRI Business"
+    },
+    {
+      "id": 77,
+      "name": "Prasarana Irigasi",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;white;character;blue;ESRI US Forestry 1;ESRI ERS Infrastructures S1"
+    },
+    {
+      "id": 78,
+      "name": "Pusat Kegiatan Lokal (PKL)",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "simple;square;rgb;yellow"
+    },
+    {
+      "id": 79,
+      "name": "Pusat Kegiatan Nasional (PKN)",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "rgb;red;simple;square"
+    },
+    {
+      "id": 80,
+      "name": "Pusat Kegiatan Strategis Nasional (PKSN)",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "simple;square;rgb;white"
+    },
+    {
+      "id": 81,
+      "name": "Pusat Kegiatan Wilayah (PKW)",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "simple;square;hsv;orange"
+    },
+    {
+      "id": 82,
+      "name": "Pusat Lingkungan Kecamatan",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "multilayer;rgb;black;character;Arial;ESRI Default Marker;yellow"
+    },
+    {
+      "id": 83,
+      "name": "Pusat Lingkungan Kelurahan/Desa",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "multilayer;rgb;black;character;Arial;ESRI Default Marker;yellow"
+    },
+    {
+      "id": 84,
+      "name": "Pusat Otomasi Sambungan Telepon",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;ESRI Telecom;green;ESRI US Forestry 1"
+    },
+    {
+      "id": 85,
+      "name": "Pusat Pelayanan Kawasan",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "rgb;orange;character;ESRI Default Marker;multilayer;black"
+    },
+    {
+      "id": 86,
+      "name": "Pusat Pelayanan Kota",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "multilayer;rgb;black;character;ESRI Default Marker;orange"
+    },
+    {
+      "id": 87,
+      "name": "Pusat Pelayanan Kota/Kawasan Perkotaan",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "multilayer;rgb;black;character;ESRI Default Marker;orange"
+    },
+    {
+      "id": 88,
+      "name": "Pusat Pelayanan Lingkungan",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "rgb;orange;character;ESRI Default Marker;multilayer;black"
+    },
+    {
+      "id": 89,
+      "name": "Pusat Rukun Warga",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "multilayer;rgb;black;character;Arial;ESRI Default Marker;yellow"
+    },
+    {
+      "id": 90,
+      "name": "Rumah Kabel",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;ESRI Business;green;ESRI US Forestry 1"
+    },
+    {
+      "id": 91,
+      "name": "Sambungan Langsung",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue;character;ESRI US Forestry 1;ESRI SDS 2.00 2"
+    },
+    {
+      "id": 92,
+      "name": "Sarana Pengolahan Hasil Pembakaran",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange;character;ESRI ArcPad;white;ESRI Default Marker"
+    },
+    {
+      "id": 93,
+      "name": "Sarana Penyimpanan Bahan Bakar",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange;character;ESRI Hazardous Materials;white;ESRI Enviro Hazard Incident;ESRI US Forestry 1;ESRI Default Marker"
+    },
+    {
+      "id": 94,
+      "name": "Sentral Telepon Otomat (STO)",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;white;character;ESRI US Forestry 1;green;ESRI Default Marker"
+    },
+    {
+      "id": 95,
+      "name": "Sistem Jaringan Persampahan",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;ESRI Enviro Hazard Analysis;orange;ESRI Hazardous Materials;white"
+    },
+    {
+      "id": 96,
+      "name": "Sistem Pengelolaan Limbah Bahan Berbahaya dan Beracun (B3)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;Arial Black;orange"
+    },
+    {
+      "id": 97,
+      "name": "Stasiun Barang",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;orange;ESRI Public1"
+    },
+    {
+      "id": 98,
+      "name": "Stasiun Bumi",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;character;ESRI Telecom;green;ESRI US Forestry 1"
+    },
+    {
+      "id": 99,
+      "name": "Stasiun Kereta Api",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;character;ESRI Public1;white;black"
+    },
+    {
+      "id": 100,
+      "name": "Stasiun Operasi",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;white;character;ESRI Default Marker;red;ESRI Public1"
+    },
+    {
+      "id": 101,
+      "name": "Stasiun Penumpang",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;character;ESRI Public1;white;blue"
+    },
+    {
+      "id": 102,
+      "name": "Stasiun Penumpang Besar",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;black;character;ESRI Public1;white"
+    },
+    {
+      "id": 103,
+      "name": "Stasiun Penumpang Kecil",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;gray;character;ESRI Default Marker;ESRI US Forestry 1;white"
+    },
+    {
+      "id": 104,
+      "name": "Stasiun Penumpang Sedang",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;gray;character;ESRI Public1;white"
+    },
+    {
+      "id": 105,
+      "name": "Stasiun Peralihan Antara (SPA)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;orange;white"
+    },
+    {
+      "id": 106,
+      "name": "Stasiun Transmisi (Sistem Televisi)",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;white;character;ESRI US Forestry 1;green;ESRI Default Marker"
+    },
+    {
+      "id": 107,
+      "name": "Sub Pusat Pelayanan Kota",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "multilayer;rgb;black;character;ESRI Default Marker;orange"
+    },
+    {
+      "id": 108,
+      "name": "Sub Pusat Pelayanan Kota/Kawasan Perkotaan",
+      "category": "Sistem Pusat Permukiman",
+      "tags": "multilayer;rgb;black;character;ESRI Default Marker;orange"
+    },
+    {
+      "id": 109,
+      "name": "Sub-sistem Pengolahan Lumpur Tinja",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;orange;character;ESRI Commodities;ESRI Default Marker;white"
+    },
+    {
+      "id": 110,
+      "name": "Sub-sistem Pengolahan Setempat",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;white;character;ESRI Commodities;orange;ESRI Default Marker"
+    },
+    {
+      "id": 111,
+      "name": "Sumur Dangkal",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;white;character;ESRI Enviro Hazard Analysis;blue;ESRI Enviro Hazard Sites"
+    },
+    {
+      "id": 112,
+      "name": "Sumur Pompa",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;white;character;ESRI Enviro Hazard Analysis;blue;ESRI Enviro Hazard Sites"
+    },
+    {
+      "id": 113,
+      "name": "Tempat Evakuasi Akhir",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "rgb;pink;character;ESRI US Forestry 1"
+    },
+    {
+      "id": 114,
+      "name": "Tempat Evakuasi Bencana",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "rgb;pink;character;ESRI Crime Analysis"
+    },
+    {
+      "id": 115,
+      "name": "Tempat Evakuasi Sementara",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;pink;character;ESRI Hazardous Materials;white;ESRI US Forestry 1"
+    },
+    {
+      "id": 116,
+      "name": "Tempat Pemrosesan Akhir (TPA)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;orange;white"
+    },
+    {
+      "id": 117,
+      "name": "Tempat Penampungan Sementara (TPS)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;orange;white"
+    },
+    {
+      "id": 118,
+      "name": "Tempat Pengelolaan Sampah Reuse, Reduce, Recycle (TPS3R)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;ESRI Hazardous Materials;orange;green;ESRI Commodities;white"
+    },
+    {
+      "id": 119,
+      "name": "Tempat Pengolahan Sampah Terpadu (TPST)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;Arial Narrow;ESRI Hazardous Materials;white;red"
+    },
+    {
+      "id": 120,
+      "name": "Terminal Air",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;character;ESRI Enviro Hazard Analysis;white"
+    },
+    {
+      "id": 121,
+      "name": "Terminal Barang",
+      "category": "Jaringan Transportasi",
+      "tags": "rgb;orange;character;ESRI Transportation & Civic"
+    },
+    {
+      "id": 122,
+      "name": "Terminal Khusus",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;black;character;Arial;ESRI Environmental & Icons;ESRI Default Marker;white"
+    },
+    {
+      "id": 123,
+      "name": "Terminal Penumpang Tipe A",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;character;Arial;ESRI Transportation & Civic;blue"
+    },
+    {
+      "id": 124,
+      "name": "Terminal Penumpang Tipe B",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;character;Arial;ESRI Transportation & Civic;red"
+    },
+    {
+      "id": 125,
+      "name": "Terminal Penumpang Tipe C",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;blue;character;Arial;ESRI Transportation & Civic"
+    },
+    {
+      "id": 126,
+      "name": "Terminal Umum",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;orange;character;ESRI Environmental & Icons;ESRI Default Marker;white;Arial"
+    },
+    {
+      "id": 127,
+      "name": "Titik Kumpul",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "rgb;pink;character;ESRI Cartography"
+    },
+    {
+      "id": 128,
+      "name": "Unit Air Baku",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue;character;ESRI Climate & Precipitation;white"
+    },
+    {
+      "id": 129,
+      "name": "Unit Pelayanan",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;white;character;ESRI Enviro Hazard Incident;blue;ESRI Hazardous Materials"
+    },
+    {
+      "id": 130,
+      "name": "Unit Produksi",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue;character;ESRI Enviro Hazard Incident"
+    }
+  ]
+}

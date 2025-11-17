@@ -1,0 +1,305 @@
+{
+  "totalColors": 10,
+  "colors": {
+    "blue": {
+      "hex": "#0000ff",
+      "rgb": {
+        "r": 0,
+        "g": 0,
+        "b": 255
+      },
+      "usedIn": {
+        "fill": 41,
+        "line": 18,
+        "marker": 23
+      },
+      "examples": [
+        {
+          "name": "Badan Air",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Cagar Alam",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Cagar Alam Laut",
+          "type": "fill",
+          "category": "Pola Ruang"
+        }
+      ]
+    },
+    "red": {
+      "hex": "#ff0000",
+      "rgb": {
+        "r": 255,
+        "g": 0,
+        "b": 0
+      },
+      "usedIn": {
+        "fill": 19,
+        "line": 12,
+        "marker": 6
+      },
+      "examples": [
+        {
+          "name": "Badan Jalan",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Holding Zone",
+          "type": "fill",
+          "category": "Ketentuan Tambahan"
+        },
+        {
+          "name": "Kawasan Campuran",
+          "type": "fill",
+          "category": "Pola Ruang"
+        }
+      ]
+    },
+    "pink": {
+      "hex": "#ffc0cb",
+      "rgb": {
+        "r": 255,
+        "g": 192,
+        "b": 203
+      },
+      "usedIn": {
+        "fill": 8,
+        "line": 2,
+        "marker": 4
+      },
+      "examples": [
+        {
+          "name": "Cagar Budaya",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Kawasan Cagar Budaya",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Kawasan Keunikan Proses Geologi",
+          "type": "fill",
+          "category": "Pola Ruang"
+        }
+      ]
+    },
+    "orange": {
+      "hex": "#ffa500",
+      "rgb": {
+        "r": 255,
+        "g": 165,
+        "b": 0
+      },
+      "usedIn": {
+        "fill": 21,
+        "line": 27,
+        "marker": 18
+      },
+      "examples": [
+        {
+          "name": "Campuran Intensitas Menengah/Sedang",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Campuran Intensitas Tinggi",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Imbuhan Air Tanah",
+          "type": "fill",
+          "category": "Pola Ruang"
+        }
+      ]
+    },
+    "green": {
+      "hex": "#00ff00",
+      "rgb": {
+        "r": 0,
+        "g": 255,
+        "b": 0
+      },
+      "usedIn": {
+        "fill": 36,
+        "line": 7,
+        "marker": 11
+      },
+      "examples": [
+        {
+          "name": "Daerah Perlindungan Budaya Maritim",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Fungsi dan Daya Dukung Lingkungan Hidup",
+          "type": "fill",
+          "category": "Kawasan Strategis"
+        },
+        {
+          "name": "Hortikultura",
+          "type": "fill",
+          "category": "Pola Ruang"
+        }
+      ]
+    },
+    "gray": {
+      "hex": "#808080",
+      "rgb": {
+        "r": 128,
+        "g": 128,
+        "b": 128
+      },
+      "usedIn": {
+        "fill": 13,
+        "line": 6,
+        "marker": 4
+      },
+      "examples": [
+        {
+          "name": "Kawasan Cagar Alam Geologi",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Kawasan Keunikan Batuan dan Fosil",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Kawasan Lindung Geologi",
+          "type": "fill",
+          "category": "Pola Ruang"
+        }
+      ]
+    },
+    "purple": {
+      "hex": "#800080",
+      "rgb": {
+        "r": 128,
+        "g": 0,
+        "b": 128
+      },
+      "usedIn": {
+        "fill": 15,
+        "line": 5,
+        "marker": 1
+      },
+      "examples": [
+        {
+          "name": "Kawasan Fasilitas Umum dan Fasilitas Sosial",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Kawasan Konservasi",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Kawasan Pariwisata",
+          "type": "fill",
+          "category": "Pola Ruang"
+        }
+      ]
+    },
+    "yellow": {
+      "hex": "#ffff00",
+      "rgb": {
+        "r": 255,
+        "g": 255,
+        "b": 0
+      },
+      "usedIn": {
+        "fill": 11,
+        "line": 2,
+        "marker": 3
+      },
+      "examples": [
+        {
+          "name": "Kawasan Lindung Gambut",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Kawasan Perkebunan",
+          "type": "fill",
+          "category": "Pola Ruang"
+        },
+        {
+          "name": "Kawasan Pertanian",
+          "type": "fill",
+          "category": "Pola Ruang"
+        }
+      ]
+    },
+    "white": {
+      "hex": "#ffffff",
+      "rgb": {
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
+      "usedIn": {
+        "fill": 0,
+        "line": 1,
+        "marker": 42
+      },
+      "examples": [
+        {
+          "name": "Garis Pantai Rencana",
+          "type": "line",
+          "category": "Jaringan Transportasi"
+        },
+        {
+          "name": "Bandar Udara Pengumpan",
+          "type": "marker",
+          "category": "Jaringan Transportasi "
+        },
+        {
+          "name": "Bandar Udara Pengumpul",
+          "type": "marker",
+          "category": "Jaringan Transportasi "
+        }
+      ]
+    },
+    "black": {
+      "hex": "#000000",
+      "rgb": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      "usedIn": {
+        "fill": 0,
+        "line": 5,
+        "marker": 18
+      },
+      "examples": [
+        {
+          "name": "Jaringan Jalur Kereta Api",
+          "type": "line",
+          "category": "Jaringan Transportasi "
+        },
+        {
+          "name": "Jaringan Jalur Kereta Api Antarkota",
+          "type": "line",
+          "category": "Jaringan Transportasi"
+        },
+        {
+          "name": "Jaringan Jalur Kereta Api Khusus",
+          "type": "line",
+          "category": "Jaringan Transportasi"
+        }
+      ]
+    }
+  }
+}

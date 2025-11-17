@@ -1,0 +1,1098 @@
+{
+  "table": "Fill Symbols",
+  "count": 182,
+  "items": [
+    {
+      "id": 1,
+      "name": "Badan Air",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 2,
+      "name": "Badan Jalan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 3,
+      "name": "Cagar Alam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 4,
+      "name": "Cagar Alam Laut",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 5,
+      "name": "Cagar Budaya",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;pink"
+    },
+    {
+      "id": 6,
+      "name": "Campuran Intensitas Menengah/Sedang",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 7,
+      "name": "Campuran Intensitas Tinggi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 8,
+      "name": "Daerah Perlindungan Adat Maritim",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue;green"
+    },
+    {
+      "id": 9,
+      "name": "Daerah Perlindungan Budaya Maritim",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 10,
+      "name": "Ekosistem Mangrove",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue;green"
+    },
+    {
+      "id": 11,
+      "name": "Fungsi dan Daya Dukung Lingkungan Hidup",
+      "category": "Kawasan Strategis",
+      "tags": "multilayer;rgb;green"
+    },
+    {
+      "id": 12,
+      "name": "Holding Zone",
+      "category": "Ketentuan Tambahan",
+      "tags": "rgb;red;line"
+    },
+    {
+      "id": 13,
+      "name": "Hortikultura",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 14,
+      "name": "Hutan Adat",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 15,
+      "name": "Hutan Lindung",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 16,
+      "name": "Hutan Produksi Terbatas",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 17,
+      "name": "Hutan Produksi Tetap",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 18,
+      "name": "Hutan Produksi yang dapat Dikonversi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 19,
+      "name": "Imbuhan Air Tanah",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 20,
+      "name": "Instalasi Pengolahan Air Limbah (IPAL)",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 21,
+      "name": "Instalasi Pengolahan Air Minum (IPAM)",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 22,
+      "name": "Jalur Hijau",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 23,
+      "name": "Kawasan Cagar Alam Geologi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 24,
+      "name": "Kawasan Cagar Budaya",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;pink"
+    },
+    {
+      "id": 25,
+      "name": "Kawasan Campuran",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 26,
+      "name": "Kawasan Ekosistem Mangrove",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue;green"
+    },
+    {
+      "id": 27,
+      "name": "Kawasan Fasilitas Umum dan Fasilitas Sosial",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple;pink"
+    },
+    {
+      "id": 28,
+      "name": "Kawasan Hortikultura",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 29,
+      "name": "Kawasan Hutan Adat",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 30,
+      "name": "Kawasan Hutan Lindung",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 31,
+      "name": "Kawasan Hutan Produksi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 32,
+      "name": "Kawasan Hutan Produksi Terbatas",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 33,
+      "name": "Kawasan Hutan Produksi Tetap",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 34,
+      "name": "Kawasan Hutan Produksi yang dapat Dikonversi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 35,
+      "name": "Kawasan Imbuhan Air Tanah",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 36,
+      "name": "Kawasan Infrastruktur Perkotaan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 37,
+      "name": "Kawasan IPPKH/PPKH",
+      "category": "Ketentuan Tambahan",
+      "tags": "rgb;orange;multilayer"
+    },
+    {
+      "id": 38,
+      "name": "Kawasan Keunikan Batuan dan Fosil",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 39,
+      "name": "Kawasan Keunikan Bentang Alam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 40,
+      "name": "Kawasan Keunikan Proses Geologi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;pink"
+    },
+    {
+      "id": 41,
+      "name": "Kawasan Konservasi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple"
+    },
+    {
+      "id": 42,
+      "name": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 43,
+      "name": "Kawasan Konservasi Maritim",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 44,
+      "name": "Kawasan Konservasi Perairan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 45,
+      "name": "Kawasan Konservasi Pesisir dan Pulau-Pulau Kecil",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 46,
+      "name": "Kawasan Lindung Gambut",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 47,
+      "name": "Kawasan Lindung Geologi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 48,
+      "name": "Kawasan Panas Bumi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 49,
+      "name": "Kawasan Pariwisata",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple;pink"
+    },
+    {
+      "id": 50,
+      "name": "Kawasan Pelestarian Alam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 51,
+      "name": "Kawasan Pemanfaatan Air Laut selain Energi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 52,
+      "name": "Kawasan Pembangkitan Tenaga Listrik",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 53,
+      "name": "Kawasan Pembuangan Hasil Pengerukan di Laut",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 54,
+      "name": "Kawasan Pencadangan Konservasi di Laut",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 55,
+      "name": "Kawasan Perdagangan dan Jasa",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 56,
+      "name": "Kawasan Pergaraman",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 57,
+      "name": "Kawasan Perikanan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 58,
+      "name": "Kawasan Perikanan Budi Daya",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 59,
+      "name": "Kawasan Perikanan Tangkap",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 60,
+      "name": "Kawasan Perkantoran",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 61,
+      "name": "Kawasan Perkebunan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 62,
+      "name": "Kawasan Perkebunan Rakyat",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 63,
+      "name": "Kawasan Perlindungan Setempat",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 64,
+      "name": "Kawasan Permukiman",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 65,
+      "name": "Kawasan Permukiman Perdesaan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 66,
+      "name": "Kawasan Permukiman Perkotaan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 67,
+      "name": "Kawasan Pertahanan dan Keamanan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple"
+    },
+    {
+      "id": 68,
+      "name": "Kawasan Pertambangan Batubara",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 69,
+      "name": "Kawasan Pertambangan dan Energi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 70,
+      "name": "Kawasan Pertambangan Mineral Bukan Logam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 71,
+      "name": "Kawasan Pertambangan Mineral Logam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 72,
+      "name": "Kawasan Pertambangan Mineral Radioaktif",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 73,
+      "name": "Kawasan Pertambangan Minyak dan Gas Bumi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 74,
+      "name": "Kawasan Pertanian",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 75,
+      "name": "Kawasan Perumahan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 76,
+      "name": "Kawasan Peruntukan Industri",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 77,
+      "name": "Kawasan Peruntukan Pertambangan Batuan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 78,
+      "name": "Kawasan Peternakan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 79,
+      "name": "Kawasan Ruang Terbuka Non Hijau",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 80,
+      "name": "Kawasan Suaka Alam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 81,
+      "name": "Kawasan Taman Buru",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 82,
+      "name": "Kawasan Tanaman Pangan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 83,
+      "name": "Kawasan Transportasi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red;orange"
+    },
+    {
+      "id": 84,
+      "name": "Kawasan yang Memberikan Perlindungan terhadap Kawasan Bawahannya",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 85,
+      "name": "Keunikan Batuan dan Fosil",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 86,
+      "name": "Keunikan Bentang Alam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 87,
+      "name": "Keunikan Proses Geologi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;pink"
+    },
+    {
+      "id": 88,
+      "name": "Lindung Gambut",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 89,
+      "name": "Overlay - Area Perjanjian Kerja Sama Internasional",
+      "category": "Ketentuan Khusus",
+      "tags": "multilayer"
+    },
+    {
+      "id": 90,
+      "name": "Overlay - Bagan Pemisah Alur",
+      "category": "Ketentuan Khusus",
+      "tags": "multilayer"
+    },
+    {
+      "id": 91,
+      "name": "Overlay - Daerah Lingkungan Kepentingan Pelabuhan",
+      "category": "Ketentuan Khusus",
+      "tags": "multilayer"
+    },
+    {
+      "id": 92,
+      "name": "Overlay - Kawasan Ancangan Pendaratan dan Lepas Landas",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;blue;line"
+    },
+    {
+      "id": 93,
+      "name": "Overlay - Kawasan Berorientasi Transit",
+      "category": "Ketentuan Khusus",
+      "tags": "cmyk;gray;line"
+    },
+    {
+      "id": 94,
+      "name": "Overlay - Kawasan Cagar Budaya",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;purple;pink;multilayer"
+    },
+    {
+      "id": 95,
+      "name": "Overlay - Kawasan di Bawah Permukaan Horizontal-Dalam",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;green;blue;line"
+    },
+    {
+      "id": 96,
+      "name": "Overlay - Kawasan di Bawah Permukaan Horizontal-Luar",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;green;line"
+    },
+    {
+      "id": 97,
+      "name": "Overlay - Kawasan di Bawah Permukaan Kerucut",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;purple;line"
+    },
+    {
+      "id": 98,
+      "name": "Overlay - Kawasan di Bawah Permukaan Transisi",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;orange;line"
+    },
+    {
+      "id": 99,
+      "name": "Overlay - Kawasan Karst",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;orange;line"
+    },
+    {
+      "id": 100,
+      "name": "Overlay - Kawasan Kemungkinan Bahaya Kecelakaan",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;red;line"
+    },
+    {
+      "id": 101,
+      "name": "Overlay - Kawasan Keselamatan Operasi Penerbangan",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;blue;line"
+    },
+    {
+      "id": 102,
+      "name": "Overlay - Kawasan Migrasi Satwa",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;green;multilayer"
+    },
+    {
+      "id": 103,
+      "name": "Overlay - Kawasan Perlindungan Ekosistem Laut",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;green;picture;bitmap"
+    },
+    {
+      "id": 104,
+      "name": "Overlay - Kawasan Pertahanan dan Keamanan",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;red;multilayer"
+    },
+    {
+      "id": 105,
+      "name": "Overlay - Kawasan Pertambangan Mineral dan Batubara",
+      "category": "Ketentuan Khusus",
+      "tags": "multilayer;rgb;pink"
+    },
+    {
+      "id": 106,
+      "name": "Overlay - Kawasan Pertanian Pangan Berkelanjutan",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;green;picture;bitmap"
+    },
+    {
+      "id": 107,
+      "name": "Overlay - Kawasan Rawan Bencana",
+      "category": "Ketentuan Khusus",
+      "tags": "line"
+    },
+    {
+      "id": 108,
+      "name": "Overlay - Kawasan Resapan Air",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;blue;line"
+    },
+    {
+      "id": 109,
+      "name": "Overlay - Lahan Cadangan Pertanian Pangan Berkelanjutan",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;yellow;picture;bitmap"
+    },
+    {
+      "id": 110,
+      "name": "Overlay - Lahan Pertanian Pangan Berkelanjutan",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;green;picture;bitmap"
+    },
+    {
+      "id": 111,
+      "name": "Overlay - Pusat Penelitian",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;pink;multilayer"
+    },
+    {
+      "id": 112,
+      "name": "Overlay - Ruang Dalam Bumi",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;orange;multilayer"
+    },
+    {
+      "id": 113,
+      "name": "Overlay - Sempadan Ketenagalistrikan",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;gray;line"
+    },
+    {
+      "id": 114,
+      "name": "Overlay - Sempadan Mata Air",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;blue;line"
+    },
+    {
+      "id": 115,
+      "name": "Overlay - Sempadan Pantai",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;blue;line"
+    },
+    {
+      "id": 116,
+      "name": "Overlay - Sempadan Pipa/Kabel",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;yellow;multilayer"
+    },
+    {
+      "id": 117,
+      "name": "Overlay - Sempadan Situ, Danau, Embung, dan Waduk",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;line;green"
+    },
+    {
+      "id": 118,
+      "name": "Overlay - Sempadan Sungai",
+      "category": "Ketentuan Khusus",
+      "tags": "multilayer"
+    },
+    {
+      "id": 119,
+      "name": "Overlay - Tempat Evakuasi Akhir",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;pink;multilayer"
+    },
+    {
+      "id": 120,
+      "name": "Overlay - Tempat Evakuasi Sementara",
+      "category": "Ketentuan Khusus",
+      "tags": "rgb;orange;multilayer"
+    },
+    {
+      "id": 121,
+      "name": "Panas Bumi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 122,
+      "name": "Pariwisata",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple;pink"
+    },
+    {
+      "id": 123,
+      "name": "Pemakaman",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 124,
+      "name": "Pembangkitan Tenaga Listrik",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 125,
+      "name": "Pendayagunaan Sumber Daya Alam dan/atau Teknologi Tinggi",
+      "category": "Kawasan Strategis",
+      "tags": "multilayer;rgb;red"
+    },
+    {
+      "id": 126,
+      "name": "Pengelolaan Persampahan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 127,
+      "name": "Pengembangan Nuklir",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 128,
+      "name": "Perdagangan dan Jasa Skala Kota",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 129,
+      "name": "Perdagangan dan Jasa Skala SWP",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 130,
+      "name": "Perdagangan dan Jasa Skala WP",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 131,
+      "name": "Pergaraman",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 132,
+      "name": "Pergudangan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 133,
+      "name": "Perikanan Budi Daya",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 134,
+      "name": "Perikanan Tangkap",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 135,
+      "name": "Perkantoran",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 136,
+      "name": "Perkebunan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 137,
+      "name": "Perkebunan Rakyat",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 138,
+      "name": "Perlindungan Setempat",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 139,
+      "name": "Pertahanan dan Keamanan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple"
+    },
+    {
+      "id": 140,
+      "name": "Pertambangan Batubara",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 141,
+      "name": "Pertambangan Mineral Bukan Logam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;gray"
+    },
+    {
+      "id": 142,
+      "name": "Pertambangan Mineral Logam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 143,
+      "name": "Pertambangan Mineral Radioaktif",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 144,
+      "name": "Pertambangan Minyak dan Gas Bumi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 145,
+      "name": "Pertumbuhan Ekonomi",
+      "category": "Kawasan Strategis",
+      "tags": "multilayer;rgb;pink"
+    },
+    {
+      "id": 146,
+      "name": "Perumahan Kepadatan Rendah",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 147,
+      "name": "Perumahan Kepadatan Sangat Rendah",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 148,
+      "name": "Perumahan Kepadatan Sangat Tinggi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;orange"
+    },
+    {
+      "id": 149,
+      "name": "Perumahan Kepadatan Sedang",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 150,
+      "name": "Perumahan Kepadatan Tinggi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;yellow"
+    },
+    {
+      "id": 151,
+      "name": "Peruntukan Pertambangan Batuan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple"
+    },
+    {
+      "id": 152,
+      "name": "Peternakan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 153,
+      "name": "Pos Lintas Batas Negara",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple"
+    },
+    {
+      "id": 154,
+      "name": "Rimba Kota",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 155,
+      "name": "Ruang Terbuka Hijau",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 156,
+      "name": "Ruang Terbuka Non Hijau",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 157,
+      "name": "Sosial dan Budaya",
+      "category": "Kawasan Strategis",
+      "tags": "multilayer;rgb;purple"
+    },
+    {
+      "id": 158,
+      "name": "SPU Skala Kecamatan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple;pink"
+    },
+    {
+      "id": 159,
+      "name": "SPU Skala Kelurahan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple;pink"
+    },
+    {
+      "id": 160,
+      "name": "SPU Skala Kota",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple;pink"
+    },
+    {
+      "id": 161,
+      "name": "SPU Skala RW",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple;pink"
+    },
+    {
+      "id": 162,
+      "name": "Suaka Margasatwa",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 163,
+      "name": "Suaka Margasatwa Laut",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 164,
+      "name": "Suaka Pesisir",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 165,
+      "name": "Suaka Pulau Kecil",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 166,
+      "name": "Taman Buru",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 167,
+      "name": "Taman Hutan Raya",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 168,
+      "name": "Taman Kecamatan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 169,
+      "name": "Taman Kelurahan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 170,
+      "name": "Taman Kota",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 171,
+      "name": "Taman Nasional",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 172,
+      "name": "Taman Pesisir",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 173,
+      "name": "Taman Pulau Kecil",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 174,
+      "name": "Taman RT",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 175,
+      "name": "Taman RW",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 176,
+      "name": "Taman Wisata Alam",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;blue"
+    },
+    {
+      "id": 177,
+      "name": "Taman Wisata Alam Laut",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;purple"
+    },
+    {
+      "id": 178,
+      "name": "Tanaman Pangan",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;green"
+    },
+    {
+      "id": 179,
+      "name": "Tempat Evakuasi Akhir",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 180,
+      "name": "Tempat Evakuasi Bencana",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red"
+    },
+    {
+      "id": 181,
+      "name": "Tempat Evakuasi Sementara",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red;pink"
+    },
+    {
+      "id": 182,
+      "name": "Transportasi",
+      "category": "Pola Ruang",
+      "tags": "rgb;simple;red;orange"
+    }
+  ]
+}

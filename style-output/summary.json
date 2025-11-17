@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "sourceFile": "Simbolisasi (1).style",
+    "extractedDate": "2025-11-17T04:12:34.021Z",
+    "totalTables": 23
+  },
+  "summary": {
+    "Area Patches": {
+      "count": 0,
+      "categories": []
+    },
+    "Backgrounds": {
+      "count": 0,
+      "categories": []
+    },
+    "Borders": {
+      "count": 0,
+      "categories": []
+    },
+    "Color Ramps": {
+      "count": 0,
+      "categories": []
+    },
+    "Colors": {
+      "count": 0,
+      "categories": []
+    },
+    "Fill Symbols": {
+      "count": 182,
+      "categories": [
+        "Pola Ruang",
+        "Kawasan Strategis",
+        "Ketentuan Tambahan",
+        "Ketentuan Khusus"
+      ]
+    },
+    "Hatches": {
+      "count": 0,
+      "categories": []
+    },
+    "Labels": {
+      "count": 0,
+      "categories": []
+    },
+    "Legend Items": {
+      "count": 0,
+      "categories": []
+    },
+    "Line Patches": {
+      "count": 0,
+      "categories": []
+    },
+    "Line Symbols": {
+      "count": 90,
+      "categories": [
+        "Jaringan Transportasi",
+        "Jaringan Transportasi ",
+        "Jaringan Prasarana Lainnya",
+        "Jaringan Energi",
+        "Jaringan Sumber Daya Air",
+        "Jaringan Telekomunikasi",
+        "Jaringan Energi "
+      ]
+    },
+    "Maplex Labels": {
+      "count": 0,
+      "categories": []
+    },
+    "Marker Symbols": {
+      "count": 130,
+      "categories": [
+        "Jaringan Prasarana Lainnya",
+        "Jaringan Transportasi ",
+        "Jaringan Transportasi",
+        "Jaringan Sumber Daya Air",
+        "Jaringan Energi",
+        "Jaringan Telekomunikasi",
+        "Jaringan Energi ",
+        "Sistem Pusat Permukiman"
+      ]
+    },
+    "North Arrows": {
+      "count": 0,
+      "categories": []
+    },
+    "Representation Markers": {
+      "count": 0,
+      "categories": []
+    },
+    "Representation Rules": {
+      "count": 0,
+      "categories": []
+    },
+    "Scale Bars": {
+      "count": 0,
+      "categories": []
+    },
+    "Scale Texts": {
+      "count": 0,
+      "categories": []
+    },
+    "Shadows": {
+      "count": 0,
+      "categories": []
+    },
+    "Text Symbols": {
+      "count": 0,
+      "categories": []
+    },
+    "Vectorization Settings": {
+      "count": 0,
+      "categories": []
+    },
+    "Classes": {
+      "count": 0,
+      "categories": []
+    },
+    "Reference Systems": {
+      "count": 0,
+      "categories": []
+    }
+  }
+}

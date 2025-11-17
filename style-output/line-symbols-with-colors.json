@@ -1,0 +1,1227 @@
+{
+  "table": "Line Symbols",
+  "count": 90,
+  "withColor": 85,
+  "symbols": [
+    {
+      "id": 1,
+      "name": "Alur-Pelayaran Kelas I",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer"
+    },
+    {
+      "id": 2,
+      "name": "Alur-Pelayaran Kelas II",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer"
+    },
+    {
+      "id": 3,
+      "name": "Alur-Pelayaran Kelas III",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer"
+    },
+    {
+      "id": 4,
+      "name": "Alur-Pelayaran Khusus",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Alur-Pelayaran Masuk Pelabuhan",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;blue;cartographic",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Alur-Pelayaran Sungai dan Alur-Pelayaran Danau",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;cartographic;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Alur-Pelayaran Umum dan Perlintasan",
+      "category": "Jaringan Transportasi",
+      "tags": "rgb;blue;cartographic",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Garis Pantai Rencana",
+      "category": "Jaringan Transportasi",
+      "tags": "rgb;multilayer;white",
+      "color": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "hex": "#ffffff",
+        "source": "tag",
+        "tagName": "white"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Jalan Arteri Primer",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 10,
+      "name": "Jalan Arteri Sekunder",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Jalan Khusus",
+      "category": "Jaringan Transportasi",
+      "tags": "rgb;gray;cartographic",
+      "color": {
+        "r": 128,
+        "g": 128,
+        "b": 128,
+        "hex": "#808080",
+        "source": "tag",
+        "tagName": "gray"
+      }
+    },
+    {
+      "id": 12,
+      "name": "Jalan Kolektor Primer",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;orange;cartographic",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 13,
+      "name": "Jalan Kolektor Sekunder",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;orange;cartographic",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 14,
+      "name": "Jalan Lingkungan Primer",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;gray;cartographic",
+      "color": {
+        "r": 128,
+        "g": 128,
+        "b": 128,
+        "hex": "#808080",
+        "source": "tag",
+        "tagName": "gray"
+      }
+    },
+    {
+      "id": 15,
+      "name": "Jalan Lingkungan Sekunder",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;gray;cartographic",
+      "color": {
+        "r": 128,
+        "g": 128,
+        "b": 128,
+        "hex": "#808080",
+        "source": "tag",
+        "tagName": "gray"
+      }
+    },
+    {
+      "id": 16,
+      "name": "Jalan Lokal Primer",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;purple;cartographic",
+      "color": {
+        "r": 128,
+        "g": 0,
+        "b": 128,
+        "hex": "#800080",
+        "source": "tag",
+        "tagName": "purple"
+      }
+    },
+    {
+      "id": 17,
+      "name": "Jalan Lokal Sekunder",
+      "category": "Jaringan Transportasi ",
+      "tags": "rgb;blue;cartographic",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 18,
+      "name": "Jalan Masuk dan Keluar Parkir",
+      "category": "Jaringan Transportasi",
+      "tags": "rgb;orange;cartographic",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 19,
+      "name": "Jalan Masuk dan Keluar Terminal Barang dan Penumpang",
+      "category": "Jaringan Transportasi",
+      "tags": "rgb;purple;cartographic",
+      "color": {
+        "r": 128,
+        "g": 0,
+        "b": 128,
+        "hex": "#800080",
+        "source": "tag",
+        "tagName": "purple"
+      }
+    },
+    {
+      "id": 20,
+      "name": "Jalan Menuju Moda Transportasi Umum",
+      "category": "Jaringan Transportasi",
+      "tags": "rgb;pink;cartographic",
+      "color": {
+        "r": 255,
+        "g": 192,
+        "b": 203,
+        "hex": "#ffc0cb",
+        "source": "tag",
+        "tagName": "pink"
+      }
+    },
+    {
+      "id": 21,
+      "name": "Jalan Tol",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 22,
+      "name": "Jalur Evakuasi Bencana",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "cmyk;purple;pink;cartographic",
+      "color": {
+        "r": 128,
+        "g": 0,
+        "b": 128,
+        "hex": "#800080",
+        "source": "tag",
+        "tagName": "purple"
+      }
+    },
+    {
+      "id": 23,
+      "name": "Jalur Kereta Rel Listrik",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 24,
+      "name": "Jalur LRT",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;green",
+      "color": {
+        "r": 0,
+        "g": 255,
+        "b": 0,
+        "hex": "#00ff00",
+        "source": "tag",
+        "tagName": "green"
+      }
+    },
+    {
+      "id": 25,
+      "name": "Jalur Monorel",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 26,
+      "name": "Jalur MRT",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;pink",
+      "color": {
+        "r": 255,
+        "g": 192,
+        "b": 203,
+        "hex": "#ffc0cb",
+        "source": "tag",
+        "tagName": "pink"
+      }
+    },
+    {
+      "id": 27,
+      "name": "Jalur Pendaratan dan Penerbangan di Laut",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer"
+    },
+    {
+      "id": 28,
+      "name": "Jalur Sepeda",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "cmyk;green;cartographic",
+      "color": {
+        "r": 0,
+        "g": 255,
+        "b": 0,
+        "hex": "#00ff00",
+        "source": "tag",
+        "tagName": "green"
+      }
+    },
+    {
+      "id": 29,
+      "name": "Jaringan Air Baku",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 30,
+      "name": "Jaringan Distribusi Pembagi",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 31,
+      "name": "Jaringan Distribusi Tenaga Listrik",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 32,
+      "name": "Jaringan Drainase Lokal",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "rgb;cartographic;marker;green",
+      "color": {
+        "r": 0,
+        "g": 255,
+        "b": 0,
+        "hex": "#00ff00",
+        "source": "tag",
+        "tagName": "green"
+      }
+    },
+    {
+      "id": 33,
+      "name": "Jaringan Drainase Primer",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "blue;cartographic;marker;rgb",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 34,
+      "name": "Jaringan Drainase Sekunder",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "rgb;cartographic;marker;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 35,
+      "name": "Jaringan Drainase Tersier",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "rgb;cartographic;marker;purple",
+      "color": {
+        "r": 128,
+        "g": 0,
+        "b": 128,
+        "hex": "#800080",
+        "source": "tag",
+        "tagName": "purple"
+      }
+    },
+    {
+      "id": 36,
+      "name": "Jaringan Irigasi Air Tanah",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 37,
+      "name": "Jaringan Irigasi Primer",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 38,
+      "name": "Jaringan Irigasi Sekunder",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 39,
+      "name": "Jaringan Irigasi Tersier",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;purple",
+      "color": {
+        "r": 128,
+        "g": 0,
+        "b": 128,
+        "hex": "#800080",
+        "source": "tag",
+        "tagName": "purple"
+      }
+    },
+    {
+      "id": 40,
+      "name": "Jaringan Jalur Kereta Api",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;black",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "hex": "#000000",
+        "source": "tag",
+        "tagName": "black"
+      }
+    },
+    {
+      "id": 41,
+      "name": "Jaringan Jalur Kereta Api Antarkota",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;black",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "hex": "#000000",
+        "source": "tag",
+        "tagName": "black"
+      }
+    },
+    {
+      "id": 42,
+      "name": "Jaringan Jalur Kereta Api Khusus",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;black",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "hex": "#000000",
+        "source": "tag",
+        "tagName": "black"
+      }
+    },
+    {
+      "id": 43,
+      "name": "Jaringan Jalur Kereta Api Perkotaan",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;black",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "hex": "#000000",
+        "source": "tag",
+        "tagName": "black"
+      }
+    },
+    {
+      "id": 44,
+      "name": "Jaringan Minyak dan Gas Bumi",
+      "category": "Jaringan Energi",
+      "tags": "multilayer"
+    },
+    {
+      "id": 45,
+      "name": "Jaringan Pejalan Kaki",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "rgb;cartographic;black",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "hex": "#000000",
+        "source": "tag",
+        "tagName": "black"
+      }
+    },
+    {
+      "id": 46,
+      "name": "Jaringan Pengendalian Banjir",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 47,
+      "name": "Jaringan Pipa/Kabel Bawah Laut Penyaluran Tenaga Listrik",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 48,
+      "name": "Jaringan Produksi",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 49,
+      "name": "Jaringan Serat Optik",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;green",
+      "color": {
+        "r": 0,
+        "g": 255,
+        "b": 0,
+        "hex": "#00ff00",
+        "source": "tag",
+        "tagName": "green"
+      }
+    },
+    {
+      "id": 50,
+      "name": "Jaringan Sistem Pengelolaan Air Limbah (SPAL)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 51,
+      "name": "Jaringan Sistem Pengelolaan Air Limbah Domestik",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;gray",
+      "color": {
+        "r": 128,
+        "g": 128,
+        "b": 128,
+        "hex": "#808080",
+        "source": "tag",
+        "tagName": "gray"
+      }
+    },
+    {
+      "id": 52,
+      "name": "Jaringan Sistem Pengelolaan Air Limbah Non Domestik",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 53,
+      "name": "Jaringan Sistem Penyediaan Air Minum (SPAM)",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 54,
+      "name": "Jaringan Tetap",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;green",
+      "color": {
+        "r": 0,
+        "g": 255,
+        "b": 0,
+        "hex": "#00ff00",
+        "source": "tag",
+        "tagName": "green"
+      }
+    },
+    {
+      "id": 55,
+      "name": "Jaringan Transmisi Air Baku",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 56,
+      "name": "Jaringan Transmisi Air Minum",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 57,
+      "name": "Jaringan Transmisi Tenaga Listrik Antarsistem",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 58,
+      "name": "Jaringan yang Menyalurkan Gas Bumi dari Fasilitas Produksi-Kilang Pengolahan",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 59,
+      "name": "Jaringan yang Menyalurkan Gas Bumi dari Fasilitas Produksi-Tempat Penyimpanan",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 60,
+      "name": "Jaringan yang Menyalurkan Gas Bumi dari Kilang Pengolahan-Konsumen",
+      "category": "Jaringan Energi ",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 61,
+      "name": "Jaringan yang Menyalurkan Minyak Bumi dari Fasilitas Produksi-Kilang Pengolahan",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 62,
+      "name": "Jaringan yang Menyalurkan Minyak Bumi dari Fasilitas Produksi-Tempat Penyimpanan",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 63,
+      "name": "Jaringan yang Menyalurkan Minyak dan Gas Bumi dari Fasilitas Produksi-Kilang Pengolahan",
+      "category": "Jaringan Energi ",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 64,
+      "name": "Jaringan yang Menyalurkan Minyak dan Gas Bumi dari Fasilitas Produksi-Tempat Penyimpanan",
+      "category": "Jaringan Energi ",
+      "tags": "multilayer;rgb;red",
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "hex": "#ff0000",
+        "source": "tag",
+        "tagName": "red"
+      }
+    },
+    {
+      "id": 65,
+      "name": "Kabel Bawah Tanah",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 66,
+      "name": "Lintas Penyeberangan Antarkabupaten/Kota dalam Provinsi",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 67,
+      "name": "Lintas Penyeberangan Antarnegara",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 68,
+      "name": "Lintas Penyeberangan Antarprovinsi",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 69,
+      "name": "Lintas Penyeberangan dalam Kabupaten",
+      "category": "Jaringan Transportasi ",
+      "tags": "multilayer;rgb;yellow",
+      "color": {
+        "r": 255,
+        "g": 255,
+        "b": 0,
+        "hex": "#ffff00",
+        "source": "tag",
+        "tagName": "yellow"
+      }
+    },
+    {
+      "id": 70,
+      "name": "Lintas Penyeberangan dalam Kota",
+      "category": "Jaringan Transportasi",
+      "tags": "multilayer;rgb;green",
+      "color": {
+        "r": 0,
+        "g": 255,
+        "b": 0,
+        "hex": "#00ff00",
+        "source": "tag",
+        "tagName": "green"
+      }
+    },
+    {
+      "id": 71,
+      "name": "Pengaman Pantai",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 72,
+      "name": "Pipa Induk",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 73,
+      "name": "Pipa Non Tinja",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 74,
+      "name": "Pipa Persil",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;yellow",
+      "color": {
+        "r": 255,
+        "g": 255,
+        "b": 0,
+        "hex": "#ffff00",
+        "source": "tag",
+        "tagName": "yellow"
+      }
+    },
+    {
+      "id": 75,
+      "name": "Pipa Retikulasi",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 76,
+      "name": "Pipa Tinja",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 77,
+      "name": "Saluran Distribusi Lainnya",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;gray",
+      "color": {
+        "r": 128,
+        "g": 128,
+        "b": 128,
+        "hex": "#808080",
+        "source": "tag",
+        "tagName": "gray"
+      }
+    },
+    {
+      "id": 78,
+      "name": "Saluran Kabel Tegangan Menengah (SKTM)",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 79,
+      "name": "Saluran Transmisi Lainnya",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;gray",
+      "color": {
+        "r": 128,
+        "g": 128,
+        "b": 128,
+        "hex": "#808080",
+        "source": "tag",
+        "tagName": "gray"
+      }
+    },
+    {
+      "id": 80,
+      "name": "Saluran Udara Tegangan Ekstra Tinggi (SUTET)",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 81,
+      "name": "Saluran Udara Tegangan Menengah (SUTM)",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 82,
+      "name": "Saluran Udara Tegangan Rendah (SUTR)",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 83,
+      "name": "Saluran Udara Tegangan Tinggi (SUTT)",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 84,
+      "name": "Saluran Udara Tegangan Tinggi Arus Searah (SUTTAS)",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 85,
+      "name": "Saluran Udara Tegangan Ultra Tinggi (SUTUT)",
+      "category": "Jaringan Energi",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 86,
+      "name": "Sistem Jaringan Air Bersih",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 87,
+      "name": "Sistem Jaringan Irigasi",
+      "category": "Jaringan Sumber Daya Air",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    },
+    {
+      "id": 88,
+      "name": "Tanggul Penahan Longsor",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;orange",
+      "color": {
+        "r": 255,
+        "g": 165,
+        "b": 0,
+        "hex": "#ffa500",
+        "source": "tag",
+        "tagName": "orange"
+      }
+    },
+    {
+      "id": 89,
+      "name": "Telepon Fixed Line",
+      "category": "Jaringan Telekomunikasi",
+      "tags": "multilayer;rgb;green",
+      "color": {
+        "r": 0,
+        "g": 255,
+        "b": 0,
+        "hex": "#00ff00",
+        "source": "tag",
+        "tagName": "green"
+      }
+    },
+    {
+      "id": 90,
+      "name": "Unit Distribusi",
+      "category": "Jaringan Prasarana Lainnya",
+      "tags": "multilayer;rgb;blue",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "hex": "#0000ff",
+        "source": "tag",
+        "tagName": "blue"
+      }
+    }
+  ]
+}
