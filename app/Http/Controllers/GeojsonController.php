@@ -10,6 +10,8 @@ use App\Models\Region;
 use App\Models\Owner;
 use App\Models\User;
 use App\Models\Kategori;
+use App\Http\Requests\StoreGeojsonRequest;
+use App\Http\Requests\UpdateGeojsonRequest;
 
 class GeojsonController extends Controller
 {
@@ -28,6 +30,7 @@ class GeojsonController extends Controller
         $ownerFilter = $request->input('owner_filter', '');
         $categoryFilter = $request->input('category_filter', '');
         $sourceFilter = $request->input('source_filter', '');
+        $mainCategoryFilter = $request->input('main_category_filter', '');
 
         // Get sorting parameters
         $sortBy = $request->input('sort_by', 'created_at');
@@ -76,6 +79,10 @@ class GeojsonController extends Controller
             $query->where('geojson.source_name', $sourceFilter);
         }
 
+        if (!empty($mainCategoryFilter)) {
+            $query->where('geojson.main_category', $mainCategoryFilter);
+        }
+
         // Apply sorting
         $allowedSortFields = ['source_name', 'created_at', 'updated_at'];
         if (in_array($sortBy, $allowedSortFields)) {
@@ -101,6 +108,14 @@ class GeojsonController extends Controller
             ->orderBy('source_name')
             ->pluck('source_name');
 
+        // Get main categories
+        $mainCategories = [
+            ['value' => 'RDTR', 'label' => 'RDTR (Rencana Detail Tata Ruang)'],
+            ['value' => 'RTRW', 'label' => 'RTRW (Rencana Tata Ruang Wilayah)'],
+            ['value' => 'KKPR', 'label' => 'KKPR (Kawasan Konservasi dan Perlindungan)'],
+            ['value' => 'GANTI RUGI', 'label' => 'GANTI RUGI'],
+        ];
+
         return Inertia::render('geojson/index', [
             'geojsons' => $geojsons,
             'regions' => $regions,
@@ -108,6 +123,7 @@ class GeojsonController extends Controller
             'owners' => $owners,
             'kategoris' => $kategoris,
             'sourceNames' => $sourceNames,
+            'mainCategories' => $mainCategories,
             'filters' => [
                 'search' => $search,
                 'user_filter' => $userFilter,
@@ -115,6 +131,7 @@ class GeojsonController extends Controller
                 'owner_filter' => $ownerFilter,
                 'category_filter' => $categoryFilter,
                 'source_filter' => $sourceFilter,
+                'main_category_filter' => $mainCategoryFilter,
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
                 'per_page' => $request->input('per_page', 10),
@@ -159,21 +176,9 @@ class GeojsonController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreGeojsonRequest $request)
     {
-        $validated = $request->validate([
-            'geojson'        => 'required_without_all:geojson_file|json',
-            'geojson_file'   => 'nullable|array',
-            'geojson_file.*' => [
-                'file',
-                'mimetypes:application/json,application/geo+json,text/plain,application/octet-stream',
-            ],
-            'id_user'        => 'required|exists:users,id',
-            'id_region'      => 'nullable|exists:region,id_region',
-            'id_owner'       => 'nullable|exists:owner,id_owner',
-            'id_kategori'    => 'nullable|exists:kategori,id_kategori',
-            'main_category'  => 'nullable|in:RDTR,RTRW,KKPR,GANTI RUGI',
-        ]);
+        $validated = $request->validated();
 
         $idUser        = $validated['id_user'];
         $idRegion      = $validated['id_region']      ?? null;
@@ -305,20 +310,11 @@ class GeojsonController extends Controller
     }
 
 
-    public function update(Request $request, $id)
+    public function update(UpdateGeojsonRequest $request, $id)
     {
         $geojsonModel = Geojson::findOrFail($id);
 
-        $validated = $request->validate([
-            'geojson'       => 'required_without:geojson_file|json',
-            'geojson_file'  => 'required_without:geojson|file|mimes:json,geojson',
-            'id_user'       => 'required|exists:users,id',
-            'id_region'     => 'nullable|exists:region,id_region',
-            'id_owner'      => 'nullable|exists:owner,id_owner',
-            'id_kategori'   => 'nullable|exists:kategori,id_kategori',
-            'source_name'   => 'nullable|string|max:255',
-            'main_category' => 'nullable|in:RDTR,RTRW,KKPR,GANTI RUGI',
-        ]);
+        $validated = $request->validated();
 
         // 1) Decode either uploaded file or raw JSON
         if ($request->hasFile('geojson_file')) {

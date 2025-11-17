@@ -60,6 +60,7 @@ interface PageProps {
     owners: { id_owner: number; name: string }[];
     kategoris: Kategori[];
     sourceNames: string[];
+    mainCategories: { value: string; label: string }[];
     filters: {
         search: string;
         user_filter: string;
@@ -67,6 +68,7 @@ interface PageProps {
         owner_filter: string;
         category_filter: string;
         source_filter: string;
+        main_category_filter: string;
         sort_by: string;
         sort_direction: string;
         per_page: number | string;
@@ -76,7 +78,7 @@ interface PageProps {
 }
 
 export default function GeojsonIndex() {
-    const { geojsons, users, regions, owners, kategoris, sourceNames, filters, flash } = usePage<PageProps>().props;
+    const { geojsons, users, regions, owners, kategoris, sourceNames, mainCategories, filters, flash } = usePage<PageProps>().props;
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [search, setSearch] = useState(filters.search || '');
     const [userFilter, setUserFilter] = useState<number | string>(filters.user_filter || '');
@@ -84,6 +86,7 @@ export default function GeojsonIndex() {
     const [ownerFilter, setOwnerFilter] = useState<number | string>(filters.owner_filter || '');
     const [categoryFilter, setCategoryFilter] = useState<number | string>(filters.category_filter || '');
     const [sourceFilter, setSourceFilter] = useState<string>(filters.source_filter || '');
+    const [mainCategoryFilter, setMainCategoryFilter] = useState<string>(filters.main_category_filter || '');
     const [sortBy, setSortBy] = useState<keyof Geojson>(filters.sort_by as keyof Geojson || 'source_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(filters.sort_direction as 'asc' | 'desc' || 'asc');
     const [pageSize, setPageSize] = useState<number | 'all'>(
@@ -109,6 +112,7 @@ export default function GeojsonIndex() {
             owner_filter: ownerFilter,
             category_filter: categoryFilter,
             source_filter: sourceFilter,
+            main_category_filter: mainCategoryFilter,
             sort_by: sortBy,
             sort_direction: sortDirection,
             per_page: pageSize,
@@ -504,6 +508,32 @@ export default function GeojsonIndex() {
                                     {owners.map((o) => (
                                         <option key={o.id_owner} value={o.id_owner}>
                                             {o.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Main Category Filter */}
+                            <div className="space-y-1">
+                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                    Main Category
+                                </label>
+                                <select
+                                    value={mainCategoryFilter}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setMainCategoryFilter(value);
+                                        navigateWithFilters({
+                                            main_category_filter: value,
+                                            page: 1
+                                        });
+                                    }}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-blue-400"
+                                >
+                                    <option value="">Semua Main Category</option>
+                                    {mainCategories.map((mc) => (
+                                        <option key={mc.value} value={mc.value}>
+                                            {mc.label}
                                         </option>
                                     ))}
                                 </select>

@@ -4,7 +4,9 @@
       "Bash(npm install:*)",
       "Bash(node scripts/extractStyleSymbols.js:*)",
       "Bash(node scripts/inspectBinaryData.js:*)",
-      "Bash(node scripts/findSymbolBlobs.js:*)"
+      "Bash(node scripts/findSymbolBlobs.js:*)",
+      "Bash(php --ini:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

@@ -96,6 +96,11 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
     const { flash } = usePage().props as { flash?: { upload_errors?: string[] } };
     const [fileList, setFileList] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isDraggingShp, setIsDraggingShp] = useState(false);
+    const [isDraggingKml, setIsDraggingKml] = useState(false);
+    const shpInputRef = useRef<HTMLInputElement | null>(null);
+    const kmlInputRef = useRef<HTMLInputElement | null>(null);
     
     // SHP/KML/KMZ to GeoJSON states
     const [shpGeojson, setShpGeojson] = useState<any>(null);
@@ -104,6 +109,18 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
     const [isConverting, setIsConverting] = useState<boolean>(false);
     const [isApplyingAll, setIsApplyingAll] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+    // Helper function to calculate file size in MB
+    const getFileSizeInMB = (data: any): number => {
+        const jsonString = JSON.stringify(data);
+        const sizeInBytes = new Blob([jsonString]).size;
+        return sizeInBytes / (1024 * 1024); // Convert to MB
+    };
+
+    // Helper function to check if file is too large (>10MB)
+    const isFileTooLarge = (data: any): boolean => {
+        return getFileSizeInMB(data) > 10;
+    };
 
     useEffect(() => {
         if (flash?.upload_errors) {
@@ -159,6 +176,155 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         if (inputRef.current) inputRef.current.value = '';
         setValue('geojson_file', undefined);
         // fileList diupdate otomatis oleh useEffect di atas
+    };
+
+    // Drag and Drop handlers
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const droppedFiles = e.dataTransfer.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+            // Filter only .geojson files
+            const geojsonFiles = Array.from(droppedFiles).filter(file =>
+                file.name.toLowerCase().endsWith('.geojson')
+            );
+
+            if (geojsonFiles.length === 0) {
+                toast.error('Hanya file .geojson yang diperbolehkan');
+                return;
+            }
+
+            // Combine with existing files if any
+            const existingFiles = files ? Array.from(files) : [];
+            const allFiles = [...existingFiles, ...geojsonFiles];
+
+            // Update file input via DataTransfer
+            const dataTransfer = new DataTransfer();
+            allFiles.forEach(file => dataTransfer.items.add(file));
+
+            if (inputRef.current) {
+                inputRef.current.files = dataTransfer.files;
+            }
+
+            setValue('geojson_file', dataTransfer.files);
+            toast.success(`${geojsonFiles.length} file ditambahkan`);
+        }
+    };
+
+    // SHP Drag and Drop handlers
+    const handleShpDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingShp(true);
+    };
+
+    const handleShpDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingShp(false);
+    };
+
+    const handleShpDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleShpDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingShp(false);
+
+        const droppedFiles = e.dataTransfer.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+            // Validate file types
+            const validExtensions = ['.zip', '.shp', '.dbf', '.shx', '.prj', '.cpg'];
+            const shpFiles = Array.from(droppedFiles).filter(file => {
+                const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+                return validExtensions.includes(ext);
+            });
+
+            if (shpFiles.length === 0) {
+                toast.error('Format file tidak valid. Upload file .zip atau SHP files');
+                return;
+            }
+
+            // Create FileList-like object
+            const dataTransfer = new DataTransfer();
+            shpFiles.forEach(file => dataTransfer.items.add(file));
+
+            // Trigger the upload handler
+            const event = {
+                target: { files: dataTransfer.files }
+            } as React.ChangeEvent<HTMLInputElement>;
+
+            handleShpUpload(event);
+        }
+    };
+
+    // KML/KMZ Drag and Drop handlers
+    const handleKmlDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingKml(true);
+    };
+
+    const handleKmlDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingKml(false);
+    };
+
+    const handleKmlDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleKmlDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingKml(false);
+
+        const droppedFiles = e.dataTransfer.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+            const kmlFiles = Array.from(droppedFiles).filter(file =>
+                file.name.toLowerCase().endsWith('.kml') || file.name.toLowerCase().endsWith('.kmz')
+            );
+
+            if (kmlFiles.length === 0) {
+                toast.error('Hanya file .kml atau .kmz yang diperbolehkan');
+                return;
+            }
+
+            // Take only the first file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(kmlFiles[0]);
+
+            // Trigger the upload handler
+            const event = {
+                target: { files: dataTransfer.files }
+            } as React.ChangeEvent<HTMLInputElement>;
+
+            handleKmlKmzUpload(event);
+        }
     };
 
     // Helper function to group SHP files by basename
@@ -514,6 +680,20 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         saveAs(blob, filename);
     };
 
+    const handleDownloadAllGeoJSON = () => {
+        if (previewGeojsons.length > 0) {
+            previewGeojsons.forEach(({ filename, data }) => {
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                saveAs(blob, filename);
+            });
+            toast.success(`${previewGeojsons.length} file berhasil didownload`);
+        } else if (shpGeojson) {
+            const blob = new Blob([JSON.stringify(shpGeojson, null, 2)], { type: 'application/json' });
+            saveAs(blob, convertedFilename);
+            toast.success('File berhasil didownload');
+        }
+    };
+
     const handleClearConversion = () => {
         setShpGeojson(null);
         setPreviewGeojsons([]);
@@ -614,36 +794,142 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                         </p>
                         
                         <div className="space-y-4">
+                            {/* SHP Upload with Drag and Drop */}
                             <div>
                                 <label htmlFor="shpUpload" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Upload File SHP
                                 </label>
-                                <input
-                                    id="shpUpload"
-                                    type="file"
-                                    accept=".zip,.shp,.dbf,.shx,.prj,.cpg"
-                                    multiple
-                                    onChange={handleShpUpload}
-                                    disabled={isConverting}
-                                    className="mt-2 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm file:mr-4 file:rounded file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700 focus:outline-none disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                                />
-                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    Format: <code>.zip</code> berisi SHP files, atau upload file individual <code>.shp</code>, <code>.dbf</code>, <code>.shx</code>, <code>.prj</code>, <code>.cpg</code>
-                                </p>
+
+                                <div
+                                    onDragEnter={handleShpDragEnter}
+                                    onDragLeave={handleShpDragLeave}
+                                    onDragOver={handleShpDragOver}
+                                    onDrop={handleShpDrop}
+                                    className={`mt-2 rounded-lg border-2 border-dashed transition-all ${
+                                        isDraggingShp
+                                            ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                                            : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800'
+                                    } ${isConverting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <input
+                                        id="shpUpload"
+                                        type="file"
+                                        accept=".zip,.shp,.dbf,.shx,.prj,.cpg"
+                                        multiple
+                                        onChange={handleShpUpload}
+                                        disabled={isConverting}
+                                        ref={shpInputRef}
+                                        className="hidden"
+                                    />
+
+                                    <label
+                                        htmlFor="shpUpload"
+                                        className={`flex cursor-pointer flex-col items-center justify-center px-4 py-6 text-center ${isConverting ? 'cursor-not-allowed' : ''}`}
+                                    >
+                                        <svg
+                                            className={`mb-2 h-10 w-10 transition-colors ${
+                                                isDraggingShp
+                                                    ? 'text-blue-500 dark:text-blue-400'
+                                                    : 'text-gray-400 dark:text-gray-500'
+                                            }`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                            />
+                                        </svg>
+                                        <p className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                            {isDraggingShp ? (
+                                                <span className="text-blue-600 dark:text-blue-400">
+                                                    Drop SHP files di sini
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <span className="text-blue-600 dark:text-blue-400">
+                                                        Click untuk upload
+                                                    </span>{' '}
+                                                    atau drag and drop
+                                                </>
+                                            )}
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            ZIP, SHP, DBF, SHX, PRJ, CPG
+                                        </p>
+                                    </label>
+                                </div>
                             </div>
 
-                            {/* KML/KMZ to GeoJSON */}
+                            {/* KML/KMZ to GeoJSON with Drag and Drop */}
                             <div className="mt-6">
                                 <h4 className="mb-2 text-md font-semibold text-gray-800 dark:text-gray-200">KML/KMZ to GeoJSON</h4>
                                 <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">Unggah file .kml atau .kmz untuk dikonversi.</p>
-                                <input
-                                    id="kmlKmzUpload"
-                                    type="file"
-                                    accept=".kml,.kmz"
-                                    onChange={handleKmlKmzUpload}
-                                    disabled={isConverting}
-                                    className="mt-2 block w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-                                />
+
+                                <div
+                                    onDragEnter={handleKmlDragEnter}
+                                    onDragLeave={handleKmlDragLeave}
+                                    onDragOver={handleKmlDragOver}
+                                    onDrop={handleKmlDrop}
+                                    className={`rounded-lg border-2 border-dashed transition-all ${
+                                        isDraggingKml
+                                            ? 'border-green-500 bg-green-50 dark:border-green-400 dark:bg-green-900/20'
+                                            : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800'
+                                    } ${isConverting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <input
+                                        id="kmlKmzUpload"
+                                        type="file"
+                                        accept=".kml,.kmz"
+                                        onChange={handleKmlKmzUpload}
+                                        disabled={isConverting}
+                                        ref={kmlInputRef}
+                                        className="hidden"
+                                    />
+
+                                    <label
+                                        htmlFor="kmlKmzUpload"
+                                        className={`flex cursor-pointer flex-col items-center justify-center px-4 py-6 text-center ${isConverting ? 'cursor-not-allowed' : ''}`}
+                                    >
+                                        <svg
+                                            className={`mb-2 h-10 w-10 transition-colors ${
+                                                isDraggingKml
+                                                    ? 'text-green-500 dark:text-green-400'
+                                                    : 'text-gray-400 dark:text-gray-500'
+                                            }`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            />
+                                        </svg>
+                                        <p className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                            {isDraggingKml ? (
+                                                <span className="text-green-600 dark:text-green-400">
+                                                    Drop KML/KMZ file di sini
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <span className="text-green-600 dark:text-green-400">
+                                                        Click untuk upload
+                                                    </span>{' '}
+                                                    atau drag and drop
+                                                </>
+                                            )}
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            File KML atau KMZ
+                                        </p>
+                                    </label>
+                                </div>
                             </div>
 
                             {isConverting && (
@@ -657,26 +943,40 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                             {shpGeojson && (
                                 <div className="rounded border border-green-200 bg-green-50 p-3 dark:border-green-700 dark:bg-green-900">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                                            {convertedFilename}
-                                        </span>
+                                        <div className="flex-1">
+                                            <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                                                {convertedFilename}
+                                            </span>
+                                            <span className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                ({getFileSizeInMB(shpGeojson).toFixed(2)} MB)
+                                            </span>
+                                            {isFileTooLarge(shpGeojson) && (
+                                                <div className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                                                    ⚠️ File lebih dari 10MB, hanya bisa download
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="flex space-x-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleUseConvertedGeoJSON(shpGeojson, convertedFilename)}
-                                                disabled={isApplyingAll || isConverting || isSubmitting}
-                                                className={`rounded px-3 py-1 text-xs font-semibold text-white transition ${
-                                                    isApplyingAll || isConverting || isSubmitting
-                                                        ? 'bg-green-400 cursor-not-allowed opacity-70'
-                                                        : 'bg-green-600 hover:bg-green-700'
-                                                }`}
-                                            >
-                                                {isApplyingAll ? 'Memproses...' : 'Gunakan'}
-                                            </button>
+                                            {!isFileTooLarge(shpGeojson) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleUseConvertedGeoJSON(shpGeojson, convertedFilename)}
+                                                    disabled={isApplyingAll || isConverting || isSubmitting}
+                                                    className={`rounded px-3 py-1 text-xs font-semibold text-white transition ${
+                                                        isApplyingAll || isConverting || isSubmitting
+                                                            ? 'bg-green-400 cursor-not-allowed opacity-70'
+                                                            : 'bg-green-600 hover:bg-green-700'
+                                                    }`}
+                                                    title="Gunakan GeoJSON ini di form"
+                                                >
+                                                    {isApplyingAll ? 'Memproses...' : 'Gunakan'}
+                                                </button>
+                                            )}
                                             <button
                                                 type="button"
                                                 onClick={() => handleDownloadGeoJSON(shpGeojson, convertedFilename)}
                                                 className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                                title="Download file GeoJSON"
                                             >
                                                 Download
                                             </button>
@@ -689,33 +989,58 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                             {previewGeojsons.length > 0 && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {previewGeojsons.length} file GeoJSON berhasil dikonversi:
-                                        </span>
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {previewGeojsons.length} file GeoJSON berhasil dikonversi
+                                            </span>
+                                            {(() => {
+                                                const largeFiles = previewGeojsons.filter(file => isFileTooLarge(file.data));
+                                                return largeFiles.length > 0 && (
+                                                    <div className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                                                        ⚠️ {largeFiles.length} file lebih dari 10MB
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
                                         <div className="flex items-center gap-2">
+                                            {(() => {
+                                                const hasLargeFiles = previewGeojsons.some(file => isFileTooLarge(file.data));
+                                                return !hasLargeFiles && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleUseAllConvertedGeoJSON}
+                                                        disabled={isApplyingAll || isConverting || isSubmitting}
+                                                        className={`inline-flex items-center gap-2 rounded px-3 py-1 text-xs font-semibold text-white transition ${
+                                                            isApplyingAll || isConverting || isSubmitting
+                                                                ? 'bg-green-400 cursor-not-allowed opacity-70'
+                                                                : 'bg-green-600 hover:bg-green-700'
+                                                        }`}
+                                                        title="Gunakan semua GeoJSON di form"
+                                                    >
+                                                        {isApplyingAll ? (
+                                                            <>
+                                                                <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                                                                Menggabungkan...
+                                                            </>
+                                                        ) : (
+                                                            'Gunakan Semua'
+                                                        )}
+                                                    </button>
+                                                );
+                                            })()}
                                             <button
                                                 type="button"
-                                                onClick={handleUseAllConvertedGeoJSON}
-                                                disabled={isApplyingAll || isConverting || isSubmitting}
-                                                className={`inline-flex items-center gap-2 rounded px-3 py-1 text-xs font-semibold text-white transition ${
-                                                    isApplyingAll || isConverting || isSubmitting
-                                                        ? 'bg-green-400 cursor-not-allowed opacity-70'
-                                                        : 'bg-green-600 hover:bg-green-700'
-                                                }`}
+                                                onClick={handleDownloadAllGeoJSON}
+                                                className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                                title="Download semua file GeoJSON"
                                             >
-                                                {isApplyingAll ? (
-                                                    <>
-                                                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                                                        Menggabungkan...
-                                                    </>
-                                                ) : (
-                                                    'Gunakan Semua'
-                                                )}
+                                                Download Semua
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={handleClearConversion}
                                                 className="rounded bg-gray-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-gray-600"
+                                                title="Hapus semua hasil konversi"
                                             >
                                                 Clear
                                             </button>
@@ -727,36 +1052,57 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                                             <span>Menggabungkan semua data GeoJSON...</span>
                                         </div>
                                     )}
-                                    {previewGeojsons.map((file, index) => (
-                                        <div key={index} className="rounded border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                                    {file.filename}
-                                                </span>
-                                                <div className="flex space-x-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleUseConvertedGeoJSON(file.data, file.filename)}
-                                                        disabled={isApplyingAll || isConverting || isSubmitting}
-                                                        className={`rounded px-3 py-1 text-xs font-semibold text-white transition ${
-                                                            isApplyingAll || isConverting || isSubmitting
-                                                                ? 'bg-green-400 cursor-not-allowed opacity-70'
-                                                                : 'bg-green-600 hover:bg-green-700'
-                                                        }`}
-                                                    >
-                                                        {isApplyingAll ? 'Memproses...' : 'Gunakan'}
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleDownloadGeoJSON(file.data, file.filename)}
-                                                        className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
-                                                    >
-                                                        Download
-                                                    </button>
+                                    {previewGeojsons.map((file, index) => {
+                                        const fileSizeMB = getFileSizeInMB(file.data);
+                                        const isTooLarge = isFileTooLarge(file.data);
+
+                                        return (
+                                            <div key={index} className="rounded border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                                                {file.filename}
+                                                            </span>
+                                                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                                ({fileSizeMB.toFixed(2)} MB)
+                                                            </span>
+                                                        </div>
+                                                        {isTooLarge && (
+                                                            <div className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                                                                ⚠️ File lebih dari 10MB, hanya bisa download
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        {!isTooLarge && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleUseConvertedGeoJSON(file.data, file.filename)}
+                                                                disabled={isApplyingAll || isConverting || isSubmitting}
+                                                                className={`rounded px-3 py-1 text-xs font-semibold text-white transition ${
+                                                                    isApplyingAll || isConverting || isSubmitting
+                                                                        ? 'bg-green-400 cursor-not-allowed opacity-70'
+                                                                        : 'bg-green-600 hover:bg-green-700'
+                                                                }`}
+                                                                title="Gunakan GeoJSON ini di form"
+                                                            >
+                                                                {isApplyingAll ? 'Memproses...' : 'Gunakan'}
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDownloadGeoJSON(file.data, file.filename)}
+                                                            className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                                            title="Download file GeoJSON"
+                                                        >
+                                                            Download
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
 
@@ -791,45 +1137,138 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                         <label htmlFor="geojson_file" className="mb-1 block font-medium text-gray-700 dark:text-gray-300">
                             GeoJSON (File Upload)
                         </label>
-                        <input
-                            id="geojson_file"
-                            type="file"
-                            accept=".geojson"
-                            multiple
-                            {...register('geojson_file')}
-                            ref={inputRef}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                            onChange={handleFileChange}
-                        />
+
+                        {/* Drag and Drop Zone */}
+                        <div
+                            onDragEnter={handleDragEnter}
+                            onDragLeave={handleDragLeave}
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            className={`relative rounded-lg border-2 border-dashed transition-all ${
+                                isDragging
+                                    ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                                    : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800'
+                            }`}
+                        >
+                            <input
+                                id="geojson_file"
+                                type="file"
+                                accept=".geojson"
+                                multiple
+                                {...register('geojson_file')}
+                                ref={inputRef}
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+
+                            <label
+                                htmlFor="geojson_file"
+                                className="flex cursor-pointer flex-col items-center justify-center px-6 py-8 text-center"
+                            >
+                                <svg
+                                    className={`mb-3 h-12 w-12 transition-colors ${
+                                        isDragging
+                                            ? 'text-blue-500 dark:text-blue-400'
+                                            : 'text-gray-400 dark:text-gray-500'
+                                    }`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                    />
+                                </svg>
+                                <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    {isDragging ? (
+                                        <span className="text-blue-600 dark:text-blue-400">
+                                            Drop file di sini
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <span className="text-blue-600 dark:text-blue-400">
+                                                Click untuk upload
+                                            </span>{' '}
+                                            atau drag and drop
+                                        </>
+                                    )}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    File GeoJSON (.geojson) - Multiple files diperbolehkan
+                                </p>
+                            </label>
+                        </div>
+
                         {errors.geojson_file && <p className="mt-1 text-sm text-red-600">{errors.geojson_file.message}</p>}
 
                         {/* List nama file yang sudah dipilih */}
                         {fileList.length > 0 && (
-                            <div className="mt-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
-                                <ul className="list-disc pl-6 text-xs text-gray-700 dark:text-gray-200">
+                            <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
+                                <div className="mb-2 flex items-center justify-between">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        {fileList.length} file dipilih
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveAll}
+                                        className="rounded bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow transition hover:bg-red-700"
+                                    >
+                                        Hapus Semua
+                                    </button>
+                                </div>
+                                <ul className="space-y-2">
                                     {fileList.map((file, idx) => (
                                         <li
                                             key={idx}
-                                            className="flex items-center justify-between gap-2 border-b border-dashed border-gray-200 py-1 last:border-0 dark:border-gray-700"
+                                            className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-800"
                                         >
-                                            <span className="truncate">{file.name}</span>
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                <svg
+                                                    className="h-5 w-5 flex-shrink-0 text-blue-500"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
+                                                </svg>
+                                                <span className="truncate text-sm text-gray-700 dark:text-gray-300">
+                                                    {file.name}
+                                                </span>
+                                                <span className="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
+                                                    ({(file.size / 1024).toFixed(2)} KB)
+                                                </span>
+                                            </div>
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveFile(idx)}
-                                                className="rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-500 transition hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800"
+                                                className="flex-shrink-0 rounded bg-red-100 p-1.5 text-red-600 transition hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800"
+                                                title="Hapus file"
                                             >
-                                                Cancel
+                                                <svg
+                                                    className="h-4 w-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
+                                                </svg>
                                             </button>
                                         </li>
                                     ))}
                                 </ul>
-                                <button
-                                    type="button"
-                                    onClick={handleRemoveAll}
-                                    className="mt-3 rounded bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-red-700"
-                                >
-                                    Cancel Semua
-                                </button>
                             </div>
                         )}
                     </div>

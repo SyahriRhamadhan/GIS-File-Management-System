@@ -123,12 +123,25 @@ export default function GeojsonEdit() {
     const { geojson, user_name, user_id, regions, owner, kategoris, flash } = usePage<PageProps>().props;
     const [fileList, setFileList] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
-    
+    const [isDragging, setIsDragging] = useState(false);
+
     // SHP/KML/KMZ to GeoJSON states
     const [shpGeojson, setShpGeojson] = useState<any>(null);
     const [previewGeojsons, setPreviewGeojsons] = useState<any[]>([]);
     const [convertedFilename, setConvertedFilename] = useState<string>('converted.geojson');
     const [isConverting, setIsConverting] = useState<boolean>(false);
+
+    // Helper function to calculate file size in MB
+    const getFileSizeInMB = (data: any): number => {
+        const jsonString = JSON.stringify(data);
+        const sizeInBytes = new Blob([jsonString]).size;
+        return sizeInBytes / (1024 * 1024); // Convert to MB
+    };
+
+    // Helper function to check if file is too large (>10MB)
+    const isFileTooLarge = (data: any): boolean => {
+        return getFileSizeInMB(data) > 10;
+    };
 
     // Normalize: convert closed LineString/MultiLineString to Polygon/MultiPolygon
     const normalizeClosedLinesToPolygons = (geojson: any) => {
@@ -258,6 +271,54 @@ export default function GeojsonEdit() {
         if (inputRef.current) inputRef.current.value = '';
         setValue('geojson_file', undefined);
         // fileList diupdate otomatis oleh useEffect di atas
+    };
+
+    // Drag and Drop handlers
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const droppedFiles = e.dataTransfer.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+            // Filter only .geojson files
+            const geojsonFiles = Array.from(droppedFiles).filter(file =>
+                file.name.toLowerCase().endsWith('.geojson')
+            );
+
+            if (geojsonFiles.length === 0) {
+                toast.error('Hanya file .geojson yang diperbolehkan');
+                return;
+            }
+
+            // For update, we only allow single file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(geojsonFiles[0]);
+
+            if (inputRef.current) {
+                inputRef.current.files = dataTransfer.files;
+            }
+
+            setValue('geojson_file', dataTransfer.files);
+            toast.success(`File ${geojsonFiles[0].name} ditambahkan`);
+        }
     };
 
     // Helper function to group SHP files by basename
@@ -433,6 +494,20 @@ export default function GeojsonEdit() {
         saveAs(blob, filename);
     };
 
+    const handleDownloadAllGeoJSON = () => {
+        if (previewGeojsons.length > 0) {
+            previewGeojsons.forEach(({ filename, data }) => {
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                saveAs(blob, filename);
+            });
+            toast.success(`${previewGeojsons.length} file berhasil didownload`);
+        } else if (shpGeojson) {
+            const blob = new Blob([JSON.stringify(shpGeojson, null, 2)], { type: 'application/json' });
+            saveAs(blob, convertedFilename);
+            toast.success('File berhasil didownload');
+        }
+    };
+
     const handleClearConversion = () => {
         setShpGeojson(null);
         setPreviewGeojsons([]);
@@ -479,6 +554,49 @@ export default function GeojsonEdit() {
         ...k, // Attach the whole category data to the option
     }));
 
+    // KML/KMZ helpers
+    const parseKmlTextToGeoJSON = (kmlText: string) => {
+        const dom = new DOMParser().parseFromString(kmlText, 'text/xml');
+        const gj = toGeoJSON.kml(dom);
+        return gj;
+    };
+
+    const handleKmlKmzUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files?.length) return;
+        setIsConverting(true);
+        try {
+            const file = files[0];
+            const lower = file.name.toLowerCase();
+            if (lower.endsWith('.kml')) {
+                const text = await file.text();
+                const gj = normalizeClosedLinesToPolygons(parseKmlTextToGeoJSON(text));
+                setShpGeojson(gj);
+                setPreviewGeojsons([]);
+                setConvertedFilename(`${file.name.replace(/\.[^/.]+$/, '')}.geojson`);
+                toast.success('Berhasil mengkonversi KML ke GeoJSON');
+            } else if (lower.endsWith('.kmz')) {
+                const buf = await file.arrayBuffer();
+                const zip = await JSZip.loadAsync(buf);
+                const kmlEntry = zip.file(/doc\.kml$/i)[0] || zip.file(/\.kml$/i)[0];
+                if (!kmlEntry) throw new Error('KMZ tidak berisi file KML');
+                const kmlText = await kmlEntry.async('text');
+                const gj = normalizeClosedLinesToPolygons(parseKmlTextToGeoJSON(kmlText));
+                setShpGeojson(gj);
+                setPreviewGeojsons([]);
+                setConvertedFilename(`${file.name.replace(/\.[^/.]+$/, '')}.geojson`);
+                toast.success('Berhasil mengkonversi KMZ ke GeoJSON');
+            } else {
+                toast.error('Format tidak dikenali. Pilih file .kml atau .kmz');
+            }
+        } catch (err: any) {
+            toast.error(`Gagal mengkonversi KML/KMZ: ${err?.message || err}`);
+        } finally {
+            setIsConverting(false);
+            if (inputRef.current) inputRef.current.value = '';
+        }
+    };
+
     return (
         <AppLayout
             breadcrumbs={[
@@ -509,17 +627,123 @@ export default function GeojsonEdit() {
 
                     {/* File Upload */}
                     <div>
-                        <label htmlFor="geojson_file" className="mb-1 block">
+                        <label htmlFor="geojson_file" className="mb-1 block font-medium text-gray-700 dark:text-gray-300">
                             GeoJSON (File Upload)
                         </label>
-                        <input
-                            id="geojson_file"
-                            type="file"
-                            accept=".geojson"
-                            {...register('geojson_file')}
-                            className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                        />
+
+                        {/* Drag and Drop Zone */}
+                        <div
+                            onDragEnter={handleDragEnter}
+                            onDragLeave={handleDragLeave}
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            className={`relative rounded-lg border-2 border-dashed transition-all ${
+                                isDragging
+                                    ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                                    : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800'
+                            }`}
+                        >
+                            <input
+                                id="geojson_file"
+                                type="file"
+                                accept=".geojson"
+                                {...register('geojson_file')}
+                                ref={inputRef}
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+
+                            <label
+                                htmlFor="geojson_file"
+                                className="flex cursor-pointer flex-col items-center justify-center px-6 py-8 text-center"
+                            >
+                                <svg
+                                    className={`mb-3 h-12 w-12 transition-colors ${
+                                        isDragging
+                                            ? 'text-blue-500 dark:text-blue-400'
+                                            : 'text-gray-400 dark:text-gray-500'
+                                    }`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                    />
+                                </svg>
+                                <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    {isDragging ? (
+                                        <span className="text-blue-600 dark:text-blue-400">
+                                            Drop file di sini
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <span className="text-blue-600 dark:text-blue-400">
+                                                Click untuk upload
+                                            </span>{' '}
+                                            atau drag and drop
+                                        </>
+                                    )}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    File GeoJSON (.geojson)
+                                </p>
+                            </label>
+                        </div>
+
                         {errors.geojson_file && <p className="mt-1 text-sm text-red-500">{errors.geojson_file.message}</p>}
+
+                        {/* Show selected file */}
+                        {fileList.length > 0 && (
+                            <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
+                                <div className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                        <svg
+                                            className="h-5 w-5 flex-shrink-0 text-blue-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            />
+                                        </svg>
+                                        <span className="truncate text-sm text-gray-700 dark:text-gray-300">
+                                            {fileList[0].name}
+                                        </span>
+                                        <span className="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
+                                            ({(fileList[0].size / 1024).toFixed(2)} KB)
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveAll}
+                                        className="flex-shrink-0 rounded bg-red-100 p-1.5 text-red-600 transition hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800"
+                                        title="Hapus file"
+                                    >
+                                        <svg
+                                            className="h-4 w-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M6 18L18 6M6 6l12 12"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* User (readonly) */}
@@ -639,21 +863,35 @@ export default function GeojsonEdit() {
                             {shpGeojson && (
                                 <div className="rounded border border-green-200 bg-green-50 p-3 dark:border-green-700 dark:bg-green-900">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                                            {convertedFilename}
-                                        </span>
+                                        <div className="flex-1">
+                                            <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                                                {convertedFilename}
+                                            </span>
+                                            <span className="ml-2 text-xs text-gray-600 dark:text-gray-400">
+                                                ({getFileSizeInMB(shpGeojson).toFixed(2)} MB)
+                                            </span>
+                                            {isFileTooLarge(shpGeojson) && (
+                                                <div className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                                                    ⚠️ File lebih dari 10MB, hanya bisa download
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="flex space-x-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleUseConvertedGeoJSON(shpGeojson, convertedFilename)}
-                                                className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
-                                            >
-                                                Gunakan
-                                            </button>
+                                            {!isFileTooLarge(shpGeojson) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleUseConvertedGeoJSON(shpGeojson, convertedFilename)}
+                                                    className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
+                                                    title="Gunakan GeoJSON ini di form"
+                                                >
+                                                    Gunakan
+                                                </button>
+                                            )}
                                             <button
                                                 type="button"
                                                 onClick={() => handleDownloadGeoJSON(shpGeojson, convertedFilename)}
                                                 className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                                title="Download file GeoJSON"
                                             >
                                                 Download
                                             </button>
@@ -666,42 +904,84 @@ export default function GeojsonEdit() {
                             {previewGeojsons.length > 0 && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {previewGeojsons.length} file GeoJSON berhasil dikonversi:
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={handleClearConversion}
-                                            className="rounded bg-gray-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-gray-600"
-                                        >
-                                            Clear
-                                        </button>
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {previewGeojsons.length} file GeoJSON berhasil dikonversi
+                                            </span>
+                                            {(() => {
+                                                const largeFiles = previewGeojsons.filter(file => isFileTooLarge(file.data));
+                                                return largeFiles.length > 0 && (
+                                                    <div className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                                                        ⚠️ {largeFiles.length} file lebih dari 10MB
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleDownloadAllGeoJSON}
+                                                className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                                title="Download semua file GeoJSON"
+                                            >
+                                                Download Semua
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleClearConversion}
+                                                className="rounded bg-gray-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-gray-600"
+                                                title="Hapus semua hasil konversi"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
                                     </div>
-                                    {previewGeojsons.map((file, index) => (
-                                        <div key={index} className="rounded border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                                    {file.filename}
-                                                </span>
-                                                <div className="flex space-x-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleUseConvertedGeoJSON(file.data, file.filename)}
-                                                        className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
-                                                    >
-                                                        Gunakan
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleDownloadGeoJSON(file.data, file.filename)}
-                                                        className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
-                                                    >
-                                                        Download
-                                                    </button>
+                                    {previewGeojsons.map((file, index) => {
+                                        const fileSizeMB = getFileSizeInMB(file.data);
+                                        const isTooLarge = isFileTooLarge(file.data);
+
+                                        return (
+                                            <div key={index} className="rounded border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                                                {file.filename}
+                                                            </span>
+                                                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                                ({fileSizeMB.toFixed(2)} MB)
+                                                            </span>
+                                                        </div>
+                                                        {isTooLarge && (
+                                                            <div className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                                                                ⚠️ File lebih dari 10MB, hanya bisa download
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        {!isTooLarge && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleUseConvertedGeoJSON(file.data, file.filename)}
+                                                                className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-green-700"
+                                                                title="Gunakan GeoJSON ini di form"
+                                                            >
+                                                                Gunakan
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDownloadGeoJSON(file.data, file.filename)}
+                                                            className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                                            title="Download file GeoJSON"
+                                                        >
+                                                            Download
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
 
@@ -815,45 +1095,3 @@ export default function GeojsonEdit() {
         </AppLayout>
     );
 }
-    // KML/KMZ helpers
-    const parseKmlTextToGeoJSON = (kmlText: string) => {
-        const dom = new DOMParser().parseFromString(kmlText, 'text/xml');
-        const gj = toGeoJSON.kml(dom);
-        return gj;
-    };
-
-    const handleKmlKmzUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files?.length) return;
-        setIsConverting(true);
-        try {
-            const file = files[0];
-            const lower = file.name.toLowerCase();
-            if (lower.endsWith('.kml')) {
-                const text = await file.text();
-                const gj = normalizeClosedLinesToPolygons(parseKmlTextToGeoJSON(text));
-                setShpGeojson(gj);
-                setPreviewGeojsons([]);
-                setConvertedFilename(`${file.name.replace(/\.[^/.]+$/, '')}.geojson`);
-                toast.success('Berhasil mengkonversi KML ke GeoJSON');
-            } else if (lower.endsWith('.kmz')) {
-                const buf = await file.arrayBuffer();
-                const zip = await JSZip.loadAsync(buf);
-                const kmlEntry = zip.file(/doc\.kml$/i)[0] || zip.file(/\.kml$/i)[0];
-                if (!kmlEntry) throw new Error('KMZ tidak berisi file KML');
-                const kmlText = await kmlEntry.async('text');
-                const gj = normalizeClosedLinesToPolygons(parseKmlTextToGeoJSON(kmlText));
-                setShpGeojson(gj);
-                setPreviewGeojsons([]);
-                setConvertedFilename(`${file.name.replace(/\.[^/.]+$/, '')}.geojson`);
-                toast.success('Berhasil mengkonversi KMZ ke GeoJSON');
-            } else {
-                toast.error('Format tidak dikenali. Pilih file .kml atau .kmz');
-            }
-        } catch (err: any) {
-            toast.error(`Gagal mengkonversi KML/KMZ: ${err?.message || err}`);
-        } finally {
-            setIsConverting(false);
-            if (inputRef.current) inputRef.current.value = '';
-        }
-    };
