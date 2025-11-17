@@ -116,6 +116,8 @@ interface MapViewProps {
     initialVisibleIds?: Array<string | number>;
 }
 
+type PolygonDisplayMode = 'fill' | 'outline';
+
 // Component to set mapRef after map is ready
 const MapRefSetter: React.FC<{ mapRef: React.MutableRefObject<LeafletMap | null> }> = ({ mapRef }) => {
     const map = useMap();
@@ -367,6 +369,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     // State
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [polygonDisplayMode, setPolygonDisplayMode] = useState<PolygonDisplayMode>('fill');
     const toggleSidebar = () => setSidebarOpen((open) => !open);
 
     // Loading effect when data changes
@@ -441,18 +444,23 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         });
     }, [groupedByCategory]);
 
-    const applyLayerColor = useCallback((key: string, color: string) => {
-        const layer = geoJsonRefs.current[key];
-        if (layer && typeof layer.setStyle === 'function') {
-            layer.setStyle({
-                color,
-                fillColor: color,
-            });
-        }
-    }, []);
+    const applyLayerColor = useCallback(
+        (key: string, color: string) => {
+            const layer = geoJsonRefs.current[key];
+            if (layer && typeof layer.setStyle === 'function') {
+                layer.setStyle({
+                    color,
+                    fillColor: color,
+                    fillOpacity: polygonDisplayMode === 'fill' ? 0.5 : 0,
+                });
+            }
+        },
+        [polygonDisplayMode]
+    );
 
     // Track previous customColors to only update changed layers
     const prevCustomColorsRef = useRef<Record<string, string>>({});
+    const currentCustomColorsRef = useRef<Record<string, string>>({});
     const previewColorsRef = useRef<Record<string, string>>({});
 
     useEffect(() => {
@@ -475,6 +483,21 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
 
         prevCustomColorsRef.current = { ...customColors };
     }, [customColors, applyLayerColor]);
+
+    useEffect(() => {
+        currentCustomColorsRef.current = customColors;
+    }, [customColors]);
+
+    useEffect(() => {
+        Object.keys(geoJsonRefs.current).forEach((key) => {
+            const color =
+                previewColorsRef.current[key] ??
+                currentCustomColorsRef.current[key] ??
+                layerDefaultColors.current[key] ??
+                '#3388ff';
+            applyLayerColor(key, color);
+        });
+    }, [polygonDisplayMode, applyLayerColor]);
 
     // Debounce persist to avoid too many localStorage writes
     useEffect(() => {
@@ -1175,7 +1198,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                                     weight: 2,
                                     opacity: 0.8,
                                     fillColor: effectiveColor,
-                                    fillOpacity: 0.5,
+                                    fillOpacity: polygonDisplayMode === 'fill' ? 0.5 : 0,
                                 };
 
                                 return (
@@ -1234,6 +1257,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 isCategoryChecked={isCategoryChecked}
                 isParentChecked={isParentChecked}
                 onSearchCoordinate={handleSearchCoordinate}
+                polygonDisplayMode={polygonDisplayMode}
+                onDisplayModeChange={(mode) => setPolygonDisplayMode(mode)}
             />
         </div>
     );

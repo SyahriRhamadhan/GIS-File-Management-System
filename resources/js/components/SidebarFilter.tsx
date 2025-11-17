@@ -23,6 +23,8 @@ interface SidebarFilterProps {
     isParentChecked?: (category: string, parent: string) => boolean;
     onView: (category: string, parent: string, childId: string) => void;
     onSearchCoordinate?: (x: string, y: string) => void;
+    polygonDisplayMode: 'fill' | 'outline';
+    onDisplayModeChange: (mode: 'fill' | 'outline') => void;
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -45,6 +47,8 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     isParentChecked = () => false,
     onView,
     onSearchCoordinate,
+    polygonDisplayMode,
+    onDisplayModeChange,
 }) => {
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
     const [expandedParents, setExpandedParents] = useState<Record<string, Record<string, boolean>>>({});
@@ -135,6 +139,17 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             return children.some((child) => child.label.toLowerCase().includes(search.toLowerCase()));
         });
     });
+
+    const baseDisplayButtonClasses =
+        'flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60';
+    const fillButtonClasses =
+        polygonDisplayMode === 'fill'
+            ? `${baseDisplayButtonClasses} bg-indigo-600 hover:bg-indigo-700`
+            : `${baseDisplayButtonClasses} bg-gray-500 hover:bg-gray-600`;
+    const outlineButtonClasses =
+        polygonDisplayMode === 'outline'
+            ? `${baseDisplayButtonClasses} bg-indigo-600 hover:bg-indigo-700`
+            : `${baseDisplayButtonClasses} bg-gray-500 hover:bg-gray-600`;
 
     return (
         <div
@@ -227,6 +242,26 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                 disabled={noneChecked}
                             >
                                 Sembunyikan Semua
+                            </button>
+                        </div>
+                        <div className="mt-3 flex w-full max-w-md gap-3">
+                            <button
+                                type="button"
+                                className={fillButtonClasses}
+                                onClick={() => onDisplayModeChange('fill')}
+                                disabled={polygonDisplayMode === 'fill'}
+                                aria-pressed={polygonDisplayMode === 'fill'}
+                            >
+                                Isi Polygon
+                            </button>
+                            <button
+                                type="button"
+                                className={outlineButtonClasses}
+                                onClick={() => onDisplayModeChange('outline')}
+                                disabled={polygonDisplayMode === 'outline'}
+                                aria-pressed={polygonDisplayMode === 'outline'}
+                            >
+                                Hanya Outline
                             </button>
                         </div>
                     </div>
