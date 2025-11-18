@@ -25,6 +25,10 @@ interface SidebarFilterProps {
     onSearchCoordinate?: (x: string, y: string) => void;
     polygonDisplayMode: 'fill' | 'outline';
     onDisplayModeChange: (mode: 'fill' | 'outline') => void;
+    fillOpacity: number;
+    outlineHidden: boolean;
+    onFillOpacityChange: (value: number) => void;
+    onOutlineHiddenChange: (hidden: boolean) => void;
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -49,6 +53,10 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     onSearchCoordinate,
     polygonDisplayMode,
     onDisplayModeChange,
+    fillOpacity,
+    outlineHidden,
+    onFillOpacityChange,
+    onOutlineHiddenChange,
 }) => {
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
     const [expandedParents, setExpandedParents] = useState<Record<string, Record<string, boolean>>>({});
@@ -56,6 +64,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [coordX, setCoordX] = useState('');
     const [coordY, setCoordY] = useState('');
     const [showCategoryInfo, setShowCategoryInfo] = useState<Record<string, boolean>>({});
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
     const handleToggleCategory = (category: string) => {
         setExpandedCategories((prev) => ({
@@ -263,6 +272,13 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                             >
                                 Hanya Outline
                             </button>
+                            <button
+                                type="button"
+                                className="flex-1 rounded-lg bg-gray-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-gray-800"
+                                onClick={() => setSettingsOpen(true)}
+                            >
+                                Pengaturan Tampilan
+                            </button>
                         </div>
                     </div>
 
@@ -455,6 +471,52 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                         ))}
                     </div>
                 </>
+            )}
+            {settingsOpen && (
+                <div
+                    className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/40"
+                    onClick={() => setSettingsOpen(false)}
+                >
+                    <div
+                        className="w-[360px] max-w-[90vw] rounded-lg bg-white p-4 shadow-lg dark:bg-[#232329]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="mb-3 flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Pengaturan Tampilan</h3>
+                            <button
+                                type="button"
+                                className="rounded bg-gray-200 px-2 py-1 text-xs text-gray-700 dark:bg-[#393e41] dark:text-gray-200"
+                                onClick={() => setSettingsOpen(false)}
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <div className="mb-1 text-xs font-medium text-gray-700 dark:text-gray-200">Opacity Isi</div>
+                                <input
+                                    type="range"
+                                    min={0}
+                                    max={100}
+                                    value={Math.round((fillOpacity || 0) * 100)}
+                                    onChange={(e) => onFillOpacityChange(Number(e.target.value) / 100)}
+                                    className="w-full"
+                                />
+                                <div className="mt-1 text-right text-xs text-gray-600 dark:text-gray-300">
+                                    {Math.round((fillOpacity || 0) * 100)}%
+                                </div>
+                            </div>
+                            <label className="flex items-center gap-2 text-xs font-medium text-gray-700 dark:text-gray-200">
+                                <input
+                                    type="checkbox"
+                                    checked={!!outlineHidden}
+                                    onChange={(e) => onOutlineHiddenChange(e.target.checked)}
+                                />
+                                Hilangkan Outline
+                            </label>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

@@ -370,6 +370,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [polygonDisplayMode, setPolygonDisplayMode] = useState<PolygonDisplayMode>('fill');
+    const [fillOpacity, setFillOpacity] = useState<number>(0.5);
+    const [outlineHidden, setOutlineHidden] = useState<boolean>(false);
     const toggleSidebar = () => setSidebarOpen((open) => !open);
 
     // Loading effect when data changes
@@ -450,12 +452,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             if (layer && typeof layer.setStyle === 'function') {
                 layer.setStyle({
                     color,
+                    weight: outlineHidden ? 0 : 2,
+                    opacity: outlineHidden ? 0 : 0.8,
                     fillColor: color,
-                    fillOpacity: polygonDisplayMode === 'fill' ? 0.5 : 0,
+                    fillOpacity: polygonDisplayMode === 'fill' ? fillOpacity : 0,
                 });
             }
         },
-        [polygonDisplayMode]
+        [polygonDisplayMode, fillOpacity, outlineHidden]
     );
 
     // Track previous customColors to only update changed layers
@@ -497,7 +501,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 '#3388ff';
             applyLayerColor(key, color);
         });
-    }, [polygonDisplayMode, applyLayerColor]);
+    }, [polygonDisplayMode, fillOpacity, outlineHidden, applyLayerColor]);
 
     // Debounce persist to avoid too many localStorage writes
     useEffect(() => {
@@ -1217,10 +1221,10 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                                 // Memoize style object to prevent unnecessary re-renders
                                 const styleObj = {
                                     color: effectiveColor,
-                                    weight: 2,
-                                    opacity: 0.8,
+                                    weight: outlineHidden ? 0 : 2,
+                                    opacity: outlineHidden ? 0 : 0.8,
                                     fillColor: effectiveColor,
-                                    fillOpacity: polygonDisplayMode === 'fill' ? 0.5 : 0,
+                                    fillOpacity: polygonDisplayMode === 'fill' ? fillOpacity : 0,
                                 };
 
                                 return (
@@ -1281,6 +1285,10 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 onSearchCoordinate={handleSearchCoordinate}
                 polygonDisplayMode={polygonDisplayMode}
                 onDisplayModeChange={(mode) => setPolygonDisplayMode(mode)}
+                fillOpacity={fillOpacity}
+                outlineHidden={outlineHidden}
+                onFillOpacityChange={(v) => setFillOpacity(v)}
+                onOutlineHiddenChange={(h) => setOutlineHidden(h)}
             />
         </div>
     );
