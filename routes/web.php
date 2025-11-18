@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\Geojson;
+use App\Models\Region;
+use App\Models\PewarnaanRdtr;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\GeojsonController;
@@ -12,7 +15,104 @@ use App\Http\Controllers\PdfGeojson;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PewarnaanRdtrController;
 // Halaman utama
-Route::get('/', fn() => Inertia::render('welcome'))->name('home');
+Route::get('/', function () {
+    $geojsons = Geojson::with('kategori')
+        ->select([
+            'geojson.id_geojson',
+            'geojson.source_name',
+            'geojson.main_category',
+            'geojson.id_kategori',
+            'geojson.geojson',
+            'geojson.geojson_bbox',
+        ])
+        ->orderByDesc('geojson.created_at')
+        ->limit(500)
+        ->get();
+
+    $bySubZona = [];
+    $byKode = [];
+    foreach (PewarnaanRdtr::select('kode', 'sub_zona', 'kode_warna', 'rgb')->get() as $r) {
+        $hex = $r->kode_warna;
+        if (empty($hex) && is_string($r->rgb)) {
+            $parts = preg_split('/\s+/', trim($r->rgb));
+            if (count($parts) === 3) {
+                $rC = max(0, min(255, (int) $parts[0]));
+                $gC = max(0, min(255, (int) $parts[1]));
+                $bC = max(0, min(255, (int) $parts[2]));
+                $hex = sprintf('#%02x%02x%02x', $rC, $gC, $bC);
+            }
+        }
+        if ($hex) {
+            if (!empty($r->sub_zona)) {
+                $bySubZona[trim((string) $r->sub_zona)] = $hex;
+            }
+            if (!empty($r->kode)) {
+                $byKode[trim((string) $r->kode)] = $hex;
+            }
+        }
+    }
+
+    $geojsons = $geojsons->map(function ($g) use ($bySubZona, $byKode) {
+        $feature = $g->getRawOriginal('geojson');
+        if (is_string($feature)) {
+            $decoded = json_decode($feature, true);
+            $feature = is_array($decoded) ? $decoded : ['type' => 'Feature', 'properties' => []];
+        } elseif (!is_array($feature)) {
+            $feature = ['type' => 'Feature', 'properties' => []];
+        }
+        if (!isset($feature['properties']) || !is_array($feature['properties'])) {
+            $feature['properties'] = [];
+        }
+
+        $color = $g->kategori->kode_warna ?? null;
+        if (!$color || $color === '#3388ff') {
+            $props = $feature['properties'] ?? [];
+            $namobj = $props['NAMOBJ'] ?? null;
+            $kodunk = $props['KODUNK'] ?? null;
+            if ($namobj && isset($bySubZona[$namobj])) {
+                $color = $bySubZona[$namobj];
+            } elseif ($kodunk && is_string($kodunk)) {
+                if (preg_match('/^([A-Z0-9\-]+)/', $kodunk, $m)) {
+                    $prefix = $m[1];
+                    if (isset($byKode[$prefix])) {
+                        $color = $byKode[$prefix];
+                    }
+                }
+            }
+        }
+        if (!$color) {
+            $color = '#3388ff';
+        }
+
+        return [
+            'id_geojson' => $g->id_geojson,
+            'source_name' => $g->source_name,
+            'main_category' => $g->main_category,
+            'id_kategori' => $g->id_kategori,
+            'kategori' => $g->kategori ? [
+                'layer_order' => $g->kategori->layer_order,
+                'orde0' => $g->kategori->orde0,
+                'kode_warna' => $g->kategori->kode_warna,
+                'kode' => $g->kategori->kode,
+            ] : null,
+            'geojson' => $feature,
+            'geojson_bbox' => $g->geojson_bbox,
+            'kode_warna' => $color,
+        ];
+    });
+
+    $regions = Region::select('id_region', 'name')->get();
+
+    return Inertia::render('welcome', [
+        'geojsons' => $geojsons,
+        'regions' => $regions,
+        'user' => null,
+    ]);
+})->name('home');
+
+// Public API for landing page map
+Route::get('/api/public/geojsons', [DashboardController::class, 'getGeojsons'])->name('api.public.geojsons');
+Route::get('/api/public/geojsons/{geojson}', [DashboardController::class, 'showGeojson'])->name('api.public.geojson.show');
 
 
 // Hanya untuk pengguna yang sudah login & verifikasi

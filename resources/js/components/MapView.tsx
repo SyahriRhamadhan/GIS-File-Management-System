@@ -121,6 +121,7 @@ interface MapViewProps {
     // Optional: daftar id yang ingin ditampilkan secara default
     initialVisibleIds?: Array<string | number>;
     fetchGeojsonBatch?: (ids: Array<string | number>) => Promise<Record<string, GeoJSON.Feature | null>>;
+    readOnly?: boolean;
 }
 
 type PolygonDisplayMode = 'fill' | 'outline';
@@ -188,7 +189,7 @@ const PopupAddPropertyRow: React.FC<PopupAddPropertyRowProps> = ({ onAdd, onPend
     );
 };
 
-const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], fetchGeojsonBatch }) => {
+const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], fetchGeojsonBatch, readOnly = false }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
     const mapRef = useRef<LeafletMap | null>(null);
@@ -486,8 +487,14 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
     const [activeParentFilters, setActiveParentFilters] = useState<Record<string, Record<string, boolean>>>({});
     const [activeChildFilters, setActiveChildFilters] = useState<Record<string, Record<string, Record<string, boolean>>>>({});
 
+    const initialFiltersAppliedRef = useRef(false);
+
     // Auto-initialize filter state for three levels
     useEffect(() => {
+        if (initialFiltersAppliedRef.current && !(Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0)) {
+            return;
+        }
+
         const hasInitial = Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0;
         const initialSet = new Set(initialVisibleIds.map((v) => String(v)));
 
@@ -523,6 +530,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
         setActiveParentFilters(parentState);
         setActiveChildFilters(childState);
         setLayerOrder(initialOrder);
+        initialFiltersAppliedRef.current = true;
     }, [groupedByCategory, uniqueCategoryNames, initialVisibleIds]);
 
     useEffect(() => {
@@ -1065,7 +1073,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
             </div>
         );
 
-        const isEditing = editingId === String(item.id_geojson);
+        const isEditing = !readOnly && editingId === String(item.id_geojson);
         if (isEditing) {
             const entries = Object.entries(editValues);
             const norm = (o: Record<string, any>) =>
@@ -1089,7 +1097,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
                     onClick={(e) => e.stopPropagation()}
                     onWheel={(e) => e.stopPropagation()}
                 >
-                    {renderLayerControls()}
+                    {!readOnly && renderLayerControls()}
                     <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
                         {entries.length === 0 && (
                             <p className="text-gray-500">Tidak ada properti. Tambahkan pasangan kunci-nilai.</p>
@@ -1145,7 +1153,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
             >
-                {renderLayerControls()}
+                {!readOnly && renderLayerControls()}
                 {(() => {
                     const propEntries = Object.entries(mergedProps).filter(([k]) => k !== 'id_geojson');
                     return (
@@ -1176,48 +1184,52 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
                     );
                 })()}
                 <div className="mt-2 flex flex-wrap items-center gap-2 justify-end">
-                    <a
-                        href={`/dashboard/geojson/${item.id_geojson}/add`}
-                        className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        title="Add PDF"
-                        onMouseDown={(e) => e.stopPropagation()}
-                    >
-                        <IoAddCircleOutline className="mr-1" />
-                        Add PDF
-                    </a>
-                    <a
-                        href={`/dashboard/geojson/${item.id_geojson}/view`}
-                        className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        title="View list PDF"
-                        onMouseDown={(e) => e.stopPropagation()}
-                    >
-                        <FaFilePdf className="mr-1" />
-                        View PDFs
-                    </a>
-                    <a
-                        href={`/dashboard/geojson/${item.id_geojson}/edit`}
-                        className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        title="Edit GeoJSON"
-                        onMouseDown={(e) => e.stopPropagation()}
-                    >
-                        <FaMapMarkedAlt className="mr-1" />
-                        Edit GeoJSON
-                    </a>
-                    <button
-                        type="button"
-                        className="inline-flex items-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all"
-                        title="Edit properties"
-                        onClick={() => startEdit(item)}
-                        onMouseDown={(e) => e.stopPropagation()}
-                    >
-                        Edit Properties
-                    </button>
+                    {!readOnly && (
+                        <>
+                            <a
+                                href={`/dashboard/geojson/${item.id_geojson}/add`}
+                                className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                title="Add PDF"
+                                onMouseDown={(e) => e.stopPropagation()}
+                            >
+                                <IoAddCircleOutline className="mr-1" />
+                                Add PDF
+                            </a>
+                            <a
+                                href={`/dashboard/geojson/${item.id_geojson}/view`}
+                                className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                title="View list PDF"
+                                onMouseDown={(e) => e.stopPropagation()}
+                            >
+                                <FaFilePdf className="mr-1" />
+                                View PDFs
+                            </a>
+                            <a
+                                href={`/dashboard/geojson/${item.id_geojson}/edit`}
+                                className="inline-flex items-center rounded bg-white px-2 py-1 text-gray-800 hover:bg-gray-100"
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                title="Edit GeoJSON"
+                                onMouseDown={(e) => e.stopPropagation()}
+                            >
+                                <FaMapMarkedAlt className="mr-1" />
+                                Edit GeoJSON
+                            </a>
+                            <button
+                                type="button"
+                                className="inline-flex items-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-all"
+                                title="Edit properties"
+                                onClick={() => startEdit(item)}
+                                onMouseDown={(e) => e.stopPropagation()}
+                            >
+                                Edit Properties
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         );
@@ -1303,7 +1315,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
                     <ScaleControl position="bottomleft" />
                     <ScaleControl position="topright" />
 
-                    <GeomanControl />
+                    {!readOnly && <GeomanControl />}
 
                     <LayersControl position="topright">
                         <BaseLayers />
