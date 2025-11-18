@@ -99,7 +99,7 @@ interface MapViewProps {
     geojsonData: Array<{
         id_geojson: number | string;
         geojson: {
-            geometry: GeoJSON.Geometry;
+            geometry?: GeoJSON.Geometry;
             properties: Record<string, any>;
         };
         kode_warna: string;
@@ -111,9 +111,16 @@ interface MapViewProps {
             kode?: string;
         };
         source_name: string;
+        geojson_bbox?: {
+            min_lng: number;
+            min_lat: number;
+            max_lng: number;
+            max_lat: number;
+        } | null;
     }>;
     // Optional: daftar id yang ingin ditampilkan secara default
     initialVisibleIds?: Array<string | number>;
+    fetchGeojsonById?: (id: string | number) => Promise<GeoJSON.Feature | null>;
 }
 
 type PolygonDisplayMode = 'fill' | 'outline';
@@ -180,7 +187,7 @@ const PopupAddPropertyRow: React.FC<PopupAddPropertyRowProps> = ({ onAdd, onPend
     );
 };
 
-const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }) => {
+const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], fetchGeojsonById }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
     const mapRef = useRef<LeafletMap | null>(null);
@@ -195,6 +202,9 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     const [hasPendingNewKV, setHasPendingNewKV] = useState<boolean>(false);
     // Cache perubahan properti per id agar tidak perlu reload
     const [updatedProps, setUpdatedProps] = useState<Record<string, Record<string, any>>>({});
+    const featureCacheRef = useRef<Record<string, Feature | null>>({});
+    const featureLoadingRef = useRef<Set<string>>(new Set());
+    const [, forceFeatureCacheUpdate] = useState(0);
     const [layerOrder, setLayerOrder] = useState<string[]>([]);
     const [customColors, setCustomColors] = useState<Record<string, string>>(() => readStoredColors());
     const startEdit = (item: (typeof geojsonData)[0]) => {
@@ -233,20 +243,27 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         }
     };
 
+    // Data sumber: gunakan props jika disediakan, jika tidak ambil via API lazy-load
+    const [data, setData] = useState<typeof geojsonData>(() => (Array.isArray(geojsonData) ? geojsonData : []));
+    useEffect(() => {
+        setData(Array.isArray(geojsonData) ? geojsonData : []);
+    }, [geojsonData]);
+    const sourceData = useMemo(() => (Array.isArray(geojsonData) && geojsonData.length ? geojsonData : data), [geojsonData, data]);
+
     // Sort & Group data
     const sortedData = useMemo(() => {
-        return [...geojsonData].sort((a, b) => {
+        return [...sourceData].sort((a, b) => {
             const aOrder = a.kategori?.layer_order ?? 0;
             const bOrder = b.kategori?.layer_order ?? 0;
             return aOrder - bOrder;
         });
-    }, [geojsonData]);
+    }, [sourceData]);
 
     const uniqueSourceNames = useMemo(() => {
         const set = new Set<string>();
-        geojsonData.forEach((item) => set.add(item.source_name));
+        sourceData.forEach((item) => set.add(item.source_name));
         return Array.from(set);
-    }, [geojsonData]);
+    }, [sourceData]);
 
     const groupedBySourceName = useMemo(() => {
         const groups: Record<string, typeof geojsonData> = {};
@@ -265,7 +282,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         // Define the order of main categories
         const mainCategoryOrder = ['RDTR', 'RTRW', 'KKPR', 'GANTI RUGI', 'Uncategorized'];
 
-        geojsonData.forEach((item) => {
+        sourceData.forEach((item) => {
             // Level 1: Main Category (langsung dari geojson.main_category)
             const mainCategory = item.main_category || 'Uncategorized';
 
@@ -308,12 +325,12 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
         });
 
         return sortedGroups;
-    }, [geojsonData]);
+    }, [sourceData]);
 
     // Create category to unique code mapping for better performance
     const categoryToCodes = useMemo(() => {
         const mapping: Record<string, string> = {};
-        geojsonData.forEach((item) => {
+        sourceData.forEach((item) => {
             const categoryName = item.kategori?.orde0 || 'Uncategorized';
             const uniqueCode = item.kategori?.kode || 'N/A';
             if (!mapping[categoryName]) {
@@ -321,12 +338,12 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             }
         });
         return mapping;
-    }, [geojsonData])
+    }, [sourceData])
 
     // Create category colors mapping (still needed for visual indicators)
     const categoryColors = useMemo(() => {
         const colors: Record<string, string> = {};
-        geojsonData.forEach((item) => {
+        sourceData.forEach((item) => {
             const categoryName = item.kategori?.orde0 || 'Uncategorized';
             if (!colors[categoryName]) {
                 // Use kode_warna from kategori if available, otherwise from item
@@ -334,7 +351,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             }
         });
         return colors;
-    }, [geojsonData]);
+    }, [sourceData]);
 
     // Utility functions for using unique codes as differentiators
     const getCategoryByCode = useCallback((code: string): string => {
@@ -352,9 +369,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
 
     const groupedChildren = useMemo(() => {
         const groups: Record<string, Array<{ id: string; label: string }>> = {};
-        geojsonData.forEach((item) => {
+        sourceData.forEach((item) => {
             const parent = item.source_name;
-            // Use helper for performance
             const label = buildPropertiesPreview(item.geojson.properties) || String(item.id_geojson || 'Unknown');
             const id = String(item.id_geojson || label);
 
@@ -364,7 +380,15 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
             }
         });
         return groups;
-    }, [geojsonData]);
+    }, [sourceData]);
+
+    const geojsonLookup = useMemo(() => {
+        const map = new Map<string, (typeof sourceData)[0]>();
+        sourceData.forEach((item) => {
+            map.set(String(item.id_geojson), item);
+        });
+        return map;
+    }, [sourceData]);
 
     // State
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -373,6 +397,48 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
     const [fillOpacity, setFillOpacity] = useState<number>(0.5);
     const [outlineHidden, setOutlineHidden] = useState<boolean>(false);
     const toggleSidebar = () => setSidebarOpen((open) => !open);
+
+    const ensureFeatureForItem = useCallback(
+        (item?: (typeof sourceData)[0]) => {
+            if (!item || !fetchGeojsonById) return;
+            const id = String(item.id_geojson);
+            if (item.geojson?.geometry || featureCacheRef.current[id] || featureLoadingRef.current.has(id)) return;
+            featureLoadingRef.current.add(id);
+            fetchGeojsonById(item.id_geojson)
+                .then((feature) => {
+                    if (feature && feature.geometry) {
+                        featureCacheRef.current[id] = feature as Feature;
+                        forceFeatureCacheUpdate((prev) => prev + 1);
+                    }
+                })
+                .catch(() => {
+                    featureCacheRef.current[id] = null;
+                })
+                .finally(() => {
+                    featureLoadingRef.current.delete(id);
+                });
+        },
+        [fetchGeojsonById]
+    );
+
+    const ensureFeatureById = useCallback(
+        (id: string | number) => {
+            const item = geojsonLookup.get(String(id));
+            ensureFeatureForItem(item);
+        },
+        [geojsonLookup, ensureFeatureForItem]
+    );
+
+    const getFeatureForItem = useCallback(
+        (item: (typeof sourceData)[0]) => {
+            if (item.geojson?.geometry) {
+                return item.geojson as Feature;
+            }
+            const cached = featureCacheRef.current[String(item.id_geojson)];
+            return cached || null;
+        },
+        []
+    );
 
     // Loading effect when data changes
     useEffect(() => {
@@ -707,6 +773,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 });
                 const children = groupedByCategory[category]?.[parent] || [];
                 children.forEach((child) => {
+                    ensureFeatureById(child.id);
                     const refKey = `${category}-${parent}-${child.id}`;
                     moveLayerToFront(refKey);
                 });
@@ -755,6 +822,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                     const updatedCategories = { ...prevCategories, [category]: true };
                     return updatedCategories;
                 });
+                ensureFeatureById(childId);
                 const refKey = `${category}-${parent}-${childId}`;
                 moveLayerToFront(refKey);
             } else {
@@ -820,6 +888,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                 groupedByCategory[category][parent].forEach(child => {
                     allChildren[category][parent][child.id] = true;
                     newKeys.push(`${category}-${parent}-${child.id}`);
+                    ensureFeatureById(child.id);
                 });
             });
         });
@@ -1140,7 +1209,27 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
 
         if (!item || !mapRef.current) return;
 
-        const geometry = item.geojson.geometry as any;
+        let geometry = item.geojson.geometry as any;
+        if (!geometry) {
+            const feature = getFeatureForItem(item);
+            if (feature?.geometry) {
+                geometry = feature.geometry;
+            } else if (item.geojson_bbox) {
+                const { min_lat, min_lng, max_lat, max_lng } = item.geojson_bbox;
+                mapRef.current.fitBounds(
+                    [
+                        [min_lat, min_lng],
+                        [max_lat, max_lng],
+                    ],
+                    { padding: [24, 24] }
+                );
+                ensureFeatureForItem(item);
+                return;
+            } else {
+                ensureFeatureForItem(item);
+                return;
+            }
+        }
         // Posisikan peta ke geometri terkait
         if (geometry.type === 'Point') {
             const [lng, lat] = geometry.coordinates as [number, number];
@@ -1218,6 +1307,12 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                                 layerDefaultColors.current[refKey] = baseColor;
                                 const effectiveColor = customColors[refKey] ?? baseColor;
 
+                                const feature = getFeatureForItem(item);
+                                if (!feature) {
+                                    ensureFeatureForItem(item);
+                                    return null;
+                                }
+
                                 // Memoize style object to prevent unnecessary re-renders
                                 const styleObj = {
                                     color: effectiveColor,
@@ -1238,7 +1333,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [] }
                                                 delete layerDefaultColors.current[refKey];
                                             }
                                         }}
-                                        data={item.geojson as Feature}
+                                        data={feature}
                                         style={styleObj}
                                     >
                                         <Popup

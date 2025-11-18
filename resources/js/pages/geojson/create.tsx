@@ -713,6 +713,9 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                 toast.error('Format GeoJSON teks tidak valid');
                 return;
             }
+        } else {
+            toast.error('Harus pilih file .geojson atau isi teks GeoJSON');
+            return;
         }
 
         formData.append('id_user', user_id.toString());
@@ -723,7 +726,19 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
 
         router.post('/dashboard/geojson', formData, {
             onStart: () => setIsSubmitting(true),
+            onError: (errs) => {
+                Object.values(errs || {}).forEach((msg) => {
+                    if (typeof msg === 'string') toast.error(msg);
+                });
+                toast.error('Gagal menyimpan GeoJSON');
+            },
+            onSuccess: () => {
+                toast.success('Semua fitur berhasil disimpan');
+                router.visit('/dashboard/geojson');
+            },
             onFinish: () => setIsSubmitting(false),
+            forceFormData: true,
+            preserveScroll: true,
         });
     };
 

@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard API endpoints for lazy loading
     Route::get('/api/dashboard/geojsons', [DashboardController::class, 'getGeojsons'])->name('api.dashboard.geojsons');
+    Route::get('/api/dashboard/geojsons/{geojson}', [DashboardController::class, 'showGeojson'])->name('api.dashboard.geojson.show');
     Route::get('/api/dashboard/categories', [DashboardController::class, 'getCategories'])->name('api.dashboard.categories');
 
     // Prefix: /dashboard
@@ -47,6 +48,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/api/geojson/{id}/data', [GeojsonController::class, 'getGeojsonData'])->name('geojson.data');
         // Update only properties from popup/editor
         Route::put('/geojson/{id}/properties', [GeojsonController::class, 'updateProperties'])->name('geojson.properties.update');
+        // Sync storage files to DB
+        Route::get('/geojson/sync-storage', [GeojsonController::class, 'syncStorage'])->name('geojson.sync_storage');
 
         // --- PDF ROUTES ---
         Route::get('/tambah-pdf', [ReportController::class, 'index'])->name('report.index');

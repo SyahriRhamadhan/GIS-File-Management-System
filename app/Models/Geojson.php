@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use App\Models\PewarnaanRdtr;
 
 class Geojson extends Model
@@ -22,10 +23,17 @@ class Geojson extends Model
         'source_name',
         'main_category',
         'id_kategori',
+        'geojson_path',
+        'geojson_size',
+        'properties_snapshot',
+        'geojson_bbox',
     ];
 
     protected $casts = [
         'geojson' => 'array',
+        'geojson_size' => 'integer',
+        'properties_snapshot' => 'array',
+        'geojson_bbox' => 'array',
     ];
     protected $appends = ['kode_warna', 'orde0', 'ket_warna'];
     protected $dates = ['deleted_at'];
@@ -53,6 +61,44 @@ class Geojson extends Model
     public function kategori()
     {
         return $this->belongsTo(Kategori::class, 'id_kategori', 'id_kategori');
+    }
+
+    /**
+     * Automatically fetch the actual GeoJSON payload when it is stored on disk.
+     */
+    public function getGeojsonAttribute($value)
+    {
+        if (is_array($value) && isset($value['__stored_in_file'])) {
+            return $this->loadGeojsonFromStorage() ?: $value;
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return json_last_error() === JSON_ERROR_NONE ? $decoded : $value;
+        }
+
+        return $value;
+    }
+
+    protected function loadGeojsonFromStorage(): ?array
+    {
+        if (empty($this->geojson_path)) {
+            return null;
+        }
+
+        try {
+            if (!Storage::exists($this->geojson_path)) {
+                return null;
+            }
+            $content = Storage::get($this->geojson_path);
+            if (!$content) {
+                return null;
+            }
+            $decoded = json_decode($content, true);
+            return json_last_error() === JSON_ERROR_NONE ? $decoded : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     public function getKodeWarnaAttribute(): ?string
@@ -91,9 +137,6 @@ class Geojson extends Model
         }
 
         $data = $this->geojson;
-        if (is_string($data)) {
-            $data = @json_decode($data, true);
-        }
         if (is_array($data)) {
             $props = $data['properties'] ?? [];
             $namobj = is_array($props) ? (isset($props['NAMOBJ']) ? trim((string) $props['NAMOBJ']) : null) : null;

@@ -1,91 +1,1975 @@
-Pengembangan Aplikasi RDTR DKPZ, DBPZ & JSON
-Deskripsi:
-• Pengembangan aplikasi web filtering ketentuan kegiatan dan penggunaan lahan berbasis Remix Framework dengan React dan TypeScript , menyediakan sistem filtering berdasarkan zona dan kode regulasi untuk mendukung koordinasi penataan ruang Kabupaten Bintan Selatan (BSB) dan Trikora dengan kemampuan konversi data JSON terintegrasi.
-• Aplikasi terdiri dari beberapa komponen utama : `KepsusFilter.tsx` untuk filtering ketentuan khusus DKPZ dengan fitur preview dan copy JSON, `IntensitasFilter.tsx` untuk filtering intensitas pemanfaatan ruang DBPZ dengan sistem export multi-format, FilterSidebar untuk kontrol filter, ActivityList untuk menampilkan hasil, WelcomeScreen untuk halaman awal, dan SearchAndSortBar untuk pencarian dan pengurutan data.
-• Setiap komponen dikembangkan secara modular untuk memudahkan pemeliharaan dan pengembangan lebih lanjut dengan dukungan multi-sumber data (Trikora dan BSB) serta sistem konversi data JSON otomatis menggunakan script `convert-bsb-to-json.js` dan `convert-trikora-to-json.js` .
-Langkah-langkah:
-• Implementasi sistem konversi data JSON otomatis :
-- Script konversi BSB dengan mapping 243 baris kode untuk transformasi data zona ke format JSON terstruktur
-- Script konversi Trikora dengan normalisasi nama zona dan handling multiple permissions (I, T1-T3, B1-B3)
-- Kategorisasi otomatis kegiatan berdasarkan permission: iznktg (diizinkan), tbtktg (terbatas), bstktg (bersyarat), tbsktg (terbatas bersyarat)
-- Debugging dan tracking sistem untuk memastikan akurasi mapping zona dan aktivitas
-• Implementasi komponen KepsusFilter untuk DKPZ :
-- Filtering ketentuan khusus kawasan dengan dukungan multi-select regulations
-- Fitur preview JSON dengan modal display untuk validasi data sebelum export
-- Sistem copy to clipboard terintegrasi dengan feedback visual success indicator
-- Error handling dan loading states untuk pengalaman pengguna yang optimal
-• Implementasi komponen IntensitasFilter untuk DBPZ :
-- Filtering intensitas pemanfaatan ruang dengan 2,847 baris kode komprehensif
-- Sistem export multi-format: CSV, Excel, dan formatted text dengan struktur data kompleks
-- Handling data persil dengan pembagian geografis (barat/timur jalan Nasional)
-- Format output terstruktur untuk KDB, KLB, KDH, ketinggian bangunan, dan garis sempadan bangunan
-- Dukungan multiple jenis dengan format output yang adaptif
-• Integrasi data JSON multi-sumber :
-- intensitas-data-merged-bsb.json dan intensitas-data-merged.json untuk data intensitas
-- kepsus-bsb-data.json dan kepsus-data.json untuk ketentuan khusus
-- bsb-data.json dan rdtr-data.json untuk data aktivitas zona
-- Sistem switching data source dinamis antara Trikora dan BSB
-• Implementasi desain responsif dengan Tailwind CSS agar tampilan optimal di desktop dan mobile dengan navigation links terintegrasi dan komponen UI yang konsisten.
-• Implementasi URL parameters untuk bookmarking dan sharing filter yang diterapkan dengan dukungan multi-select regulations dan state management yang persistent.
-• Implementasi export functionality komprehensif untuk format text terstruktur, CSV, dan Excel pada hasil filtering dengan formatting khusus untuk dokumen teknis penataan ruang.
-
-2) Uji Titik Trikora dan Bandar Seri Bentan
-Deskripsi:
-•	Perbaikan File DKBZ, DBPZ & JSON merupakan tahapan kritis dalam proses validasi dan koreksi data spasial yang dikembangkan menggunakan teknologi web modern. Aplikasi ini dibangun dengan framework Remix dan React menggunakan TypeScript , menyediakan antarmuka yang intuitif untuk melakukan perbaikan dan validasi data RDTR (Rencana Detail Tata Ruang) secara sistematis dan akurat sesuai dengan peraturan perundang-undangan yang berlaku.
-Langkah-langkah:
-1. Akses Halaman Utama
-•	Buka aplikasi melalui browser
-•	Pada halaman utama, Anda akan melihat dashboard RDTR Filter dengan navigasi ke berbagai modul
-•	Pilih sumber data (Trikora atau BSB) menggunakan toggle di bagian kanan atas
-•	Gunakan menu navigasi untuk mengakses modul yang dibutuhkan:
-o	Filter Intensitas untuk data DBPZ
-o	Ketentuan Khusus untuk data DKBZ
-o	HTML Parser untuk konversi data
-2. Perbaikan Data DKBZ (Ketentuan Khusus)
-•	Klik menu "Ketentuan Khusus" untuk mengakses modul DKBZ
-•	Pilih sumber data (Trikora/BSB) sesuai kebutuhan
-•	Gunakan filter pencarian untuk menemukan kawasan spesifik:
-o	Filter Kawasan: Pilih jenis kawasan (Cagar Budaya, Pariwisata, dll.)
-o	Filter Kode SWP: Pilih kode Sub Wilayah Perencanaan
-o	Filter Kode Blok: Pilih blok spesifik
-o	Filter Sub Zona: Pilih sub zona yang akan diperbaiki
-•	Periksa ketentuan yang ditampilkan dan bandingkan dengan peraturan yang berlaku
-•	Gunakan fitur "Preview JSON" untuk melihat format data yang akan dihasilkan
-•	Klik "Copy Format" untuk menyalin data dalam format yang sesuai dengan peraturan
-3. Perbaikan Data DBPZ (Intensitas Pemanfaatan)
-•	Akses menu "Filter Intensitas" untuk modul DBPZ
-•	Pilih sumber data yang sesuai (Trikora/BSB)
-•	Gunakan filter untuk mencari data yang perlu diperbaiki:
-o	Filter Zona: Pilih zona pemanfaatan ruang
-o	Filter Sub Zona: Pilih sub zona spesifik
-o	Filter Jenis: Pilih jenis kegiatan khusus
-•	Periksa parameter intensitas yang ditampilkan:
-o	KDB (Koefisien Dasar Bangunan)
-o	KLB (Koefisien Lantai Bangunan)
-o	KDH (Koefisien Dasar Hijau)
-o	Ketinggian Bangunan
-o	Garis Sempadan Bangunan
-•	Gunakan fitur "Generate Copy Text" untuk mendapatkan format teks sesuai peraturan
-•	Klik "Export CSV" untuk mengunduh data dalam format spreadsheet
-4. Validasi dan Koreksi JSON
-•	Gunakan fitur "Preview JSON" pada setiap modul untuk memeriksa struktur data
-•	Bandingkan data yang ditampilkan dengan dokumen peraturan resmi
-•	Identifikasi ketidaksesuaian antara data aplikasi dengan perbub/perda
-•	Gunakan fitur pencarian untuk menemukan data spesifik yang perlu dikoreksi
-•	Manfaatkan filter kombinasi untuk analisis data yang lebih detail
-5. Export dan Dokumentasi
-•	Setelah melakukan koreksi, gunakan fitur export untuk menyimpan data:
-o	Format CSV: Untuk analisis lebih lanjut di spreadsheet
-o	Format JSON: Untuk integrasi dengan sistem lain
-o	Format Teks: Untuk dokumentasi dan laporan
-•	Simpan hasil koreksi dengan penamaan file yang sistematis
-•	Dokumentasikan perubahan yang dilakukan untuk audit trail
-6. Verifikasi Akhir
-•	Lakukan pengecekan ulang menggunakan fitur pencarian
-•	Pastikan semua data telah sesuai dengan peraturan yang berlaku
-•	Gunakan fitur sorting untuk memverifikasi konsistensi data
-•	Bandingkan hasil export dengan dokumen referensi peraturan
-Fitur Validasi Otomatis:
-•	Pengecekan Konsistensi: Sistem otomatis mendeteksi inkonsistensi data
-•	Format Standardisasi: Otomatis memformat data sesuai standar peraturan
-•	Validasi Referensi: Memastikan data mengacu pada peraturan yang benar
+{
+  "errors": {},
+  "name": "Laravel",
+  "quote": {
+    "message": "Simplicity is the consequence of refined emotions.",
+    "author": "Jean D'Alembert"
+  },
+  "auth": {
+    "user": {
+      "id": 1,
+      "name": "Super Admin",
+      "email": "admin@example.com",
+      "email_verified_at": "2025-11-18T03:54:24.000000Z",
+      "role": "superadmin",
+      "created_at": "2025-11-18T03:54:24.000000Z",
+      "updated_at": "2025-11-18T03:54:24.000000Z",
+      "deleted_at": null
+    }
+  },
+  "ziggy": {
+    "url": "http://127.0.0.1:8000",
+    "port": 8000,
+    "defaults": [],
+    "routes": {
+      "api.main-categories": {
+        "uri": "api/main-categories",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "api.geojson.properties.update": {
+        "uri": "api/geojson/{id}/properties",
+        "methods": [
+          "PUT"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "home": {
+        "uri": "/",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "ShpToGeojson": {
+        "uri": "convert-shp",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard": {
+        "uri": "dashboard",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "api.dashboard.geojsons": {
+        "uri": "api/dashboard/geojsons",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "api.dashboard.categories": {
+        "uri": "api/dashboard/categories",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.region.index": {
+        "uri": "dashboard/region",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.region.create": {
+        "uri": "dashboard/region/create",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.region.store": {
+        "uri": "dashboard/region",
+        "methods": [
+          "POST"
+        ]
+      },
+      "dashboard.region.show": {
+        "uri": "dashboard/region/{id}",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.region.edit": {
+        "uri": "dashboard/region/{id}/edit",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.region.update": {
+        "uri": "dashboard/region/{id}",
+        "methods": [
+          "PUT"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.region.destroy": {
+        "uri": "dashboard/region/{id}",
+        "methods": [
+          "DELETE"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.geojson.index": {
+        "uri": "dashboard/geojson",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.geojson.create": {
+        "uri": "dashboard/geojson/create",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.geojson.store": {
+        "uri": "dashboard/geojson",
+        "methods": [
+          "POST"
+        ]
+      },
+      "dashboard.geojson.edit": {
+        "uri": "dashboard/geojson/{id}/edit",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.geojson.update": {
+        "uri": "dashboard/geojson/{id}",
+        "methods": [
+          "PUT"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.geojson.destroy": {
+        "uri": "dashboard/geojson/{id}",
+        "methods": [
+          "DELETE"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.geojson.data": {
+        "uri": "dashboard/api/geojson/{id}/data",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.geojson.properties.update": {
+        "uri": "dashboard/geojson/{id}/properties",
+        "methods": [
+          "PUT"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.geojson.sync_storage": {
+        "uri": "dashboard/geojson/sync-storage",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.report.index": {
+        "uri": "dashboard/tambah-pdf",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.report.create": {
+        "uri": "dashboard/tambah-pdf/create",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.report.store": {
+        "uri": "dashboard/tambah-pdf",
+        "methods": [
+          "POST"
+        ]
+      },
+      "dashboard.report.edit": {
+        "uri": "dashboard/tambah-pdf/{id}/edit",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.report.update": {
+        "uri": "dashboard/tambah-pdf/{id}",
+        "methods": [
+          "PUT"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.report.destroy": {
+        "uri": "dashboard/tambah-pdf/{id}",
+        "methods": [
+          "DELETE"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.kategori.index": {
+        "uri": "dashboard/kategori",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.kategori.create": {
+        "uri": "dashboard/kategori/create",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.kategori.store": {
+        "uri": "dashboard/kategori",
+        "methods": [
+          "POST"
+        ]
+      },
+      "dashboard.kategori.edit": {
+        "uri": "dashboard/kategori/{id}/edit",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.kategori.update": {
+        "uri": "dashboard/kategori/{id}",
+        "methods": [
+          "PUT"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.kategori.destroy": {
+        "uri": "dashboard/kategori/{id}",
+        "methods": [
+          "DELETE"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.owner.store": {
+        "uri": "dashboard/owner",
+        "methods": [
+          "POST"
+        ]
+      },
+      "dashboard.users.index": {
+        "uri": "dashboard/users",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.users.create": {
+        "uri": "dashboard/users/create",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.users.store": {
+        "uri": "dashboard/users",
+        "methods": [
+          "POST"
+        ]
+      },
+      "dashboard.users.show": {
+        "uri": "dashboard/users/{user}",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "user"
+        ],
+        "bindings": {
+          "user": "id"
+        }
+      },
+      "dashboard.users.edit": {
+        "uri": "dashboard/users/{user}/edit",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "user"
+        ],
+        "bindings": {
+          "user": "id"
+        }
+      },
+      "dashboard.users.update": {
+        "uri": "dashboard/users/{user}",
+        "methods": [
+          "PUT"
+        ],
+        "parameters": [
+          "user"
+        ],
+        "bindings": {
+          "user": "id"
+        }
+      },
+      "dashboard.users.destroy": {
+        "uri": "dashboard/users/{user}",
+        "methods": [
+          "DELETE"
+        ],
+        "parameters": [
+          "user"
+        ],
+        "bindings": {
+          "user": "id"
+        }
+      },
+      "dashboard.users.bulk-delete": {
+        "uri": "dashboard/users/bulk-delete",
+        "methods": [
+          "POST"
+        ]
+      },
+      "dashboard.users.restore": {
+        "uri": "dashboard/users/{user}/restore",
+        "methods": [
+          "POST"
+        ],
+        "parameters": [
+          "user"
+        ],
+        "bindings": {
+          "user": "id"
+        }
+      },
+      "dashboard.users.force-delete": {
+        "uri": "dashboard/users/{user}/force-delete",
+        "methods": [
+          "DELETE"
+        ],
+        "parameters": [
+          "user"
+        ],
+        "bindings": {
+          "user": "id"
+        }
+      },
+      "dashboard.geojson.add_pdf": {
+        "uri": "dashboard/geojson/{id}/add",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.geojson.list_pdf": {
+        "uri": "dashboard/geojson/{id}/view",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.pewarnaan_rdtr.index": {
+        "uri": "dashboard/pewarnaan-rdtr",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.pewarnaan_rdtr.create": {
+        "uri": "dashboard/pewarnaan-rdtr/create",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "dashboard.pewarnaan_rdtr.store": {
+        "uri": "dashboard/pewarnaan-rdtr",
+        "methods": [
+          "POST"
+        ]
+      },
+      "dashboard.pewarnaan_rdtr.edit": {
+        "uri": "dashboard/pewarnaan-rdtr/{id}/edit",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.pewarnaan_rdtr.update": {
+        "uri": "dashboard/pewarnaan-rdtr/{id}",
+        "methods": [
+          "PUT"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "dashboard.pewarnaan_rdtr.destroy": {
+        "uri": "dashboard/pewarnaan-rdtr/{id}",
+        "methods": [
+          "DELETE"
+        ],
+        "parameters": [
+          "id"
+        ]
+      },
+      "profile.edit": {
+        "uri": "settings/profile",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "profile.update": {
+        "uri": "settings/profile",
+        "methods": [
+          "PATCH"
+        ]
+      },
+      "profile.destroy": {
+        "uri": "settings/profile",
+        "methods": [
+          "DELETE"
+        ]
+      },
+      "password.edit": {
+        "uri": "settings/password",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "password.update": {
+        "uri": "settings/password",
+        "methods": [
+          "PUT"
+        ]
+      },
+      "appearance": {
+        "uri": "settings/appearance",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "login": {
+        "uri": "login",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "password.request": {
+        "uri": "forgot-password",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "password.email": {
+        "uri": "forgot-password",
+        "methods": [
+          "POST"
+        ]
+      },
+      "password.reset": {
+        "uri": "reset-password/{token}",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "token"
+        ]
+      },
+      "password.store": {
+        "uri": "reset-password",
+        "methods": [
+          "POST"
+        ]
+      },
+      "verification.notice": {
+        "uri": "verify-email",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "verification.verify": {
+        "uri": "verify-email/{id}/{hash}",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "parameters": [
+          "id",
+          "hash"
+        ]
+      },
+      "verification.send": {
+        "uri": "email/verification-notification",
+        "methods": [
+          "POST"
+        ]
+      },
+      "password.confirm": {
+        "uri": "confirm-password",
+        "methods": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "logout": {
+        "uri": "logout",
+        "methods": [
+          "POST"
+        ]
+      },
+      "storage.local": {
+        "uri": "storage/{path}",
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "wheres": {
+          "path": ".*"
+        },
+        "parameters": [
+          "path"
+        ]
+      }
+    },
+    "location": "http://127.0.0.1:8000/dashboard/geojson/create"
+  },
+  "user_name": "Super Admin",
+  "regions": [
+    {
+      "id_region": 1,
+      "name": "Air Gelubi",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Bintan Pesisir",
+      "desa": "Air Gelubi",
+      "detail": "Air Gelubi, Bintan Pesisir, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Air+Gelubi%2C+Bintan+Pesisir%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 2,
+      "name": "Batu Lepuk",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Tambelan",
+      "desa": "Batu Lepuk",
+      "detail": "Batu Lepuk, Tambelan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Batu+Lepuk%2C+Tambelan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 3,
+      "name": "Berakit",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Sebong",
+      "desa": "Berakit",
+      "detail": "Berakit, Teluk Sebong, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Berakit%2C+Teluk+Sebong%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 4,
+      "name": "Bintan Buyu",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Bintan",
+      "desa": "Bintan Buyu",
+      "detail": "Bintan Buyu, Teluk Bintan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Bintan+Buyu%2C+Teluk+Bintan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 5,
+      "name": "Busung",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Seri Kuala Lobam",
+      "desa": "Busung",
+      "detail": "Busung, Seri Kuala Lobam, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Busung%2C+Seri+Kuala+Lobam%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 6,
+      "name": "Dendun",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Mantang",
+      "desa": "Dendun",
+      "detail": "Dendun, Mantang, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Dendun%2C+Mantang%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 7,
+      "name": "Ekang Anculai",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Sebong",
+      "desa": "Ekang Anculai",
+      "detail": "Ekang Anculai, Teluk Sebong, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Ekang+Anculai%2C+Teluk+Sebong%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 8,
+      "name": "Gunung Kijang",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Gunung Kijang",
+      "desa": "Gunung Kijang",
+      "detail": "Gunung Kijang, Gunung Kijang, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Gunung+Kijang%2C+Gunung+Kijang%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 9,
+      "name": "Kampung Hilir",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Tambelan",
+      "desa": "Kampung Hilir",
+      "detail": "Kampung Hilir, Tambelan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Kampung+Hilir%2C+Tambelan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 10,
+      "name": "Kampung Melayu",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Tambelan",
+      "desa": "Kampung Melayu",
+      "detail": "Kampung Melayu, Tambelan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Kampung+Melayu%2C+Tambelan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 11,
+      "name": "Kawal",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Gunung Kijang",
+      "desa": "Kawal",
+      "detail": "Kawal, Gunung Kijang, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Kawal%2C+Gunung+Kijang%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 12,
+      "name": "Kelong",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Bintan Pesisir",
+      "desa": "Kelong",
+      "detail": "Kelong, Bintan Pesisir, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Kelong%2C+Bintan+Pesisir%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 13,
+      "name": "Kuala Sempang",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Seri Kuala Lobam",
+      "desa": "Kuala Sempang",
+      "detail": "Kuala Sempang, Seri Kuala Lobam, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Kuala+Sempang%2C+Seri+Kuala+Lobam%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 14,
+      "name": "Kukup",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Tambelan",
+      "desa": "Kukup",
+      "detail": "Kukup, Tambelan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Kukup%2C+Tambelan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 15,
+      "name": "Lancang Kuning",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Bintan Utara",
+      "desa": "Lancang Kuning",
+      "detail": "Lancang Kuning, Bintan Utara, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Lancang+Kuning%2C+Bintan+Utara%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 16,
+      "name": "Malang Rapat",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Gunung Kijang",
+      "desa": "Malang Rapat",
+      "detail": "Malang Rapat, Gunung Kijang, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Malang+Rapat%2C+Gunung+Kijang%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 17,
+      "name": "Mantang Baru",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Mantang",
+      "desa": "Mantang Baru",
+      "detail": "Mantang Baru, Mantang, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Mantang+Baru%2C+Mantang%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 18,
+      "name": "Mantang Besar",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Mantang",
+      "desa": "Mantang Besar",
+      "detail": "Mantang Besar, Mantang, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Mantang+Besar%2C+Mantang%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 19,
+      "name": "Mantang Lama",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Mantang",
+      "desa": "Mantang Lama",
+      "detail": "Mantang Lama, Mantang, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Mantang+Lama%2C+Mantang%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 20,
+      "name": "Mapur",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Bintan Pesisir",
+      "desa": "Mapur",
+      "detail": "Mapur, Bintan Pesisir, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Mapur%2C+Bintan+Pesisir%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 21,
+      "name": "Numbing",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Bintan Pesisir",
+      "desa": "Numbing",
+      "detail": "Numbing, Bintan Pesisir, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Numbing%2C+Bintan+Pesisir%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 22,
+      "name": "Pangkil",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Bintan",
+      "desa": "Pangkil",
+      "detail": "Pangkil, Teluk Bintan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Pangkil%2C+Teluk+Bintan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 23,
+      "name": "Penaga",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Bintan",
+      "desa": "Penaga",
+      "detail": "Penaga, Teluk Bintan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Penaga%2C+Teluk+Bintan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 24,
+      "name": "Pengikik",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Tambelan",
+      "desa": "Pengikik",
+      "detail": "Pengikik, Tambelan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Pengikik%2C+Tambelan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 25,
+      "name": "Pengudang",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Sebong",
+      "desa": "Pengudang",
+      "detail": "Pengudang, Teluk Sebong, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Pengudang%2C+Teluk+Sebong%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 26,
+      "name": "Pengujan",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Bintan",
+      "desa": "Pengujan",
+      "detail": "Pengujan, Teluk Bintan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Pengujan%2C+Teluk+Bintan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 27,
+      "name": "Pulau Mentebung",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Tambelan",
+      "desa": "Pulau Mentebung",
+      "detail": "Pulau Mentebung, Tambelan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Pulau+Mentebung%2C+Tambelan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 28,
+      "name": "Pulau Pinang",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Tambelan",
+      "desa": "Pulau Pinang",
+      "detail": "Pulau Pinang, Tambelan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Pulau+Pinang%2C+Tambelan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 29,
+      "name": "Sebong Lagoi",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Sebong",
+      "desa": "Sebong Lagoi",
+      "detail": "Sebong Lagoi, Teluk Sebong, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Sebong+Lagoi%2C+Teluk+Sebong%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 30,
+      "name": "Sebong Pereh",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Sebong",
+      "desa": "Sebong Pereh",
+      "detail": "Sebong Pereh, Teluk Sebong, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Sebong+Pereh%2C+Teluk+Sebong%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 31,
+      "name": "Tanjung Uban Timur",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Bintan Utara",
+      "desa": "Tanjung Uban Timur",
+      "detail": "Tanjung Uban Timur, Bintan Utara, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Tanjung+Uban+Timur%2C+Bintan+Utara%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 32,
+      "name": "Tanjung Uban Utara",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Bintan Utara",
+      "desa": "Tanjung Uban Utara",
+      "detail": "Tanjung Uban Utara, Bintan Utara, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Tanjung+Uban+Utara%2C+Bintan+Utara%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 33,
+      "name": "Teluk Bakau",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Gunung Kijang",
+      "desa": "Teluk Bakau",
+      "detail": "Teluk Bakau, Gunung Kijang, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Teluk+Bakau%2C+Gunung+Kijang%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 34,
+      "name": "Teluk Sekuni",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Tambelan",
+      "desa": "Teluk Sekuni",
+      "detail": "Teluk Sekuni, Tambelan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Teluk+Sekuni%2C+Tambelan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 35,
+      "name": "Tembeling Tanjung",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Bintan",
+      "desa": "Tembeling Tanjung",
+      "detail": "Tembeling Tanjung, Teluk Bintan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Tembeling+Tanjung%2C+Teluk+Bintan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 36,
+      "name": "Tembeling",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Teluk Bintan",
+      "desa": "Tembeling",
+      "detail": "Tembeling, Teluk Bintan, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Tembeling%2C+Teluk+Bintan%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_region": 37,
+      "name": "Toapaya",
+      "provinsi": "Kepulauan Riau",
+      "kabupaten": "Bintan",
+      "kecamatan": "Toapaya",
+      "desa": "Toapaya",
+      "detail": "Toapaya, Toapaya, Bintan, Kepulauan Riau",
+      "link": "https://www.google.com/maps/search/?api=1&query=Toapaya%2C+Toapaya%2C+Bintan%2C+Kepulauan+Riau",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    }
+  ],
+  "owner": [
+    {
+      "id_owner": 1,
+      "name": "PT. ABC",
+      "wali": "indah",
+      "type": "PT",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z",
+      "no_hp": null
+    },
+    {
+      "id_owner": 2,
+      "name": "CV. XYZ",
+      "wali": "budi",
+      "type": "CV",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z",
+      "no_hp": null
+    },
+    {
+      "id_owner": 3,
+      "name": "Yayasan Pendidikan",
+      "wali": "sari",
+      "type": "Yayasan/Lembaga",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z",
+      "no_hp": null
+    },
+    {
+      "id_owner": 4,
+      "name": "Perorangan Joko",
+      "wali": null,
+      "type": "Perorangan",
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z",
+      "no_hp": null
+    }
+  ],
+  "user_id": 1,
+  "kategoris": [
+    {
+      "id_kategori": 1,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Badan Air",
+      "orde2": null,
+      "orde3": null,
+      "orde4": null,
+      "kode": "BA",
+      "kode_warna": "#97DBF2",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 2,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan yang Memberikan Perlindungan terhadap Kawasan Bawahannya **",
+      "orde2": null,
+      "orde3": null,
+      "orde4": null,
+      "kode": "PTB",
+      "kode_warna": "#194128",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 3,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan yang Memberikan Perlindungan terhadap Kawasan Bawahannya **",
+      "orde2": "Kawasan Hutan Lindung",
+      "orde3": null,
+      "orde4": null,
+      "kode": "HL",
+      "kode_warna": "#325F28",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 4,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan yang Memberikan Perlindungan terhadap Kawasan Bawahannya **",
+      "orde2": "Kawasan Lindung Gambut",
+      "orde3": null,
+      "orde4": null,
+      "kode": "LG",
+      "kode_warna": "#696900",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 5,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Perlindungan Setempat",
+      "orde2": null,
+      "orde3": null,
+      "orde4": null,
+      "kode": "PS",
+      "kode_warna": "#05D7D7",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 6,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": null,
+      "orde3": null,
+      "orde4": null,
+      "kode": "KSA",
+      "kode_warna": "#323287",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 7,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Suaka Alam",
+      "orde3": "Cagar Alam",
+      "orde4": null,
+      "kode": "CA",
+      "kode_warna": "#4646A5",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 8,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Suaka Alam",
+      "orde3": "Cagar Alam Laut",
+      "orde4": null,
+      "kode": "CAL",
+      "kode_warna": "#5A5AC3",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 9,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Suaka Alam",
+      "orde3": "Suaka Margasatwa",
+      "orde4": null,
+      "kode": "SM",
+      "kode_warna": "#6E6EE1",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 10,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Suaka Alam",
+      "orde3": "Suaka Margasatwa Laut",
+      "orde4": null,
+      "kode": "SML",
+      "kode_warna": "#8282FF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 11,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Pelestarian Alam",
+      "orde3": null,
+      "orde4": null,
+      "kode": "KPA",
+      "kode_warna": "#785AFF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 12,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Pelestarian Alam",
+      "orde3": "Taman Nasional",
+      "orde4": null,
+      "kode": "TN",
+      "kode_warna": "#9B87FF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 13,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Pelestarian Alam",
+      "orde3": "Taman Hutan Raya",
+      "orde4": null,
+      "kode": "THR",
+      "kode_warna": "#B9A5FF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 14,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Pelestarian Alam",
+      "orde3": "Taman Wisata Alam",
+      "orde4": null,
+      "kode": "TWA",
+      "kode_warna": "#D2BEFF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 15,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Pelestarian Alam",
+      "orde3": "Taman Wisata Alam Laut",
+      "orde4": null,
+      "kode": "TWL",
+      "kode_warna": "#E6D2FF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 16,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Taman Buru",
+      "orde3": null,
+      "orde4": null,
+      "kode": "TB",
+      "kode_warna": "#4696FF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 17,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "",
+      "orde4": "",
+      "kode": "KWP",
+      "kode_warna": "#00827D",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 18,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Pesisir dan Pulau Pulau Kecil",
+      "orde4": "",
+      "kode": "KP3K",
+      "kode_warna": "#1496AA",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 19,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Pesisir dan Pulau Pulau Kecil",
+      "orde4": "Suaka Pesisir",
+      "kode": "SPS",
+      "kode_warna": "#46B4BE",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 20,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Pesisir dan Pulau Pulau Kecil",
+      "orde4": "Suaka Pulau Kecil",
+      "kode": "SPK",
+      "kode_warna": "#78CDD2",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 21,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Pesisir dan Pulau Pulau Kecil",
+      "orde4": "Taman Pesisir",
+      "kode": "TP",
+      "kode_warna": "#A0E6DC",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 22,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Pesisir dan Pulau Pulau Kecil",
+      "orde4": "Taman Pulau Kecil",
+      "kode": "TPK",
+      "kode_warna": "#C8F0E6",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 23,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Maritim",
+      "orde4": "",
+      "kode": "KMR",
+      "kode_warna": "#05A07D",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 24,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Maritim",
+      "orde4": "Daerah Perlindungan Adat Maritim",
+      "kode": "PAM",
+      "kode_warna": "#1EB47D",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 25,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Maritim",
+      "orde4": "Daerah Perlindungan Budaya Maritim",
+      "kode": "PBM",
+      "kode_warna": "#32D29B",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 26,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Konservasi",
+      "orde2": "Kawasan Konservasi di Wilayah Pesisir dan Pulau-Pulau Kecil",
+      "orde3": "Kawasan Konservasi Perairan",
+      "orde4": "",
+      "kode": "KPR",
+      "kode_warna": "#50F57D",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 27,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Lindung Geologi",
+      "orde2": "Kawasan Cagar Alam Geologi",
+      "orde3": "",
+      "orde4": "",
+      "kode": "CAG",
+      "kode_warna": "#6E876E",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 28,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Lindung Geologi",
+      "orde2": "Kawasan Cagar Alam Geologi",
+      "orde3": "Kawasan Keunikan Batuan dan Fosil",
+      "orde4": "",
+      "kode": "LGE-1",
+      "kode_warna": "#968796",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 29,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Lindung Geologi",
+      "orde2": "Kawasan Cagar Alam Geologi",
+      "orde3": "Kawasan Keunikan Bentang Alam",
+      "orde4": "",
+      "kode": "LGE-2",
+      "kode_warna": "#B48796",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 30,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Lindung Geologi",
+      "orde2": "Kawasan Cagar Alam Geologi",
+      "orde3": "Kawasan Keunikan Proses Geologi",
+      "orde4": "",
+      "kode": "LGE-3",
+      "kode_warna": "#D287B4",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 31,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Lindung Geologi",
+      "orde2": "Kawasan yang Memberikan Perlindungan terhadap Air Tanah",
+      "orde3": "Kawasan Imbuhan Air Tanah",
+      "orde4": "",
+      "kode": "LGE-4",
+      "kode_warna": "#CD8764",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 32,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Cagar Budaya",
+      "orde2": "",
+      "orde3": "",
+      "orde4": "",
+      "kode": "CB",
+      "kode_warna": "#FF37CD",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 33,
+      "orde0": "Kawasan Lindung",
+      "orde1": "Kawasan Ekosistem Mangrove",
+      "orde2": "",
+      "orde3": "",
+      "orde4": "",
+      "kode": "EM",
+      "kode_warna": "#2D966E",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 34,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Hutan Produksi",
+      "orde2": "Kawasan Hutan Produksi Terbatas",
+      "orde3": "",
+      "orde4": "",
+      "kode": "HPT",
+      "kode_warna": "#4B9B37",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 35,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Hutan Produksi",
+      "orde2": "Kawasan Hutan Produksi Tetap",
+      "orde3": "",
+      "orde4": "",
+      "kode": "HP",
+      "kode_warna": "#7DB437",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 36,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Hutan Produksi",
+      "orde2": "Kawasan Hutan Produksi yang dapat Dikonversi",
+      "orde3": "",
+      "orde4": "",
+      "kode": "HPK",
+      "kode_warna": "#9BE137",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 37,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Perkebunan Rakyat",
+      "orde2": "",
+      "orde3": "",
+      "orde4": "",
+      "kode": "KR",
+      "kode_warna": "#9BC89B",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 38,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertanian",
+      "orde2": "Kawasan Tanaman Pangan",
+      "orde3": "",
+      "orde4": "",
+      "kode": "P-1",
+      "kode_warna": "#C8F546",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 39,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertanian",
+      "orde2": "Kawasan Hortikultura",
+      "orde3": "",
+      "orde4": "",
+      "kode": "P-2",
+      "kode_warna": "#E6FF4B",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 40,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertanian",
+      "orde2": "Kawasan Perkebunan",
+      "orde3": "",
+      "orde4": "",
+      "kode": "P-3",
+      "kode_warna": "#AFAF37",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 41,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertanian",
+      "orde2": "Kawasan Peternakan",
+      "orde3": "",
+      "orde4": "",
+      "kode": "P-4",
+      "kode_warna": "#B9EBB9",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 42,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Perikanan",
+      "orde2": "Kawasan Perikanan Tangkap",
+      "orde3": "",
+      "orde4": "",
+      "kode": "IK-1",
+      "kode_warna": "#649BD2",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 43,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Perikanan",
+      "orde2": "Kawasan Perikanan Budidaya",
+      "orde3": "",
+      "orde4": "",
+      "kode": "IK-2",
+      "kode_warna": "#82B9D2",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 44,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pergaraman",
+      "orde2": "",
+      "orde3": "",
+      "orde4": "",
+      "kode": "KEG",
+      "kode_warna": "#B49678",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 45,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertambangan dan Energi",
+      "orde2": "Kawasan Pertambangan Mineral",
+      "orde3": "Kawasan Pertambangan Mineral Radioaktif",
+      "orde4": "",
+      "kode": "MRA",
+      "kode_warna": "#192D4B",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 46,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertambangan dan Energi",
+      "orde2": "Kawasan Pertambangan Mineral",
+      "orde3": "Kawasan Pertambangan Mineral Logam",
+      "orde4": "",
+      "kode": "MLG",
+      "kode_warna": "#2D415F",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 47,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertambangan dan Energi",
+      "orde2": "Kawasan Pertambangan Mineral",
+      "orde3": "Kawasan Pertambangan Mineral Bukan Logam",
+      "orde4": "",
+      "kode": "MNL",
+      "kode_warna": "#415573",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 48,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertambangan dan Energi",
+      "orde2": "Kawasan Pertambangan Mineral",
+      "orde3": "Kawasan Pertambangan Batuan",
+      "orde4": "",
+      "kode": "MBT",
+      "kode_warna": "#5F7391",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 49,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertambangan dan Energi",
+      "orde2": "Kawasan Pertambangan Batubara",
+      "orde3": "",
+      "orde4": "",
+      "kode": "BR",
+      "kode_warna": "#7D91AF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 50,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertambangan dan Energi",
+      "orde2": "Kawasan Pertambangan Minyak dan Gas Bumi",
+      "orde3": "",
+      "orde4": "",
+      "kode": "MG",
+      "kode_warna": "#9BAFCD",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 51,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertambangan dan Energi",
+      "orde2": "Kawasan Panas Bumi",
+      "orde3": "",
+      "orde4": "",
+      "kode": "PB",
+      "kode_warna": "#CD0000",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 52,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertambangan dan Energi",
+      "orde2": "Kawasan Pembangkit Tenaga Listrik",
+      "orde3": "",
+      "orde4": "",
+      "kode": "PTL",
+      "kode_warna": "#00FFCD",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 53,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Permukiman",
+      "orde2": "Kawasan Permukiman Perkotaan",
+      "orde3": "",
+      "orde4": "",
+      "kode": "PK",
+      "kode_warna": "#F59B1E",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 54,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Permukiman",
+      "orde2": "Kawasan Permukiman Perdesaan",
+      "orde3": "",
+      "orde4": "",
+      "kode": "PD",
+      "kode_warna": "#EB9B3C",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 55,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Transportasi",
+      "orde2": "",
+      "orde3": "",
+      "orde4": "",
+      "kode": "TR",
+      "kode_warna": "#D73700",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    },
+    {
+      "id_kategori": 56,
+      "orde0": "Kawasan Budi Daya",
+      "orde1": "Kawasan Pertahanan dan Keamanan",
+      "orde2": "",
+      "orde3": "",
+      "orde4": "",
+      "kode": "HK",
+      "kode_warna": "#9B00FF",
+      "ket_warna": null,
+      "layer_order": 2,
+      "deleted_at": null,
+      "created_at": "2025-11-18T03:54:26.000000Z",
+      "updated_at": "2025-11-18T03:54:26.000000Z"
+    }
+  ]
+}

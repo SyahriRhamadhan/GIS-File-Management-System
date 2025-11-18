@@ -68,13 +68,13 @@ const Dashboard = ({
 }: DashboardProps) => {
     const [activeTab, setActiveTab] = useState('statistics');
     const initialGeojsons = useMemo(() => (Array.isArray(geojsons) ? geojsons : []), [geojsons]);
-    const [mapGeojsons, setMapGeojsons] = useState(initialGeojsons);
-    const [isLoadingMapData, setIsLoadingMapData] = useState(initialGeojsons.length === 0);
-    const [mapDataError, setMapDataError] = useState<string | null>(null);
+    const [geojsonMeta, setGeojsonMeta] = useState(initialGeojsons);
+    const [isLoadingMeta, setIsLoadingMeta] = useState(initialGeojsons.length === 0);
+    const [metaError, setMetaError] = useState<string | null>(null);
     const isMountedRef = useRef(true);
-    const isFetchingRef = useRef(false);
+    const isFetchingMetaRef = useRef(false);
     const autoFetchTriggeredRef = useRef(false);
-    const [mapLoadProgress, setMapLoadProgress] = useState<{ loaded: number; total: number | null }>({
+    const [metaProgress, setMetaProgress] = useState<{ loaded: number; total: number | null }>({
         loaded: initialGeojsons.length,
         total: null,
     });
@@ -88,55 +88,53 @@ const Dashboard = ({
     useEffect(() => {
         if (initialGeojsons.length > 0) {
             autoFetchTriggeredRef.current = false;
-            setMapGeojsons(initialGeojsons);
-            setIsLoadingMapData(false);
-            setMapDataError(null);
+            setGeojsonMeta(initialGeojsons);
+            setIsLoadingMeta(false);
+            setMetaError(null);
         }
     }, [initialGeojsons]);
 
-    const fetchGeojsonPages = useCallback(async () => {
-        if (isFetchingRef.current) return;
-        isFetchingRef.current = true;
+    const fetchMetadataPages = useCallback(async () => {
+        if (isFetchingMetaRef.current) return;
+        isFetchingMetaRef.current = true;
         if (isMountedRef.current) {
-            setIsLoadingMapData(true);
-            setMapDataError(null);
-            setMapGeojsons([]);
-            setMapLoadProgress({
-                loaded: 0,
-                total: null,
-            });
+            setIsLoadingMeta(true);
+            setMetaError(null);
+            setGeojsonMeta([]);
+            setMetaProgress({ loaded: 0, total: null });
         }
 
         try {
-            const perPage = 100;
+            const perPage = 300;
             let page = 1;
-            const aggregated: any[] = [];
             let keepFetching = true;
             let expectedTotal: number | null = null;
+            const aggregated: any[] = [];
 
             while (keepFetching) {
-                const response = await fetch(`/api/dashboard/geojsons?per_page=${perPage}&page=${page}`);
+                const response = await fetch(`/api/dashboard/geojsons?mode=meta&per_page=${perPage}&page=${page}`);
                 if (!response.ok) {
-                    throw new Error('Gagal memuat data GeoJSON.');
+                    throw new Error('Gagal memuat metadata GeoJSON.');
                 }
                 const payload = await response.json();
                 const pageData = Array.isArray(payload?.data) ? payload.data : [];
-                aggregated.push(...pageData);
                 const meta = payload?.meta ?? {};
-                const currentPage = meta.current_page ?? page;
-                const lastPage = meta.last_page ?? currentPage;
+                aggregated.push(...pageData);
+
                 if (typeof meta.total === 'number') {
                     expectedTotal = meta.total;
                 }
 
                 if (isMountedRef.current) {
-                    setMapGeojsons(aggregated.slice());
-                    setMapLoadProgress({
+                    setGeojsonMeta(aggregated.slice());
+                    setMetaProgress({
                         loaded: aggregated.length,
                         total: expectedTotal,
                     });
                 }
 
+                const currentPage = meta.current_page ?? page;
+                const lastPage = meta.last_page ?? currentPage;
                 if (!meta.last_page || currentPage >= lastPage) {
                     keepFetching = false;
                 } else {
@@ -145,28 +143,21 @@ const Dashboard = ({
             }
 
             if (isMountedRef.current) {
-                setMapGeojsons(aggregated);
-                setMapDataError(null);
+                setGeojsonMeta(aggregated);
+                setMetaError(null);
             }
         } catch (error: any) {
             console.error(error);
             if (isMountedRef.current) {
-                setMapGeojsons([]);
-                setMapDataError(error?.message ?? 'Gagal memuat data GeoJSON.');
-                setMapLoadProgress({
-                    loaded: 0,
-                    total: null,
-                });
+                setGeojsonMeta([]);
+                setMetaError(error?.message ?? 'Gagal memuat metadata GeoJSON.');
+                setMetaProgress({ loaded: 0, total: null });
             }
         } finally {
             if (isMountedRef.current) {
-                setIsLoadingMapData(false);
-                setMapLoadProgress((prev) => ({
-                    loaded: prev.loaded,
-                    total: prev.total,
-                }));
+                setIsLoadingMeta(false);
             }
-            isFetchingRef.current = false;
+            isFetchingMetaRef.current = false;
         }
     }, []);
 
@@ -178,13 +169,22 @@ const Dashboard = ({
             return;
         }
         autoFetchTriggeredRef.current = true;
-        fetchGeojsonPages();
-    }, [initialGeojsons, fetchGeojsonPages]);
+        fetchMetadataPages();
+    }, [initialGeojsons, fetchMetadataPages]);
 
     const handleReloadGeojsons = () => {
         autoFetchTriggeredRef.current = true;
-        fetchGeojsonPages();
+        fetchMetadataPages();
     };
+
+    const fetchFullGeojsonById = useCallback(async (id: string | number) => {
+        const response = await fetch(`/api/dashboard/geojsons/${id}`);
+        if (!response.ok) {
+            throw new Error('Gagal memuat detail GeoJSON.');
+        }
+        const payload = await response.json();
+        return payload?.geojson ?? null;
+    }, []);
 
     // Format category data for pie chart
     const categoryData = byCategory.map((item) => ({
@@ -505,30 +505,27 @@ const Dashboard = ({
                             <CardContent className="p-0">
                                 <div className="h-[calc(100vh-200px)] w-full">
                                     <div className="relative h-full w-full">
-                                        {(isLoadingMapData || mapDataError) && (
-                                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/90 p-4 text-center">
-                                                {isLoadingMapData && (
-                                                    <p className="text-sm text-gray-600">
-                                                        Memuat data peta...
-                                                        {mapLoadProgress.total !== null && (
-                                                            <>
-                                                                <br />
-                                                                <span>
-                                                                    {mapLoadProgress.loaded.toLocaleString()} /{' '}
-                                                                    {mapLoadProgress.total.toLocaleString()} layer
-                                                                </span>
-                                                            </>
+                                        {(isLoadingMeta || metaError) && (
+                                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white/80 p-6 text-center">
+                                                <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
+                                                {isLoadingMeta && (
+                                                    <div className="text-sm text-gray-700">
+                                                        <p className="font-semibold">Menyiapkan data peta…</p>
+                                                        {metaProgress.total !== null && (
+                                                            <p className="mt-1 text-xs text-gray-500">
+                                                                {metaProgress.loaded.toLocaleString()} / {metaProgress.total.toLocaleString()} metadata
+                                                            </p>
                                                         )}
-                                                    </p>
+                                                    </div>
                                                 )}
-                                                {mapDataError && (
+                                                {metaError && (
                                                     <>
-                                                        <p className="text-sm text-red-600">{mapDataError}</p>
+                                                        <p className="text-sm text-red-600">{metaError}</p>
                                                         <button
                                                             type="button"
                                                             className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700 disabled:opacity-60"
                                                             onClick={handleReloadGeojsons}
-                                                            disabled={isLoadingMapData}
+                                                            disabled={isLoadingMeta}
                                                         >
                                                             Muat ulang data
                                                         </button>
@@ -536,7 +533,11 @@ const Dashboard = ({
                                                 )}
                                             </div>
                                         )}
-                                        <MapView geojsonData={mapGeojsons} initialVisibleIds={selectedIds ?? []} />
+                                        <MapView
+                                            geojsonData={geojsonMeta}
+                                            initialVisibleIds={selectedIds ?? []}
+                                            fetchGeojsonById={fetchFullGeojsonById}
+                                        />
                                     </div>
                                 </div>
                             </CardContent>

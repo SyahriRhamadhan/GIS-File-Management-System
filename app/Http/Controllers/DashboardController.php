@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\PewarnaanRdtr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -45,7 +46,7 @@ class DashboardController extends Controller
             $limitValue = max(0, (int) $limitParam);
         }
 
-        $shouldLoadGeojsons = $loadAll || !empty($selectedIds) || ($limitValue !== null && $limitValue > 0);
+        $shouldLoadGeojsons = false;
 
         if (!$shouldLoadGeojsons) {
             // Skip sending heavy GeoJSON payloads; frontend will fetch via API.
@@ -223,6 +224,7 @@ class DashboardController extends Controller
 
         // Recent geojsons (last 10)
         $recentGeojsons = Geojson::with(['kategori', 'region', 'owner', 'user'])
+            ->select(['id_geojson', 'source_name', 'id_kategori', 'id_region', 'id_owner', 'id_user', 'created_at'])
             ->orderByDesc('created_at')
             ->limit(10)
             ->get()
@@ -265,21 +267,14 @@ class DashboardController extends Controller
      */
     public function getGeojsons(Request $request)
     {
-        $perPage = $request->query('per_page', 50); // Load 50 at a time
+        $mode = $request->query('mode', 'meta');
+        $perPage = (int) $request->query('per_page', 100);
         $categoryFilter = $request->query('category');
         $mainCategoryFilter = $request->query('main_category');
+        $idsParam = $request->query('ids');
 
-        $query = Geojson::with('kategori')
-            ->select([
-                'geojson.id_geojson',
-                'geojson.source_name',
-                'geojson.main_category',
-                'geojson.id_kategori',
-                'geojson.geojson',
-                'geojson.created_at'
-            ]);
+        $query = Geojson::with('kategori');
 
-        // Apply filters if provided
         if ($mainCategoryFilter) {
             $query->where('geojson.main_category', $mainCategoryFilter);
         }
@@ -290,19 +285,177 @@ class DashboardController extends Controller
             });
         }
 
-        $result = $query->paginate($perPage);
-
-        $geojsons = $result->map(function ($geojson) {
-            if (is_string($geojson->geojson)) {
-                $geojson->geojson = json_decode($geojson->geojson, true);
+        if ($mode === 'full') {
+            $ids = $this->parseIds($idsParam);
+            if (empty($ids)) {
+                return response()->json([
+                    'data' => [],
+                ]);
             }
-            $geojson->kode_warna = $geojson->kategori->kode_warna ?? null;
-            return $geojson;
-        });
 
-        $rdtr = PewarnaanRdtr::select('kode','sub_zona','kode_warna','rgb')->get();
+            $geojsons = $query
+                ->whereIn('geojson.id_geojson', $ids)
+                ->get()
+                ->map(fn ($geojson) => $this->formatGeojsonForPayload($geojson, true));
+
+            return response()->json([
+                'data' => $geojsons,
+            ]);
+        }
+
+        $result = $query
+            ->select([
+                'geojson.id_geojson',
+                'geojson.source_name',
+                'geojson.main_category',
+                'geojson.id_kategori',
+                'geojson.geojson_path',
+                'geojson.geojson_size',
+                'geojson.properties_snapshot',
+                'geojson.geojson_bbox',
+                'geojson.created_at',
+            ])
+            ->paginate($perPage);
+
+        $collection = $result->getCollection()->map(fn ($geojson) => $this->formatGeojsonForPayload($geojson, false));
+        $result->setCollection($collection);
+
+        return response()->json([
+            'data' => $result->items(),
+            'meta' => [
+                'current_page' => $result->currentPage(),
+                'last_page' => $result->lastPage(),
+                'per_page' => $result->perPage(),
+                'total' => $result->total(),
+            ],
+        ]);
+    }
+
+    public function showGeojson(Geojson $geojson)
+    {
+        return response()->json($this->formatGeojsonForPayload($geojson, true));
+    }
+
+    private function parseIds($idsParam): array
+    {
+        if (is_array($idsParam)) {
+            return collect($idsParam)
+                ->map(fn ($v) => (int) $v)
+                ->filter(fn ($v) => $v > 0)
+                ->values()
+                ->all();
+        }
+
+        if (is_string($idsParam)) {
+            return collect(explode(',', $idsParam))
+                ->map(fn ($v) => (int) trim($v))
+                ->filter(fn ($v) => $v > 0)
+                ->values()
+                ->all();
+        }
+
+        return [];
+    }
+
+    private function formatGeojsonForPayload(Geojson $geojson, bool $includeGeometry = false): array
+    {
+        $properties = $geojson->properties_snapshot ?? [];
+        if (!is_array($properties)) {
+            $properties = [];
+        }
+
+        $feature = [
+            'type' => 'Feature',
+            'properties' => $properties,
+        ];
+
+        if ($includeGeometry) {
+            $full = $this->loadGeojsonFeature($geojson);
+            if (is_array($full)) {
+                $feature = $full;
+                if (!isset($feature['properties']) || !is_array($feature['properties'])) {
+                    $feature['properties'] = $properties;
+                }
+            }
+        }
+
+        $color = $geojson->kategori->kode_warna ?? null;
+        if (!$color) {
+            [$bySubZona, $byKode] = $this->getRdtrMappings();
+            $namobj = $properties['NAMOBJ'] ?? null;
+            $kodunk = $properties['KODUNK'] ?? null;
+            if ($namobj && isset($bySubZona[$namobj])) {
+                $color = $bySubZona[$namobj];
+            } elseif ($kodunk && is_string($kodunk)) {
+                if (preg_match('/^([A-Z0-9\-]+)/', $kodunk, $m)) {
+                    $prefix = $m[1];
+                    if (isset($byKode[$prefix])) {
+                        $color = $byKode[$prefix];
+                    }
+                }
+            }
+        }
+        if (!$color) {
+            $color = '#3388ff';
+        }
+
+        return [
+            'id_geojson' => $geojson->id_geojson,
+            'source_name' => $geojson->source_name,
+            'main_category' => $geojson->main_category,
+            'id_kategori' => $geojson->id_kategori,
+            'kategori' => $geojson->kategori ? [
+                'layer_order' => $geojson->kategori->layer_order,
+                'orde0' => $geojson->kategori->orde0,
+                'kode_warna' => $geojson->kategori->kode_warna,
+                'kode' => $geojson->kategori->kode,
+            ] : null,
+            'geojson' => $feature,
+            'geojson_bbox' => $geojson->geojson_bbox,
+            'kode_warna' => $color,
+            'created_at' => $geojson->created_at,
+        ];
+    }
+
+    private function loadGeojsonFeature(Geojson $geojson): ?array
+    {
+        if (!empty($geojson->geojson_path)) {
+            try {
+                if (Storage::exists($geojson->geojson_path)) {
+                    $content = Storage::get($geojson->geojson_path);
+                    $decoded = json_decode($content, true);
+                    if (is_array($decoded)) {
+                        return $decoded;
+                    }
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
+        $data = $geojson->getRawOriginal('geojson');
+        if (is_string($data)) {
+            $decoded = json_decode($data, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        } elseif (is_array($data)) {
+            return $data;
+        }
+
+        return null;
+    }
+
+    private function getRdtrMappings(): array
+    {
+        static $cached = null;
+        if ($cached !== null) {
+            return $cached;
+        }
+
         $bySubZona = [];
         $byKode = [];
+        $rdtr = PewarnaanRdtr::select('kode', 'sub_zona', 'kode_warna', 'rgb')->get();
+
         foreach ($rdtr as $r) {
             $hex = $r->kode_warna;
             if (empty($hex) && is_string($r->rgb)) {
@@ -323,43 +476,9 @@ class DashboardController extends Controller
                 }
             }
         }
-        $geojsons = $geojsons->map(function ($item) use ($bySubZona, $byKode) {
-            $color = $item->kode_warna;
-            if (empty($color) && is_array($item->geojson)) {
-                $props = $item->geojson['properties'] ?? [];
-                $namobj = is_array($props) ? (isset($props['NAMOBJ']) ? trim((string) $props['NAMOBJ']) : null) : null;
-                $kodunk = is_array($props) ? ($props['KODUNK'] ?? null) : null;
-                if ($namobj && isset($bySubZona[$namobj])) {
-                    $color = $bySubZona[$namobj];
-                } elseif ($kodunk && is_string($kodunk)) {
-                    $m = [];
-                    if (preg_match('/^([A-Z0-9\-]+)/', $kodunk, $m)) {
-                        $prefix = $m[1];
-                        if (isset($byKode[$prefix])) {
-                            $color = $byKode[$prefix];
-                        }
-                    }
-                }
-                if ($color) {
-                    $item->kode_warna = $color;
-                } else {
-                    $item->kode_warna = '#3388ff';
-                }
-            } elseif (empty($color)) {
-                $item->kode_warna = '#3388ff';
-            }
-            return $item;
-        });
 
-        return response()->json([
-            'data' => $geojsons,
-            'meta' => [
-                'current_page' => $result->currentPage(),
-                'last_page' => $result->lastPage(),
-                'per_page' => $result->perPage(),
-                'total' => $result->total(),
-            ],
-        ]);
+        $cached = [$bySubZona, $byKode];
+        return $cached;
     }
 
     /**
@@ -375,7 +494,7 @@ class DashboardController extends Controller
                 'geojson.source_name',
                 'geojson.main_category',
                 'geojson.id_kategori',
-                DB::raw('geojson.geojson->\'$.properties\' as properties') // Only properties, not geometry
+                'geojson.properties_snapshot',
             ])
             ->get()
             ->groupBy(function ($item) {

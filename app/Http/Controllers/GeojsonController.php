@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Geojson;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\Auth;
 use App\Models\Region;
 use App\Models\Owner;
 use App\Models\User;
@@ -13,6 +13,9 @@ use App\Models\Kategori;
 use App\Models\PewarnaanRdtr;
 use App\Http\Requests\StoreGeojsonRequest;
 use App\Http\Requests\UpdateGeojsonRequest;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class GeojsonController extends Controller
 {
@@ -214,11 +217,16 @@ class GeojsonController extends Controller
     public function getGeojsonData($id)
     {
         $geojson = Geojson::with(['region', 'owner'])->findOrFail($id);
-        
-        // Ensure geojson data is properly formatted
-        $geojsonData = $geojson->geojson;
-        if (is_string($geojsonData)) {
-            $geojsonData = json_decode($geojsonData, true);
+
+        $geojsonData = null;
+        if ($geojson->geojson_path && \Illuminate\Support\Facades\Storage::exists($geojson->geojson_path)) {
+            $geojsonData = json_decode(\Illuminate\Support\Facades\Storage::get($geojson->geojson_path), true);
+        }
+        if (!$geojsonData) {
+            $geojsonData = $geojson->geojson;
+            if (is_string($geojsonData)) {
+                $geojsonData = json_decode($geojsonData, true);
+            }
         }
 
         return response()->json([
@@ -265,15 +273,31 @@ class GeojsonController extends Controller
                     }
                     try {
                         $this->processCoordinates($feature);
-                        Geojson::create([
-                            'geojson'        => $feature,
+                        $metadata = $this->extractMetadataFromFeature($feature);
+                        $created = Geojson::create([
+                            'geojson'        => ['__stored_in_file' => true],
                             'source_name'    => $featureSource,
                             'id_user'        => $idUser,
                             'id_region'      => $idRegion,
                             'id_owner'       => $idOwner,
                             'id_kategori'    => $idKategori,
                             'main_category'  => $mainCategory,
+                            'properties_snapshot' => $metadata['properties_snapshot'],
+                            'geojson_bbox' => $metadata['geojson_bbox'],
                         ]);
+                        try {
+                            $dir = 'geojson/features';
+                            Storage::makeDirectory($dir);
+                            $path = $dir.'/'.($created->id_geojson).'.json';
+                            Storage::put($path, json_encode($feature));
+                            $size = Storage::size($path) ?: null;
+                            $created->update([
+                                'geojson_path' => $path,
+                                'geojson_size' => $size,
+                            ]);
+                        } catch (\Throwable $e) {
+                            // Ignore file persist errors; DB still has blob
+                        }
                     } catch (\Throwable $e) {
                         $uploadErrors[] = "Gagal menyimpan fitur di \"{$fileName}\": " . $e->getMessage();
                     }
@@ -302,15 +326,31 @@ class GeojsonController extends Controller
                 }
                 try {
                     $this->processCoordinates($feature);
-                    Geojson::create([
-                        'geojson'        => $feature,
+                    $metadata = $this->extractMetadataFromFeature($feature);
+                    $created = Geojson::create([
+                        'geojson'        => ['__stored_in_file' => true],
                         'source_name'    => $featureSource,
                         'id_user'        => $idUser,
                         'id_region'      => $idRegion,
                         'id_owner'       => $idOwner,
                         'id_kategori'    => $idKategori,
                         'main_category'  => $mainCategory,
+                        'properties_snapshot' => $metadata['properties_snapshot'],
+                        'geojson_bbox' => $metadata['geojson_bbox'],
                     ]);
+                    try {
+                        $dir = 'geojson/features';
+                        Storage::makeDirectory($dir);
+                        $path = $dir.'/'.($created->id_geojson).'.json';
+                        Storage::put($path, json_encode($feature));
+                        $size = Storage::size($path) ?: null;
+                        $created->update([
+                            'geojson_path' => $path,
+                            'geojson_size' => $size,
+                        ]);
+                    } catch (\Throwable $e) {
+                        // Ignore file persist errors
+                    }
                 } catch (\Throwable $e) {
                     $uploadErrors[] = "Gagal fitur ke-" . ($i + 1) . ": " . $e->getMessage();
                 }
@@ -348,9 +388,85 @@ class GeojsonController extends Controller
         }
     }
 
+    private function calculateBoundingBox(?array $geometry): ?array
+    {
+        if (!is_array($geometry) || !isset($geometry['coordinates'])) {
+            return null;
+        }
+
+        $minLng = $minLat = $maxLng = $maxLat = null;
+
+        $flatten = function ($coords) use (&$flatten, &$minLng, &$minLat, &$maxLng, &$maxLat) {
+            if (!is_array($coords)) {
+                return;
+            }
+
+            if (isset($coords[0]) && is_numeric($coords[0]) && isset($coords[1]) && is_numeric($coords[1])) {
+                $lng = (float) $coords[0];
+                $lat = (float) $coords[1];
+                $minLng = $minLng === null ? $lng : min($minLng, $lng);
+                $maxLng = $maxLng === null ? $lng : max($maxLng, $lng);
+                $minLat = $minLat === null ? $lat : min($minLat, $lat);
+                $maxLat = $maxLat === null ? $lat : max($maxLat, $lat);
+                return;
+            }
+
+            foreach ($coords as $child) {
+                $flatten($child);
+            }
+        };
+
+        $flatten($geometry['coordinates']);
+
+        if ($minLng === null || $minLat === null || $maxLng === null || $maxLat === null) {
+            return null;
+        }
+
+        return [
+            'min_lng' => $minLng,
+            'min_lat' => $minLat,
+            'max_lng' => $maxLng,
+            'max_lat' => $maxLat,
+        ];
+    }
+
+    private function extractMetadataFromFeature(array $feature): array
+    {
+        $properties = is_array($feature['properties'] ?? null) ? $feature['properties'] : [];
+        if (isset($feature['properties']) && is_array($feature['properties'])) {
+            $properties = $feature['properties'];
+        }
+
+        $bbox = null;
+        if (isset($feature['bbox']) && is_array($feature['bbox']) && count($feature['bbox']) === 4) {
+            $bbox = [
+                'min_lng' => (float) $feature['bbox'][0],
+                'min_lat' => (float) $feature['bbox'][1],
+                'max_lng' => (float) $feature['bbox'][2],
+                'max_lat' => (float) $feature['bbox'][3],
+            ];
+        } else {
+            $bbox = $this->calculateBoundingBox($feature['geometry'] ?? null);
+        }
+
+        return [
+            'properties_snapshot' => $properties,
+            'geojson_bbox' => $bbox,
+        ];
+    }
+
     public function edit($id)
     {
         $geojson = Geojson::findOrFail($id);
+        try {
+            if ($geojson->geojson_path && \Illuminate\Support\Facades\Storage::exists($geojson->geojson_path)) {
+                $decoded = json_decode(\Illuminate\Support\Facades\Storage::get($geojson->geojson_path), true);
+                if ($decoded) {
+                    $geojson->geojson = $decoded;
+                }
+            }
+        } catch (\Throwable $e) {
+        }
 
         return Inertia::render('geojson/update', [
             'geojson'   => $geojson,
@@ -386,15 +502,18 @@ class GeojsonController extends Controller
 
         // 3) Normalize coordinates exactly as in store()
         $this->processCoordinates($feature);
+        $metadata = $this->extractMetadataFromFeature($feature);
 
         // 4) Build up the data array
         $data = [
-            'geojson'        => $feature,
+            'geojson'        => ['__stored_in_file' => true],
             'id_user'        => $validated['id_user'],
             'id_region'      => $validated['id_region']      ?? null,
             'id_owner'       => $validated['id_owner']       ?? null,
             'id_kategori'    => $validated['id_kategori']    ?? null,
             'main_category'  => $validated['main_category']  ?? null,
+            'properties_snapshot' => $metadata['properties_snapshot'],
+            'geojson_bbox' => $metadata['geojson_bbox'],
         ];
 
         // 5) Handle source_name - prioritize form data over fileName from GeoJSON
@@ -406,6 +525,18 @@ class GeojsonController extends Controller
 
         // 6) Persist changes
         $geojsonModel->update($data);
+        try {
+            $dir = 'geojson/features';
+            $path = $geojsonModel->geojson_path ?: ($dir.'/'.($geojsonModel->id_geojson).'.json');
+            Storage::put($path, json_encode($feature));
+            $size = Storage::size($path) ?: null;
+            $geojsonModel->update([
+                'geojson_path' => $path,
+                'geojson_size' => $size,
+            ]);
+        } catch (\Throwable $e) {
+            // Ignore file persist errors
+        }
 
         return redirect()
             ->route('dashboard.geojson.index')
@@ -435,9 +566,15 @@ class GeojsonController extends Controller
 
         $geo = Geojson::findOrFail($id);
 
-        $feature = $geo->geojson;
-        if (is_string($feature)) {
-            $feature = json_decode($feature, true) ?: [];
+        $feature = null;
+        if ($geo->geojson_path && Storage::exists($geo->geojson_path)) {
+            $feature = json_decode(Storage::get($geo->geojson_path), true) ?: [];
+        }
+        if (!is_array($feature)) {
+            $feature = $geo->geojson;
+            if (is_string($feature)) {
+                $feature = json_decode($feature, true) ?: [];
+            }
         }
         if (!is_array($feature)) {
             $feature = [];
@@ -462,8 +599,21 @@ class GeojsonController extends Controller
 
         $feature['properties'] = $newProps;
 
-        $geo->geojson = $feature;
+        $geo->fill([
+            'geojson' => ['__stored_in_file' => true],
+            'properties_snapshot' => $newProps,
+        ]);
         $geo->save();
+        try {
+            if ($geo->geojson_path) {
+                $dir = dirname($geo->geojson_path);
+                Storage::makeDirectory($dir);
+                Storage::put($geo->geojson_path, json_encode($feature));
+                $geo->update(['geojson_size' => Storage::size($geo->geojson_path) ?: null]);
+            }
+        } catch (\Throwable $e) {
+            // ignore
+        }
 
         if ($request->wantsJson() || $request->is('api/*')) {
             return response()->json([
@@ -473,5 +623,66 @@ class GeojsonController extends Controller
         }
 
         return back()->with('success', 'Properties berhasil diperbarui.');
+    }
+
+    /**
+     * Utility: Sinkronisasi file fitur di storage ke DB jika baris hilang.
+     * GET /dashboard/geojson/sync-storage
+     */
+    public function syncStorage()
+    {
+        $paths = array_merge(
+            Storage::exists('geojson/features') ? Storage::files('geojson/features') : [],
+            Storage::exists('private/geojson/features') ? Storage::files('private/geojson/features') : []
+        );
+
+        $createdCount = 0;
+        $userId = Auth::id();
+        if (!$userId) {
+            $userId = DB::table('users')->value('id') ?: null;
+        }
+
+        foreach ($paths as $path) {
+            if (!str_ends_with($path, '.json')) continue;
+            $filename = basename($path);
+            $idStr = preg_replace('/\.json$/', '', $filename);
+            $id = (int) $idStr;
+            if ($id <= 0) continue;
+
+            $exists = Geojson::where('id_geojson', $id)->exists();
+            if ($exists) continue;
+
+            $size = null;
+            $feature = null;
+            try {
+                $size = Storage::size($path) ?: null;
+                $feature = json_decode(Storage::get($path), true) ?: null;
+            } catch (\Throwable $e) {}
+
+            $metadata = is_array($feature) ? $this->extractMetadataFromFeature($feature) : [
+                'properties_snapshot' => [],
+                'geojson_bbox' => null,
+            ];
+
+            $m = new Geojson([
+                'geojson' => ['__stored_in_file' => true],
+                'id_user' => $userId,
+                'properties_snapshot' => $metadata['properties_snapshot'],
+                'geojson_bbox' => $metadata['geojson_bbox'],
+            ]);
+            $m->id_geojson = $id;
+            $m->save();
+            $m->update([
+                'geojson_path' => $path,
+                'geojson_size' => $size,
+            ]);
+            $createdCount++;
+        }
+
+        try {
+            DB::statement("SELECT setval(pg_get_serial_sequence('geojson','id_geojson'), (SELECT COALESCE(MAX(id_geojson),1) FROM geojson))");
+        } catch (\Throwable $e) {}
+
+        return redirect()->route('dashboard.geojson.index')->with('success', "Sinkronisasi selesai: {$createdCount} baris ditambahkan.");
     }
 }
