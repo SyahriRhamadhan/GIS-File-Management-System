@@ -14,6 +14,7 @@ use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\PdfGeojson;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PewarnaanRdtrController;
+use Illuminate\Http\Request;
 // Halaman utama
 Route::get('/', function () {
     $geojsons = Geojson::with('kategori')
@@ -107,12 +108,16 @@ Route::get('/', function () {
         'geojsons' => $geojsons,
         'regions' => $regions,
         'user' => null,
+        'fullscreen' => request()->boolean('fullscreen'),
     ]);
 })->name('home');
 
 // Public API for landing page map
 Route::get('/api/public/geojsons', [DashboardController::class, 'getGeojsons'])->name('api.public.geojsons');
 Route::get('/api/public/geojsons/{geojson}', [DashboardController::class, 'showGeojson'])->name('api.public.geojson.show');
+Route::get('/map/fullscreen', function (Request $request) {
+    return redirect()->route('home', ['fullscreen' => 1] + $request->query());
+})->name('map.public.fullscreen');
 
 
 // Hanya untuk pengguna yang sudah login & verifikasi
