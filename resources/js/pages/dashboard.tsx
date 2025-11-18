@@ -11,7 +11,7 @@ import {
     AreaChart, Area
 } from 'recharts';
 import { Map, Layers, Users, FileText, Building2, FolderTree, BarChart3 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -67,7 +67,124 @@ const Dashboard = ({
     recentGeojsons
 }: DashboardProps) => {
     const [activeTab, setActiveTab] = useState('statistics');
-    const geojsonData = Array.isArray(geojsons) ? geojsons : [];
+    const initialGeojsons = useMemo(() => (Array.isArray(geojsons) ? geojsons : []), [geojsons]);
+    const [mapGeojsons, setMapGeojsons] = useState(initialGeojsons);
+    const [isLoadingMapData, setIsLoadingMapData] = useState(initialGeojsons.length === 0);
+    const [mapDataError, setMapDataError] = useState<string | null>(null);
+    const isMountedRef = useRef(true);
+    const isFetchingRef = useRef(false);
+    const autoFetchTriggeredRef = useRef(false);
+    const [mapLoadProgress, setMapLoadProgress] = useState<{ loaded: number; total: number | null }>({
+        loaded: initialGeojsons.length,
+        total: null,
+    });
+
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (initialGeojsons.length > 0) {
+            autoFetchTriggeredRef.current = false;
+            setMapGeojsons(initialGeojsons);
+            setIsLoadingMapData(false);
+            setMapDataError(null);
+        }
+    }, [initialGeojsons]);
+
+    const fetchGeojsonPages = useCallback(async () => {
+        if (isFetchingRef.current) return;
+        isFetchingRef.current = true;
+        if (isMountedRef.current) {
+            setIsLoadingMapData(true);
+            setMapDataError(null);
+            setMapGeojsons([]);
+            setMapLoadProgress({
+                loaded: 0,
+                total: null,
+            });
+        }
+
+        try {
+            const perPage = 100;
+            let page = 1;
+            const aggregated: any[] = [];
+            let keepFetching = true;
+            let expectedTotal: number | null = null;
+
+            while (keepFetching) {
+                const response = await fetch(`/api/dashboard/geojsons?per_page=${perPage}&page=${page}`);
+                if (!response.ok) {
+                    throw new Error('Gagal memuat data GeoJSON.');
+                }
+                const payload = await response.json();
+                const pageData = Array.isArray(payload?.data) ? payload.data : [];
+                aggregated.push(...pageData);
+                const meta = payload?.meta ?? {};
+                const currentPage = meta.current_page ?? page;
+                const lastPage = meta.last_page ?? currentPage;
+                if (typeof meta.total === 'number') {
+                    expectedTotal = meta.total;
+                }
+
+                if (isMountedRef.current) {
+                    setMapGeojsons(aggregated.slice());
+                    setMapLoadProgress({
+                        loaded: aggregated.length,
+                        total: expectedTotal,
+                    });
+                }
+
+                if (!meta.last_page || currentPage >= lastPage) {
+                    keepFetching = false;
+                } else {
+                    page = currentPage + 1;
+                }
+            }
+
+            if (isMountedRef.current) {
+                setMapGeojsons(aggregated);
+                setMapDataError(null);
+            }
+        } catch (error: any) {
+            console.error(error);
+            if (isMountedRef.current) {
+                setMapGeojsons([]);
+                setMapDataError(error?.message ?? 'Gagal memuat data GeoJSON.');
+                setMapLoadProgress({
+                    loaded: 0,
+                    total: null,
+                });
+            }
+        } finally {
+            if (isMountedRef.current) {
+                setIsLoadingMapData(false);
+                setMapLoadProgress((prev) => ({
+                    loaded: prev.loaded,
+                    total: prev.total,
+                }));
+            }
+            isFetchingRef.current = false;
+        }
+    }, []);
+
+    useEffect(() => {
+        if (initialGeojsons.length > 0) {
+            return;
+        }
+        if (autoFetchTriggeredRef.current) {
+            return;
+        }
+        autoFetchTriggeredRef.current = true;
+        fetchGeojsonPages();
+    }, [initialGeojsons, fetchGeojsonPages]);
+
+    const handleReloadGeojsons = () => {
+        autoFetchTriggeredRef.current = true;
+        fetchGeojsonPages();
+    };
 
     // Format category data for pie chart
     const categoryData = byCategory.map((item) => ({
@@ -387,7 +504,40 @@ const Dashboard = ({
                             </CardHeader> */}
                             <CardContent className="p-0">
                                 <div className="h-[calc(100vh-200px)] w-full">
-                                    <MapView geojsonData={geojsonData} initialVisibleIds={selectedIds ?? []} />
+                                    <div className="relative h-full w-full">
+                                        {(isLoadingMapData || mapDataError) && (
+                                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/90 p-4 text-center">
+                                                {isLoadingMapData && (
+                                                    <p className="text-sm text-gray-600">
+                                                        Memuat data peta...
+                                                        {mapLoadProgress.total !== null && (
+                                                            <>
+                                                                <br />
+                                                                <span>
+                                                                    {mapLoadProgress.loaded.toLocaleString()} /{' '}
+                                                                    {mapLoadProgress.total.toLocaleString()} layer
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                    </p>
+                                                )}
+                                                {mapDataError && (
+                                                    <>
+                                                        <p className="text-sm text-red-600">{mapDataError}</p>
+                                                        <button
+                                                            type="button"
+                                                            className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700 disabled:opacity-60"
+                                                            onClick={handleReloadGeojsons}
+                                                            disabled={isLoadingMapData}
+                                                        >
+                                                            Muat ulang data
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+                                        <MapView geojsonData={mapGeojsons} initialVisibleIds={selectedIds ?? []} />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>

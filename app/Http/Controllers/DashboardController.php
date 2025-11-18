@@ -21,7 +21,8 @@ class DashboardController extends Controller
         // Optional filter berdasarkan query param id atau ids (comma-separated)
         $idsParam = $request->query('ids');
         $idParam = $request->query('id');
-        $limit = $request->query('limit', null); // New: limit parameter for lazy loading
+        $limitParam = $request->query('limit');
+        $loadAll = $request->boolean('load_all', false);
 
         $selectedIds = [];
         if ($idsParam) {
@@ -39,13 +40,21 @@ class DashboardController extends Controller
             $geojsonQuery->whereIn('id_geojson', $selectedIds);
         }
 
-        // Performance optimization: limit initial load
-        // Load only necessary fields to reduce payload size
-        if ($limit && empty($selectedIds)) {
-            // For initial dashboard load, don't send full GeoJSON data
-            // Frontend can lazy-load geometries when needed
-            $geojsons = collect([]); // Empty for now, load on-demand
+        $limitValue = null;
+        if (is_numeric($limitParam)) {
+            $limitValue = max(0, (int) $limitParam);
+        }
+
+        $shouldLoadGeojsons = $loadAll || !empty($selectedIds) || ($limitValue !== null && $limitValue > 0);
+
+        if (!$shouldLoadGeojsons) {
+            // Skip sending heavy GeoJSON payloads; frontend will fetch via API.
+            $geojsons = collect([]);
         } else {
+            if ($limitValue && empty($selectedIds)) {
+                $geojsonQuery->limit($limitValue);
+            }
+
             $geojsons = $geojsonQuery
                 ->select([
                     'geojson.id_geojson',
@@ -246,7 +255,7 @@ class DashboardController extends Controller
             'recentGeojsons' => $recentGeojsons,
 
             // Performance: Add metadata for lazy loading
-            'hasMoreData' => !empty($selectedIds) ? false : ($geojsons->count() > 0),
+            'hasMoreData' => !$shouldLoadGeojsons,
         ]);
     }
 
