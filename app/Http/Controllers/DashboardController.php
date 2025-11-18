@@ -9,6 +9,7 @@ use App\Models\Kategori;
 use App\Models\Owner;
 use App\Models\Report;
 use App\Models\User;
+use App\Models\PewarnaanRdtr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -63,6 +64,53 @@ class DashboardController extends Controller
                     $geojson->kode_warna = $geojson->kategori->kode_warna ?? '#3388ff';
                     return $geojson;
                 });
+
+            $rdtr = PewarnaanRdtr::select('kode','sub_zona','kode_warna','rgb')->get();
+            $bySubZona = [];
+            $byKode = [];
+            foreach ($rdtr as $r) {
+                $hex = $r->kode_warna;
+                if (empty($hex) && is_string($r->rgb)) {
+                    $parts = preg_split('/\s+/', trim($r->rgb));
+                    if (count($parts) === 3) {
+                        $rC = max(0, min(255, (int) $parts[0]));
+                        $gC = max(0, min(255, (int) $parts[1]));
+                        $bC = max(0, min(255, (int) $parts[2]));
+                        $hex = sprintf('#%02x%02x%02x', $rC, $gC, $bC);
+                    }
+                }
+                if ($hex) {
+                    if (!empty($r->sub_zona)) {
+                        $bySubZona[trim((string) $r->sub_zona)] = $hex;
+                    }
+                    if (!empty($r->kode)) {
+                        $byKode[trim((string) $r->kode)] = $hex;
+                    }
+                }
+            }
+            $geojsons = $geojsons->map(function ($item) use ($bySubZona, $byKode) {
+                $color = $item->kode_warna;
+                if ((empty($color) || $color === '#3388ff') && is_array($item->geojson)) {
+                    $props = $item->geojson['properties'] ?? [];
+                    $namobj = is_array($props) ? (isset($props['NAMOBJ']) ? trim((string) $props['NAMOBJ']) : null) : null;
+                    $kodunk = is_array($props) ? ($props['KODUNK'] ?? null) : null;
+                    if ($namobj && isset($bySubZona[$namobj])) {
+                        $color = $bySubZona[$namobj];
+                    } elseif ($kodunk && is_string($kodunk)) {
+                        $m = [];
+                        if (preg_match('/^([A-Z0-9\-]+)/', $kodunk, $m)) {
+                            $prefix = $m[1];
+                            if (isset($byKode[$prefix])) {
+                                $color = $byKode[$prefix];
+                            }
+                        }
+                    }
+                    if ($color) {
+                        $item->kode_warna = $color;
+                    }
+                }
+                return $item;
+            });
         }
 
         $regions = Region::all();
@@ -239,9 +287,59 @@ class DashboardController extends Controller
             if (is_string($geojson->geojson)) {
                 $geojson->geojson = json_decode($geojson->geojson, true);
             }
-            // Add kode_warna from kategori relation
-            $geojson->kode_warna = $geojson->kategori->kode_warna ?? '#3388ff';
+            $geojson->kode_warna = $geojson->kategori->kode_warna ?? null;
             return $geojson;
+        });
+
+        $rdtr = PewarnaanRdtr::select('kode','sub_zona','kode_warna','rgb')->get();
+        $bySubZona = [];
+        $byKode = [];
+        foreach ($rdtr as $r) {
+            $hex = $r->kode_warna;
+            if (empty($hex) && is_string($r->rgb)) {
+                $parts = preg_split('/\s+/', trim($r->rgb));
+                if (count($parts) === 3) {
+                    $rC = max(0, min(255, (int) $parts[0]));
+                    $gC = max(0, min(255, (int) $parts[1]));
+                    $bC = max(0, min(255, (int) $parts[2]));
+                    $hex = sprintf('#%02x%02x%02x', $rC, $gC, $bC);
+                }
+            }
+            if ($hex) {
+                if (!empty($r->sub_zona)) {
+                    $bySubZona[trim((string) $r->sub_zona)] = $hex;
+                }
+                if (!empty($r->kode)) {
+                    $byKode[trim((string) $r->kode)] = $hex;
+                }
+            }
+        }
+        $geojsons = $geojsons->map(function ($item) use ($bySubZona, $byKode) {
+            $color = $item->kode_warna;
+            if (empty($color) && is_array($item->geojson)) {
+                $props = $item->geojson['properties'] ?? [];
+                $namobj = is_array($props) ? (isset($props['NAMOBJ']) ? trim((string) $props['NAMOBJ']) : null) : null;
+                $kodunk = is_array($props) ? ($props['KODUNK'] ?? null) : null;
+                if ($namobj && isset($bySubZona[$namobj])) {
+                    $color = $bySubZona[$namobj];
+                } elseif ($kodunk && is_string($kodunk)) {
+                    $m = [];
+                    if (preg_match('/^([A-Z0-9\-]+)/', $kodunk, $m)) {
+                        $prefix = $m[1];
+                        if (isset($byKode[$prefix])) {
+                            $color = $byKode[$prefix];
+                        }
+                    }
+                }
+                if ($color) {
+                    $item->kode_warna = $color;
+                } else {
+                    $item->kode_warna = '#3388ff';
+                }
+            } elseif (empty($color)) {
+                $item->kode_warna = '#3388ff';
+            }
+            return $item;
         });
 
         return response()->json([

@@ -10,6 +10,7 @@ use App\Models\Region;
 use App\Models\Owner;
 use App\Models\User;
 use App\Models\Kategori;
+use App\Models\PewarnaanRdtr;
 use App\Http\Requests\StoreGeojsonRequest;
 use App\Http\Requests\UpdateGeojsonRequest;
 
@@ -94,6 +95,59 @@ class GeojsonController extends Controller
         // Get paginated results
         $geojsons = $query->paginate($perPage)
             ->appends($request->except('page'));
+
+        $rdtr = PewarnaanRdtr::select('kode','sub_zona','kode_warna','rgb')->get();
+        $bySubZona = [];
+        $byKode = [];
+        foreach ($rdtr as $r) {
+            $hex = $r->kode_warna;
+            if (empty($hex) && is_string($r->rgb)) {
+                $parts = preg_split('/\s+/', trim($r->rgb));
+                if (count($parts) === 3) {
+                    $rC = max(0, min(255, (int) $parts[0]));
+                    $gC = max(0, min(255, (int) $parts[1]));
+                    $bC = max(0, min(255, (int) $parts[2]));
+                    $hex = sprintf('#%02x%02x%02x', $rC, $gC, $bC);
+                }
+            }
+            if ($hex) {
+                if (!empty($r->sub_zona)) {
+                    $bySubZona[trim((string) $r->sub_zona)] = $hex;
+                }
+                if (!empty($r->kode)) {
+                    $byKode[trim((string) $r->kode)] = $hex;
+                }
+            }
+        }
+        $geojsons->setCollection(
+            $geojsons->getCollection()->map(function ($item) use ($bySubZona, $byKode) {
+                $color = $item->kode_warna;
+                if (empty($color)) {
+                    $data = $item->geojson;
+                    if (is_string($data)) {
+                        $data = json_decode($data, true);
+                    }
+                    if (is_array($data)) {
+                        $props = $data['properties'] ?? [];
+                        $namobj = is_array($props) ? (isset($props['NAMOBJ']) ? trim((string) $props['NAMOBJ']) : null) : null;
+                        $kodunk = is_array($props) ? ($props['KODUNK'] ?? null) : null;
+                        if ($namobj && isset($bySubZona[$namobj])) {
+                            $color = $bySubZona[$namobj];
+                        } elseif ($kodunk && is_string($kodunk)) {
+                            $m = [];
+                            if (preg_match('/^([A-Z0-9\-]+)/', $kodunk, $m)) {
+                                $prefix = $m[1];
+                                if (isset($byKode[$prefix])) {
+                                    $color = $byKode[$prefix];
+                                }
+                            }
+                        }
+                    }
+                }
+                $item->kode_warna = $color ?: '#3388ff';
+                return $item;
+            })
+        );
 
         // Get all data for filters
         $regions = Region::all();

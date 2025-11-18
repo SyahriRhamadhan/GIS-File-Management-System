@@ -22,13 +22,28 @@ function FitToBounds({ data }: { data: any }) {
 
 export default function Modal({ geojson, onClose }: { geojson: any; onClose: () => void }) {
     const [centre] = useState<[number, number]>([1.0, 104.521117]);
+    const MAX_VISIBLE_PROPERTIES = 8;
 
     const onEachFeature = (feature: any, layer: L.Layer) => {
         if (feature.properties) {
+            const entries = Object.entries(feature.properties);
+            const visibleEntries = entries.slice(0, MAX_VISIBLE_PROPERTIES);
+            const scrollableEntries = entries.slice(MAX_VISIBLE_PROPERTIES);
+
+            // Show the first `MAX_VISIBLE_PROPERTIES` items, then place the rest in a scrollable container.
             let html = '<div>';
-            Object.entries(feature.properties).forEach(([key, value]) => {
+            visibleEntries.forEach(([key, value]) => {
                 html += `<p><strong>${key}:</strong> ${value}</p>`;
             });
+
+            if (scrollableEntries.length) {
+                html += '<div style="max-height: 200px; overflow-y: auto; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">';
+                scrollableEntries.forEach(([key, value]) => {
+                    html += `<p><strong>${key}:</strong> ${value}</p>`;
+                });
+                html += '</div>';
+            }
+
             html += '</div>';
             layer.bindPopup(html);
         }
