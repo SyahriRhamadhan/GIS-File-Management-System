@@ -177,13 +177,24 @@ const Dashboard = ({
         fetchMetadataPages();
     };
 
-    const fetchFullGeojsonById = useCallback(async (id: string | number) => {
-        const response = await fetch(`/api/dashboard/geojsons/${id}`);
+    const fetchFullGeojsonBatch = useCallback(async (ids: Array<string | number>) => {
+        if (!ids || ids.length === 0) return {};
+        const params = new URLSearchParams({
+            mode: 'full',
+            ids: ids.join(','),
+        });
+        const response = await fetch(`/api/dashboard/geojsons?${params.toString()}`);
         if (!response.ok) {
             throw new Error('Gagal memuat detail GeoJSON.');
         }
         const payload = await response.json();
-        return payload?.geojson ?? null;
+        const map: Record<string, any> = {};
+        (payload?.data ?? []).forEach((item: any) => {
+            if (item?.id_geojson && item?.geojson) {
+                map[String(item.id_geojson)] = item.geojson;
+            }
+        });
+        return map;
     }, []);
 
     // Format category data for pie chart
@@ -536,7 +547,7 @@ const Dashboard = ({
                                         <MapView
                                             geojsonData={geojsonMeta}
                                             initialVisibleIds={selectedIds ?? []}
-                                            fetchGeojsonById={fetchFullGeojsonById}
+                                            fetchGeojsonBatch={fetchFullGeojsonBatch}
                                         />
                                     </div>
                                 </div>

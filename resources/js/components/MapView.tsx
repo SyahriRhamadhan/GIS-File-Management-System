@@ -120,10 +120,11 @@ interface MapViewProps {
     }>;
     // Optional: daftar id yang ingin ditampilkan secara default
     initialVisibleIds?: Array<string | number>;
-    fetchGeojsonById?: (id: string | number) => Promise<GeoJSON.Feature | null>;
+    fetchGeojsonBatch?: (ids: Array<string | number>) => Promise<Record<string, GeoJSON.Feature | null>>;
 }
 
 type PolygonDisplayMode = 'fill' | 'outline';
+const FEATURE_BATCH_SIZE = 50;
 
 // Component to set mapRef after map is ready
 const MapRefSetter: React.FC<{ mapRef: React.MutableRefObject<LeafletMap | null> }> = ({ mapRef }) => {
@@ -187,7 +188,7 @@ const PopupAddPropertyRow: React.FC<PopupAddPropertyRowProps> = ({ onAdd, onPend
     );
 };
 
-const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], fetchGeojsonById }) => {
+const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], fetchGeojsonBatch }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
     const mapRef = useRef<LeafletMap | null>(null);
@@ -203,7 +204,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
     // Cache perubahan properti per id agar tidak perlu reload
     const [updatedProps, setUpdatedProps] = useState<Record<string, Record<string, any>>>({});
     const featureCacheRef = useRef<Record<string, Feature | null>>({});
-    const featureLoadingRef = useRef<Set<string>>(new Set());
+    const pendingFeatureIdsRef = useRef<Set<string>>(new Set());
+    const isBatchFetchingRef = useRef(false);
     const [, forceFeatureCacheUpdate] = useState(0);
     const [layerOrder, setLayerOrder] = useState<string[]>([]);
     const [customColors, setCustomColors] = useState<Record<string, string>>(() => readStoredColors());
@@ -398,27 +400,54 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
     const [outlineHidden, setOutlineHidden] = useState<boolean>(false);
     const toggleSidebar = () => setSidebarOpen((open) => !open);
 
-    const ensureFeatureForItem = useCallback(
-        (item?: (typeof sourceData)[0]) => {
-            if (!item || !fetchGeojsonById) return;
-            const id = String(item.id_geojson);
-            if (item.geojson?.geometry || featureCacheRef.current[id] || featureLoadingRef.current.has(id)) return;
-            featureLoadingRef.current.add(id);
-            fetchGeojsonById(item.id_geojson)
-                .then((feature) => {
+    const processFeatureQueue = useCallback(() => {
+        if (!fetchGeojsonBatch || isBatchFetchingRef.current) return;
+        const ids = Array.from(pendingFeatureIdsRef.current).slice(0, FEATURE_BATCH_SIZE);
+        if (ids.length === 0) return;
+        isBatchFetchingRef.current = true;
+
+        fetchGeojsonBatch(ids)
+            .then((features) => {
+                const received = new Set(Object.keys(features || {}));
+                ids.forEach((id) => {
+                    const key = String(id);
+                    pendingFeatureIdsRef.current.delete(key);
+                    if (!received.has(key) && featureCacheRef.current[key] === undefined) {
+                        featureCacheRef.current[key] = null;
+                    }
+                });
+                Object.entries(features || {}).forEach(([id, feature]) => {
                     if (feature && feature.geometry) {
                         featureCacheRef.current[id] = feature as Feature;
-                        forceFeatureCacheUpdate((prev) => prev + 1);
+                    } else {
+                        featureCacheRef.current[id] = null;
                     }
-                })
-                .catch(() => {
-                    featureCacheRef.current[id] = null;
-                })
-                .finally(() => {
-                    featureLoadingRef.current.delete(id);
                 });
+                forceFeatureCacheUpdate((prev) => prev + 1);
+            })
+            .catch(() => {
+                ids.forEach((id) => {
+                    pendingFeatureIdsRef.current.delete(String(id));
+                    featureCacheRef.current[String(id)] = null;
+                });
+            })
+            .finally(() => {
+                isBatchFetchingRef.current = false;
+                if (pendingFeatureIdsRef.current.size > 0) {
+                    processFeatureQueue();
+                }
+            });
+    }, [fetchGeojsonBatch]);
+
+    const ensureFeatureForItem = useCallback(
+        (item?: (typeof sourceData)[0]) => {
+            if (!item || !fetchGeojsonBatch) return;
+            const id = String(item.id_geojson);
+            if (item.geojson?.geometry || featureCacheRef.current[id] || pendingFeatureIdsRef.current.has(id)) return;
+            pendingFeatureIdsRef.current.add(id);
+            processFeatureQueue();
         },
-        [fetchGeojsonById]
+        [fetchGeojsonBatch, processFeatureQueue]
     );
 
     const ensureFeatureById = useCallback(
