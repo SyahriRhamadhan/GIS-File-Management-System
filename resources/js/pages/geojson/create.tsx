@@ -11,6 +11,8 @@ import shp from 'shpjs';
 import JSZip from 'jszip';
 import * as toGeoJSON from '@tmcw/togeojson';
 
+const CATEGORY_SELECTION_DISABLED = true;
+
 // Custom styles for React Select to support dark/light mode
 const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
     
@@ -1313,12 +1315,16 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                                     options={categoryOptions}
                                     value={categoryOptions.find((opt) => opt.value.toString() === field.value)}
                                     onChange={(opt) => {
+                                        if (CATEGORY_SELECTION_DISABLED) return;
                                         field.onChange(opt?.value.toString() ?? '');
                                         setSelectedKat(opt);
                                     }}
                                     getOptionLabel={(e) => e.label}
                                     getOptionValue={(e) => e.value.toString()}
-                                    placeholder="— Select Category —"
+                                    placeholder={
+                                        CATEGORY_SELECTION_DISABLED ? 'Pemilihan kategori sedang dikunci' : '— Select Category —'
+                                    }
+                                    isDisabled={CATEGORY_SELECTION_DISABLED}
                                     styles={selectStyles}
                                     className="react-select-container"
                                     classNamePrefix="react-select"
@@ -1326,18 +1332,25 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                             )}
                         />
 
-                        {selectedKat && (
-                            <div className="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
-                                <span className="block h-6 w-6 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
-                                <div className="text-sm">
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">{selectedKat.orde0}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Orde 1 = {selectedKat.orde1}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Orde 2 = {selectedKat.orde2}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Orde 3 = {selectedKat.orde3}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Orde 4 = {selectedKat.orde4}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">*Ket {selectedKat.ket_warna}</p>
+                        {CATEGORY_SELECTION_DISABLED ? (
+                            <p className="mt-2 text-sm text-amber-600">
+                                Pemilihan kategori sementara dinonaktifkan oleh administrator. Gunakan field lain seperti Main
+                                Category untuk klasifikasi sementara.
+                            </p>
+                        ) : (
+                            selectedKat && (
+                                <div className="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                                    <span className="block h-6 w-6 flex-shrink-0 rounded" style={{ backgroundColor: selectedKat.kode_warna }} />
+                                    <div className="text-sm">
+                                        <p className="font-medium text-gray-900 dark:text-gray-100">{selectedKat.orde0}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Orde 1 = {selectedKat.orde1}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Orde 2 = {selectedKat.orde2}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Orde 3 = {selectedKat.orde3}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Orde 4 = {selectedKat.orde4}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">*Ket {selectedKat.ket_warna}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )
                         )}
                     </div>
 

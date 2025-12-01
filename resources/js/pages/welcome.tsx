@@ -119,7 +119,7 @@ const Welcome = ({
                     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
                 </Head>
                 <div className="min-h-screen bg-black">
-                    <MapView geojsonData={geojsonData} readOnly fetchGeojsonBatch={fetchGeojsonBatch} />
+                    <MapView geojsonData={geojsonData} readOnly showLayerControls fetchGeojsonBatch={fetchGeojsonBatch} />
                 </div>
             </>
         );
@@ -189,7 +189,7 @@ const Welcome = ({
                 <section className="px-4 pb-8">
                     <div className="mx-auto max-w-6xl rounded-lg bg-white p-2 shadow">
                         <div className="h-[80vh] overflow-hidden rounded-md border">
-                            <MapView geojsonData={geojsonData} readOnly fetchGeojsonBatch={fetchGeojsonBatch} />
+                            <MapView geojsonData={geojsonData} readOnly showLayerControls fetchGeojsonBatch={fetchGeojsonBatch} />
                         </div>
                     </div>
                 </section>

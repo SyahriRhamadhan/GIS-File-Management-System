@@ -11,6 +11,8 @@ import shp from 'shpjs';
 import JSZip from 'jszip';
 import * as toGeoJSON from '@tmcw/togeojson';
 
+const CATEGORY_SELECTION_DISABLED = true;
+
 // Custom styles for React Select to support dark/light mode
 const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
     
@@ -1010,17 +1012,27 @@ export default function GeojsonEdit() {
                                         options={categoryOptions}
                                         value={categoryOptions.find((opt) => opt.value.toString() === field.value)}
                                         onChange={(opt) => {
+                                            if (CATEGORY_SELECTION_DISABLED) return;
                                             field.onChange(opt?.value.toString() ?? '');
                                             setSelectedKat(opt ?? null);
                                         }}
                                         getOptionLabel={(e) => e.label}
                                         getOptionValue={(e) => e.value.toString()}
-                                        placeholder="— Select Category —"
+                                        placeholder={
+                                            CATEGORY_SELECTION_DISABLED ? 'Pengubahan kategori dikunci sementara' : '— Select Category —'
+                                        }
+                                        isDisabled={CATEGORY_SELECTION_DISABLED}
                                         className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                     />
                                 )}
                             />
                             {errors.id_kategori && <p className="mt-1 text-sm text-red-500">{errors.id_kategori.message}</p>}
+
+                            {CATEGORY_SELECTION_DISABLED && (
+                                <p className="mt-2 text-sm text-amber-600">
+                                    Pengubahan kategori dinonaktifkan sementara. Nilai yang tampil di bawah ini tetap digunakan.
+                                </p>
+                            )}
 
                             {selectedKat && (
                                 <div className="mt-2 flex items-center gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">

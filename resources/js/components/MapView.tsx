@@ -122,6 +122,7 @@ interface MapViewProps {
     initialVisibleIds?: Array<string | number>;
     fetchGeojsonBatch?: (ids: Array<string | number>) => Promise<Record<string, GeoJSON.Feature | null>>;
     readOnly?: boolean;
+    showLayerControls?: boolean;
 }
 
 type PolygonDisplayMode = 'fill' | 'outline';
@@ -189,7 +190,13 @@ const PopupAddPropertyRow: React.FC<PopupAddPropertyRowProps> = ({ onAdd, onPend
     );
 };
 
-const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], fetchGeojsonBatch, readOnly = false }) => {
+const MapView: React.FC<MapViewProps> = ({
+    geojsonData,
+    initialVisibleIds = [],
+    fetchGeojsonBatch,
+    readOnly = false,
+    showLayerControls = false,
+}) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
     const mapRef = useRef<LeafletMap | null>(null);
@@ -450,6 +457,8 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
         },
         [fetchGeojsonBatch, processFeatureQueue]
     );
+
+    const allowLayerControls = showLayerControls || !readOnly;
 
     const ensureFeatureById = useCallback(
         (id: string | number) => {
@@ -1097,7 +1106,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
                     onClick={(e) => e.stopPropagation()}
                     onWheel={(e) => e.stopPropagation()}
                 >
-                    {!readOnly && renderLayerControls()}
+                    {allowLayerControls && renderLayerControls()}
                     <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
                         {entries.length === 0 && (
                             <p className="text-gray-500">Tidak ada properti. Tambahkan pasangan kunci-nilai.</p>
@@ -1153,7 +1162,7 @@ const MapView: React.FC<MapViewProps> = ({ geojsonData, initialVisibleIds = [], 
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
             >
-                {!readOnly && renderLayerControls()}
+                {allowLayerControls && renderLayerControls()}
                 {(() => {
                     const propEntries = Object.entries(mergedProps).filter(([k]) => k !== 'id_geojson');
                     return (
