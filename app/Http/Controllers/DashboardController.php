@@ -224,15 +224,17 @@ class DashboardController extends Controller
 
         // Recent geojsons (last 10)
         $recentGeojsons = Geojson::with(['kategori', 'region', 'owner', 'user'])
-            ->select(['id_geojson', 'source_name', 'id_kategori', 'id_region', 'id_owner', 'id_user', 'created_at'])
+            ->select(['id_geojson', 'source_name', 'id_kategori', 'id_region', 'id_owner', 'id_user', 'created_at', 'properties_snapshot'])
             ->orderByDesc('created_at')
             ->limit(10)
             ->get()
             ->map(function ($geojson) {
+                $properties = $this->normalizeProperties($geojson->properties_snapshot ?? []);
+                $kategoriMeta = $this->buildKategoriMeta($geojson->kategori, $properties);
                 return [
                     'id_geojson' => $geojson->id_geojson,
                     'source_name' => $geojson->source_name,
-                    'category' => $geojson->kategori->orde1 ?? 'N/A',
+                    'category' => $kategoriMeta['display_label'] ?? 'N/A',
                     'region' => $geojson->region->name ?? 'N/A',
                     'owner' => $geojson->owner->name ?? 'N/A',
                     'user' => $geojson->user->name ?? 'N/A',
@@ -357,12 +359,281 @@ class DashboardController extends Controller
         return [];
     }
 
+    private function normalizeProperties($properties): array
+    {
+        if (is_array($properties)) {
+            return $properties;
+        }
+
+        if (is_string($properties)) {
+            $decoded = json_decode($properties, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return [];
+    }
+
+    private function normalizeKategoriKey(string $value): string
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        $lower = function_exists('mb_strtolower') ? mb_strtolower($trimmed) : strtolower($trimmed);
+        // Remove separators and duplicated whitespace so "Budidaya" == "Budi Daya"
+        $normalized = preg_replace('/[^a-z0-9]+/', '', $lower);
+        return $normalized ?? '';
+    }
+
+    private function resolveKategoriDisplayName($kategori): ?string
+    {
+        if (!$kategori) {
+            return null;
+        }
+
+        $orders = ['orde4', 'orde3', 'orde2', 'orde1', 'orde0'];
+        foreach ($orders as $field) {
+            $value = is_array($kategori) ? ($kategori[$field] ?? null) : $kategori->{$field} ?? null;
+            if (is_string($value)) {
+                $trimmed = trim($value);
+                if ($trimmed !== '') {
+                    return $trimmed;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function indexKategoriLookupValues(array &$lookup, array $data): void
+    {
+        foreach (['orde4', 'orde3', 'orde2', 'orde1', 'orde0'] as $field) {
+            $value = $data[$field] ?? null;
+            if (is_string($value)) {
+                $normalized = $this->normalizeKategoriKey($value);
+                if ($normalized !== '') {
+                    $lookup[$normalized] = $data;
+                }
+            }
+        }
+
+        if (!empty($data['kode']) && is_string($data['kode'])) {
+            $normalized = $this->normalizeKategoriKey($data['kode']);
+            if ($normalized !== '') {
+                $lookup[$normalized] = $data;
+            }
+        }
+    }
+
+    private function getKategoriLookup(): array
+    {
+        static $lookup = null;
+        if ($lookup !== null) {
+            return $lookup;
+        }
+
+        $lookup = [];
+        $kategoris = Kategori::select('id_kategori', 'orde0', 'orde1', 'orde2', 'orde3', 'orde4', 'kode', 'kode_warna', 'layer_order')->get();
+        foreach ($kategoris as $kategori) {
+            $data = [
+                'id_kategori' => $kategori->id_kategori,
+                'orde0' => $kategori->orde0,
+                'orde1' => $kategori->orde1,
+                'orde2' => $kategori->orde2,
+                'orde3' => $kategori->orde3,
+                'orde4' => $kategori->orde4,
+                'kode' => $kategori->kode,
+                'kode_warna' => $kategori->kode_warna,
+                'layer_order' => $kategori->layer_order,
+                'display_name' => $this->resolveKategoriDisplayName($kategori),
+            ];
+            $this->indexKategoriLookupValues($lookup, $data);
+        }
+
+        return $lookup;
+    }
+
+    private function matchKategoriLookupValue(array $lookup, ?string $value): ?array
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        $candidates = [$value];
+        if (str_contains($value, '/')) {
+            foreach (explode('/', $value) as $fragment) {
+                $fragment = trim($fragment);
+                if ($fragment !== '') {
+                    $candidates[] = $fragment;
+                }
+            }
+        }
+
+        foreach ($candidates as $candidate) {
+            $normalized = $this->normalizeKategoriKey($candidate);
+            if (isset($lookup[$normalized])) {
+                return $lookup[$normalized];
+            }
+        }
+
+        return null;
+    }
+
+    private function inferKategoriFromProperties(array $properties): ?array
+    {
+        if (empty($properties)) {
+            return null;
+        }
+
+        $lookup = $this->getKategoriLookup();
+        $upperProps = [];
+        foreach ($properties as $key => $value) {
+            $upperProps[strtoupper((string) $key)] = $value;
+        }
+
+        $candidateKeys = [
+            'SIMBOLOGI',
+            'USULAN',
+            'USULAN_1',
+            'KETERANGAN',
+            'KETERANG_1',
+            'KLS_IV',
+            'KLS_IV_1',
+            'KLS_III',
+            'KLS_III_1',
+            'KLS_II',
+            'KLS_I',
+            'KLS_I_1',
+        ];
+
+        foreach ($candidateKeys as $key) {
+            if (!array_key_exists($key, $upperProps)) {
+                continue;
+            }
+            $rawValue = $upperProps[$key];
+            if (is_scalar($rawValue) || (is_object($rawValue) && method_exists($rawValue, '__toString'))) {
+                $match = $this->matchKategoriLookupValue($lookup, (string) $rawValue);
+                if ($match) {
+                    return $match;
+                }
+            }
+        }
+
+        // No direct match in kategori table; build inferred category based on available fields.
+        $fallbackKeys = [
+            'SIMBOLOGI',
+            'USULAN_1',
+            'USULAN',
+            'KLS_III_1',
+            'KLS_III',
+            'KLS_II',
+            'KLS_I_1',
+            'KLS_I',
+        ];
+
+        foreach ($fallbackKeys as $key) {
+            if (empty($upperProps[$key])) {
+                continue;
+            }
+            $value = trim((string) $upperProps[$key]);
+            if ($value === '') {
+                continue;
+            }
+
+            $color = $this->generateColorFromString($value);
+
+            return [
+                'id_kategori' => null,
+                'layer_order' => null,
+                'orde0' => $upperProps['KLS_I'] ?? ($upperProps['KLS_I_1'] ?? null),
+                'orde1' => $upperProps['KLS_I_1'] ?? ($upperProps['KLS_II'] ?? null),
+                'orde2' => $upperProps['KLS_II'] ?? ($upperProps['KLS_III'] ?? null),
+                'orde3' => $upperProps['KLS_III'] ?? ($upperProps['KLS_III_1'] ?? null),
+                'orde4' => $upperProps['KLS_IV'] ?? ($upperProps['KLS_IV_1'] ?? null),
+                'kode' => null,
+                'kode_warna' => $color,
+                'display_name' => $value,
+                'inferred' => true,
+            ];
+        }
+
+        return null;
+    }
+
+    private function generateColorFromString(string $value): string
+    {
+        $normalized = $this->normalizeKategoriKey($value);
+        if ($normalized === '') {
+            $normalized = md5($value);
+        }
+        $hash = substr(md5($normalized), 0, 6);
+        // Ensure the color is not too dark by bumping channels slightly
+        $r = max(64, hexdec(substr($hash, 0, 2)));
+        $g = max(64, hexdec(substr($hash, 2, 2)));
+        $b = max(64, hexdec(substr($hash, 4, 2)));
+        return sprintf('#%02x%02x%02x', $r, $g, $b);
+    }
+
+    private function buildKategoriMeta(?Kategori $kategori, array $properties): array
+    {
+        $payload = null;
+        $displayLabel = null;
+        $inferredColor = null;
+
+        if ($kategori) {
+            $payload = [
+                'id_kategori' => $kategori->id_kategori,
+                'layer_order' => $kategori->layer_order,
+                'orde0' => $kategori->orde0,
+                'orde1' => $kategori->orde1,
+                'orde2' => $kategori->orde2,
+                'orde3' => $kategori->orde3,
+                'orde4' => $kategori->orde4,
+                'kode' => $kategori->kode,
+                'kode_warna' => $kategori->kode_warna,
+                'display_name' => $this->resolveKategoriDisplayName($kategori),
+                'inferred' => false,
+            ];
+            $displayLabel = $payload['display_name'] ?? $kategori->orde0;
+        } else {
+            $match = $this->inferKategoriFromProperties($properties);
+            if ($match) {
+                $payload = [
+                    'id_kategori' => $match['id_kategori'] ?? null,
+                    'layer_order' => $match['layer_order'] ?? null,
+                    'orde0' => $match['orde0'] ?? null,
+                    'orde1' => $match['orde1'] ?? null,
+                    'orde2' => $match['orde2'] ?? null,
+                    'orde3' => $match['orde3'] ?? null,
+                    'orde4' => $match['orde4'] ?? null,
+                    'kode' => $match['kode'] ?? null,
+                    'kode_warna' => $match['kode_warna'] ?? null,
+                    'display_name' => $match['display_name'] ?? $this->resolveKategoriDisplayName($match),
+                    'inferred' => true,
+                ];
+                $displayLabel = $payload['display_name'] ?? $match['orde0'] ?? null;
+                $inferredColor = $match['kode_warna'] ?? null;
+            }
+        }
+
+        return [
+            'kategori' => $payload,
+            'display_label' => $displayLabel,
+            'inferred_color' => $inferredColor,
+        ];
+    }
+
     private function formatGeojsonForPayload(Geojson $geojson, bool $includeGeometry = false): array
     {
-        $properties = $geojson->properties_snapshot ?? [];
-        if (!is_array($properties)) {
-            $properties = [];
-        }
+        $properties = $this->normalizeProperties($geojson->properties_snapshot ?? []);
 
         $feature = [
             'type' => 'Feature',
@@ -379,11 +650,14 @@ class DashboardController extends Controller
             }
         }
 
+        $categoryProps = is_array($feature['properties']) ? $feature['properties'] : $properties;
+        $kategoriMeta = $this->buildKategoriMeta($geojson->kategori, $categoryProps);
+
         $color = $geojson->kategori->kode_warna ?? null;
         if (!$color) {
             [$bySubZona, $byKode] = $this->getRdtrMappings();
-            $namobj = $properties['NAMOBJ'] ?? null;
-            $kodunk = $properties['KODUNK'] ?? null;
+            $namobj = $categoryProps['NAMOBJ'] ?? null;
+            $kodunk = $categoryProps['KODUNK'] ?? null;
             if ($namobj && isset($bySubZona[$namobj])) {
                 $color = $bySubZona[$namobj];
             } elseif ($kodunk && is_string($kodunk)) {
@@ -395,6 +669,9 @@ class DashboardController extends Controller
                 }
             }
         }
+        if (!$color && !empty($kategoriMeta['inferred_color'])) {
+            $color = $kategoriMeta['inferred_color'];
+        }
         if (!$color) {
             $color = '#3388ff';
         }
@@ -404,12 +681,8 @@ class DashboardController extends Controller
             'source_name' => $geojson->source_name,
             'main_category' => $geojson->main_category,
             'id_kategori' => $geojson->id_kategori,
-            'kategori' => $geojson->kategori ? [
-                'layer_order' => $geojson->kategori->layer_order,
-                'orde0' => $geojson->kategori->orde0,
-                'kode_warna' => $geojson->kategori->kode_warna,
-                'kode' => $geojson->kategori->kode,
-            ] : null,
+            'kategori' => $kategoriMeta['kategori'],
+            'kategori_display_name' => $kategoriMeta['display_label'],
             'geojson' => $feature,
             'geojson_bbox' => $geojson->geojson_bbox,
             'kode_warna' => $color,
@@ -481,45 +754,208 @@ class DashboardController extends Controller
         return $cached;
     }
 
-    /**
-     * API endpoint to get minimal category/hierarchy data
-     * GET /api/dashboard/categories
-     */
-    public function getCategories()
-    {
-        // Return only category structure without full GeoJSON
-        $categories = Geojson::with('kategori')
-            ->select([
-                'geojson.id_geojson',
-                'geojson.source_name',
-                'geojson.main_category',
-                'geojson.id_kategori',
-                'geojson.properties_snapshot',
-            ])
-            ->get()
-            ->groupBy(function ($item) {
-                $mainCategory = $item->main_category ?? 'Uncategorized';
-                $categoryName = $item->kategori->orde0 ?? 'Tanpa Kategori';
-                return "{$mainCategory} › {$categoryName}";
-            })
-            ->map(function ($items, $key) {
-                return [
-                    'key' => $key,
-                    'count' => $items->count(),
-                    'items' => $items->map(function ($item) {
-                        $properties = $item->properties;
-                        if (is_string($properties)) {
-                            $properties = json_decode($properties, true);
-                        }
-                        return [
-                            'id' => $item->id_geojson,
-                            'source_name' => $item->source_name,
-                            'properties' => $properties,
-                        ];
-                    }),
-                ];
-            });
+                /**
 
-        return response()->json($categories);
+     * API endpoint to get minimal category/hierarchy data
+
+     * GET /api/dashboard/categories
+
+     */
+
+    public function getCategories()
+
+    {
+
+        $categories = Geojson::with('kategori')
+
+            ->select([
+
+                'geojson.id_geojson',
+
+                'geojson.source_name',
+
+                'geojson.main_category',
+
+                'geojson.id_kategori',
+
+                'geojson.properties_snapshot',
+
+            ])
+
+            ->get()
+
+            ->map(function ($item) {
+
+                $properties = $this->normalizeProperties($item->properties_snapshot ?? []);
+
+                $meta = $this->buildKategoriMeta($item->kategori, $properties);
+
+                $mainCategory = $item->main_category ?? 'Uncategorized';
+
+                $categoryName = $meta['display_label'] ?? $item->kategori->orde0 ?? 'Tanpa Kategori';
+
+                $color = $item->kategori->kode_warna ?? $meta['inferred_color'] ?? null;
+
+
+
+                return [
+
+                    'main_category' => $mainCategory,
+
+                    'category_name' => $categoryName,
+
+                    'color' => $color,
+
+                    'geojson' => $item,
+
+                    'properties' => $properties,
+
+                    'meta' => $meta,
+
+                ];
+
+            })
+
+            ->groupBy(fn ($entry) => "{$entry['main_category']} - {$entry['category_name']}")
+
+            ->map(function ($entries, $key) {
+
+                $first = $entries->first();
+
+
+
+                return [
+
+                    'key' => $key,
+
+                    'count' => $entries->count(),
+
+                    'color' => $first['color'],
+
+                    'items' => $entries->map(function ($entry) {
+
+                        /** @var \App\Models\Geojson $geojson */
+
+                        $geojson = $entry['geojson'];
+
+
+
+                        return [
+
+                            'id' => $geojson->id_geojson,
+
+                            'source_name' => $geojson->source_name,
+
+                            'properties' => $entry['properties'],
+
+                            'kategori' => $entry['meta']['kategori'],
+
+                        ];
+
+                    })->values(),
+
+                ];
+
+            })
+
+            ->values();
+
+
+
+        return response()->json(['data' => $categories]);
+
     }
+
+
+
+
+
+
+    /**
+
+
+     * API endpoint to expose RTRW categories grouped by their deepest orde.
+
+     */
+
+    public function getRtrwCategories()
+
+    {
+
+        $categories = Kategori::select([
+
+                'id_kategori',
+
+                'orde0',
+
+                'orde1',
+
+                'orde2',
+
+                'orde3',
+
+                'orde4',
+
+                'kode',
+
+                'kode_warna',
+
+                'layer_order',
+
+            ])
+
+            ->orderBy('orde0')
+
+            ->orderBy('layer_order')
+
+            ->get()
+
+            ->map(function ($kategori) {
+
+                return [
+
+                    'id_kategori' => $kategori->id_kategori,
+
+                    'orde0' => $kategori->orde0,
+
+                    'orde1' => $kategori->orde1,
+
+                    'orde2' => $kategori->orde2,
+
+                    'orde3' => $kategori->orde3,
+
+                    'orde4' => $kategori->orde4,
+
+                    'kode' => $kategori->kode,
+
+                    'kode_warna' => $kategori->kode_warna,
+
+                    'layer_order' => $kategori->layer_order,
+
+                    'display_name' => $this->resolveKategoriDisplayName($kategori),
+
+                ];
+
+            })
+
+            ->groupBy('orde0')
+
+            ->map(fn ($items, $orde0) => [
+
+                'orde0' => $orde0,
+
+                'items' => $items->values(),
+
+            ])
+
+            ->values();
+
+
+
+        return response()->json([
+            'data' => $categories,
+        ]);
+    }
+
 }
+

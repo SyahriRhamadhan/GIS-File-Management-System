@@ -130,6 +130,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/dashboard/geojsons', [DashboardController::class, 'getGeojsons'])->name('api.dashboard.geojsons');
     Route::get('/api/dashboard/geojsons/{geojson}', [DashboardController::class, 'showGeojson'])->name('api.dashboard.geojson.show');
     Route::get('/api/dashboard/categories', [DashboardController::class, 'getCategories'])->name('api.dashboard.categories');
+    Route::get('/api/dashboard/rtrw-categories', [DashboardController::class, 'getRtrwCategories'])->name('api.dashboard.rtrw-categories');
 
     // Prefix: /dashboard
     Route::prefix('dashboard')->name('dashboard.')->group(function () {

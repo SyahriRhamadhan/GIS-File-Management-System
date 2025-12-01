@@ -1,7 +1,7 @@
 // resources/js/Pages/Geojson/Index.tsx
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface Kategori {
     id_kategori: number;
@@ -83,26 +83,41 @@ export default function Index({ kategoris }: IndexProps) {
 
     const layerOptions = useMemo(() => [...new Set(kategoris.map((k) => k.layer_order))].sort((a, b) => a - b), [kategoris]);
 
-    // ──────────────────── FILTER & SORT
+    const matchesSearch = useCallback((kategori: Kategori, term: string) => {
+        if (!term) return true;
+        const haystack = [
+            kategori.id_kategori?.toString() ?? '',
+            kategori.orde0 ?? '',
+            kategori.orde1 ?? '',
+            kategori.orde2 ?? '',
+            kategori.orde3 ?? '',
+            kategori.orde4 ?? '',
+            kategori.kode ?? '',
+            kategori.kode_warna ?? '',
+            kategori.ket_warna ?? '',
+            kategori.layer_order?.toString() ?? '',
+        ];
+        return haystack.some((value) => value.toLowerCase().includes(term));
+    }, []);
+
+    // ???????????????????? FILTER & SORT
     const filtered = useMemo(
-        () =>
-            kategoris
+        () => {
+            const term = search.trim().toLowerCase();
+            return kategoris
                 .slice()
                 .sort((a, b) => a.layer_order - b.layer_order)
                 .filter(
                     (k) =>
-                        (k.orde0.toLowerCase().includes(search.toLowerCase()) ||
-                            k.orde1?.toLowerCase().includes(search.toLowerCase()) ||
-                            k.orde2?.toLowerCase().includes(search.toLowerCase()) ||
-                            k.orde3?.toLowerCase().includes(search.toLowerCase()) ||
-                            k.orde4?.toLowerCase().includes(search.toLowerCase())) &&
+                        matchesSearch(k, term) &&
                         (!namaFilter || k.orde0 === namaFilter) &&
                         (!orde1Filter || k.orde1 === orde1Filter) &&
                         (!orde2Filter || k.orde2 === orde2Filter) &&
                         (!orde3Filter || k.orde3 === orde3Filter) &&
                         (!layerFilter || k.layer_order === layerFilter),
-                ),
-        [kategoris, search, namaFilter, orde1Filter, orde2Filter, orde3Filter, layerFilter],
+                );
+        },
+        [kategoris, search, matchesSearch, namaFilter, orde1Filter, orde2Filter, orde3Filter, layerFilter],
     );
 
     // total halaman
