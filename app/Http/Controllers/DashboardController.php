@@ -277,6 +277,10 @@ class DashboardController extends Controller
 
         $query = Geojson::with('kategori');
 
+        if ($this->isPublicGeojsonRequest($request)) {
+            $this->applyPublicVisibilityScope($query);
+        }
+
         if ($mainCategoryFilter) {
             $query->where('geojson.main_category', $mainCategoryFilter);
         }
@@ -333,9 +337,64 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function showGeojson(Geojson $geojson)
+    public function showGeojson(Request $request, Geojson $geojson)
     {
+        if ($this->isPublicGeojsonRequest($request) && $this->shouldHideGeojsonFromPublic($geojson->main_category)) {
+            abort(404);
+        }
         return response()->json($this->formatGeojsonForPayload($geojson, true));
+    }
+
+    protected function isPublicGeojsonRequest(Request $request): bool
+    {
+        return $request->routeIs('api.public.geojsons') || $request->routeIs('api.public.geojson.show');
+    }
+
+    protected function applyPublicVisibilityScope($query): void
+    {
+        $hiddenCategories = $this->getPublicHiddenMainCategories();
+        if (empty($hiddenCategories)) {
+            return;
+        }
+
+        $query->where(function ($q) use ($hiddenCategories) {
+            $q->whereNull('geojson.main_category')
+                ->orWhereNotIn('geojson.main_category', $hiddenCategories);
+        });
+    }
+
+    protected function shouldHideGeojsonFromPublic(?string $mainCategory): bool
+    {
+        if (!is_string($mainCategory)) {
+            return false;
+        }
+        $trimmed = trim($mainCategory);
+        if ($trimmed === '') {
+            return false;
+        }
+
+        foreach ($this->getPublicHiddenMainCategories() as $hidden) {
+            if (strcasecmp($trimmed, $hidden) === 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function getPublicHiddenMainCategories(): array
+    {
+        $raw = config('map.public_hidden_main_categories', []);
+        $list = [];
+        foreach ($raw as $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+            $trimmed = trim($value);
+            if ($trimmed !== '') {
+                $list[] = $trimmed;
+            }
+        }
+        return $list;
     }
 
     private function parseIds($idsParam): array
@@ -958,4 +1017,3 @@ class DashboardController extends Controller
     }
 
 }
-

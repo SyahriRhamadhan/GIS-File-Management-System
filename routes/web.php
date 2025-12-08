@@ -17,7 +17,7 @@ use App\Http\Controllers\PewarnaanRdtrController;
 use Illuminate\Http\Request;
 // Halaman utama
 Route::get('/', function () {
-    $geojsons = Geojson::with('kategori')
+    $geojsonQuery = Geojson::with('kategori')
         ->select([
             'geojson.id_geojson',
             'geojson.source_name',
@@ -25,7 +25,22 @@ Route::get('/', function () {
             'geojson.id_kategori',
             'geojson.geojson',
             'geojson.geojson_bbox',
-        ])
+        ]);
+
+    $publicHiddenMainCategories = collect(config('map.public_hidden_main_categories', []))
+        ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+        ->map(fn ($value) => trim($value))
+        ->values()
+        ->all();
+
+    if (!empty($publicHiddenMainCategories)) {
+        $geojsonQuery->where(function ($query) use ($publicHiddenMainCategories) {
+            $query->whereNull('geojson.main_category')
+                ->orWhereNotIn('geojson.main_category', $publicHiddenMainCategories);
+        });
+    }
+
+    $geojsons = $geojsonQuery
         ->orderByDesc('geojson.created_at')
         ->limit(500)
         ->get();
