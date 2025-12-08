@@ -1,7 +1,10 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useMemo, useRef, useState } from 'react';
 // Tree-shakeable icon imports for better bundle size
 import { IoChevronDown, IoChevronForward, IoInformationCircleOutline } from 'react-icons/io5';
 import { MdOutlineEdit, MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
+import type { FeatureCollection, Geometry } from 'geojson';
+import shp from 'shpjs';
+import * as shpNamespace from 'shpjs';
 
 interface SidebarFilterProps {
     sidebarOpen: boolean;
@@ -31,6 +34,10 @@ interface SidebarFilterProps {
     onOutlineHiddenChange: (hidden: boolean) => void;
     onParentRename?: (oldParent: string, newParent: string) => void;
     readOnly?: boolean;
+    onUserLayerUpload?: (payload: { data: FeatureCollection; fileName: string }) => void;
+    onUserLayerClear?: () => void;
+    userLayerSummary?: { fileName: string; featureCount: number } | null;
+    onUserLayerBringToFront?: () => void;
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -61,6 +68,10 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     onOutlineHiddenChange,
     onParentRename,
     readOnly = false,
+    onUserLayerUpload,
+    onUserLayerClear,
+    userLayerSummary,
+    onUserLayerBringToFront,
 }) => {
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
     const [expandedParents, setExpandedParents] = useState<Record<string, Record<string, boolean>>>({});
@@ -74,7 +85,31 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [parentRenameError, setParentRenameError] = useState<string | null>(null);
     const [parentRenameSuccess, setParentRenameSuccess] = useState<string | null>(null);
     const [parentRenameLoading, setParentRenameLoading] = useState(false);
+    const [uploadingUserLayer, setUploadingUserLayer] = useState(false);
+    const [userLayerError, setUserLayerError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const checkboxBaseClass = 'size-[18px] shrink-0 rounded border border-gray-300 text-blue-600 focus:ring-blue-500';
+    const parseShpFn = useMemo(() => {
+        const fn = (shpNamespace as any).parseShp;
+        if (typeof fn !== 'function') {
+            return null;
+        }
+        return fn as (buffer: ArrayBuffer, prj?: string | ArrayBuffer) => Geometry[];
+    }, []);
+    const parseDbfFn = useMemo(() => {
+        const fn = (shpNamespace as any).parseDbf;
+        if (typeof fn !== 'function') {
+            return null;
+        }
+        return fn as (buffer: ArrayBuffer, cpg?: ArrayBuffer | string) => Record<string, any>[];
+    }, []);
+    const combineFn = useMemo(() => {
+        const fn = (shpNamespace as any).combine;
+        if (typeof fn !== 'function') {
+            return null;
+        }
+        return fn as (arr: [Geometry[], Record<string, any>[]]) => FeatureCollection;
+    }, []);
     const formatCategoryLabel = (category: string) => {
         if (!category) return category;
         const [firstPart] = category.split('-');
@@ -193,6 +228,106 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             setParentRenameSuccess(null);
         } finally {
             setParentRenameLoading(false);
+        }
+    };
+
+    const parseShpParts = async (files: FileList | File[]): Promise<{ data: FeatureCollection; name: string }> => {
+        if (!parseShpFn || !parseDbfFn || !combineFn) {
+            throw new Error('Parser SHP tidak tersedia di browser ini.');
+        }
+        const groups = new Map<
+            string,
+            {
+                shp?: File;
+                dbf?: File;
+                prj?: File;
+            }
+        >();
+
+        Array.from(files).forEach((file) => {
+            const extMatch = /\.([^.]+)$/i.exec(file.name);
+            const ext = extMatch ? extMatch[1].toLowerCase() : '';
+            if (!ext) return;
+            const base = file.name.replace(/\.[^.]+$/, '');
+            if (!groups.has(base)) {
+                groups.set(base, {});
+            }
+            const entry = groups.get(base)!;
+            if (ext === 'shp') entry.shp = file;
+            if (ext === 'dbf') entry.dbf = file;
+            if (ext === 'prj') entry.prj = file;
+        });
+
+        for (const [base, entry] of groups.entries()) {
+            if (entry.shp && entry.dbf) {
+                const [shpBuffer, dbfBuffer] = await Promise.all([entry.shp.arrayBuffer(), entry.dbf.arrayBuffer()]);
+                const geometries = parseShpFn(shpBuffer, entry.prj ? await entry.prj.text() : undefined);
+                const properties = parseDbfFn(dbfBuffer, undefined);
+                const combined = combineFn([geometries, properties]);
+                if (combined?.type === 'FeatureCollection') {
+                    return { data: combined as FeatureCollection, name: `${base}.shp` };
+                }
+            }
+        }
+
+        throw new Error('Tidak menemukan pasangan berkas .shp dan .dbf dengan nama yang sama.');
+    };
+
+    const parseFileToGeojson = async (file: File): Promise<FeatureCollection> => {
+        const lowerName = file.name.toLowerCase();
+        if (lowerName.endsWith('.geojson') || lowerName.endsWith('.json')) {
+            const text = await file.text();
+            const parsed = JSON.parse(text);
+            if (parsed?.type === 'FeatureCollection' && Array.isArray(parsed.features)) {
+                return parsed as FeatureCollection;
+            }
+            throw new Error('File GeoJSON tidak valid.');
+        }
+
+        const buffer = await file.arrayBuffer();
+        const output = await shp(buffer);
+        if (Array.isArray(output)) {
+            return {
+                type: 'FeatureCollection',
+                features: output as any,
+            };
+        }
+        if (output?.type === 'FeatureCollection') {
+            return output as FeatureCollection;
+        }
+        if (output && typeof output === 'object') {
+            return {
+                type: 'FeatureCollection',
+                features: [output as any],
+            };
+        }
+        throw new Error('Format berkas tidak dapat diproses.');
+    };
+
+    const handleUserLayerChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files || files.length === 0 || !onUserLayerUpload) return;
+        setUserLayerError(null);
+        setUploadingUserLayer(true);
+        try {
+            let data: FeatureCollection;
+            let fileName = '';
+            if (files.length === 1) {
+                data = await parseFileToGeojson(files[0]);
+                fileName = files[0].name;
+            } else {
+                const parsed = await parseShpParts(files);
+                data = parsed.data;
+                fileName = parsed.name;
+            }
+            onUserLayerUpload({ data, fileName });
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        } catch (error) {
+            setUserLayerError((error as Error).message || 'Gagal memproses berkas.');
+        } finally {
+            setUploadingUserLayer(false);
         }
     };
 
@@ -339,6 +474,66 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                 </button>
                             </div>
                         </form>
+
+                        {/* Upload user SHP/GeoJSON */}
+                        <div className="w-full max-w-md rounded-lg border border-dashed border-blue-300 bg-blue-50/60 p-3 text-xs text-gray-700 dark:border-blue-800 dark:bg-blue-900/10 dark:text-gray-200">
+                            <p className="mb-2 font-semibold text-sm text-blue-700 dark:text-blue-200">
+                                Unggah SHP / GeoJSON Lahan Anda
+                            </p>
+                            <p className="mb-3 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
+                                Pilih berkas <strong>.zip</strong>, <strong>.geojson</strong>, atau sepasang <strong>.shp</strong> +
+                                <strong>.dbf</strong> (boleh tambahkan <strong>.prj</strong>) dengan nama yang sama untuk menampilkan batas
+                                lahan sementara di peta.
+                            </p>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleUserLayerChange}
+                                accept=".zip,.shp,.dbf,.geojson,.json,.prj"
+                                multiple
+                                className="sr-only"
+                                disabled={uploadingUserLayer}
+                            />
+                            <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={uploadingUserLayer || !onUserLayerUpload}
+                                    className="rounded bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+                                >
+                                    {uploadingUserLayer ? 'Memproses…' : 'Pilih Berkas'}
+                                </button>
+                                {userLayerSummary && (
+                                    <button
+                                        type="button"
+                                        onClick={onUserLayerClear}
+                                        className="rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700/50"
+                                    >
+                                        Hapus Lapisan
+                                    </button>
+                                )}
+                                {userLayerSummary && onUserLayerBringToFront && (
+                                    <button
+                                        type="button"
+                                        onClick={onUserLayerBringToFront}
+                                        className="rounded border border-blue-300 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-50 dark:border-blue-600 dark:text-blue-200 dark:hover:bg-blue-900/40"
+                                    >
+                                        Naikkan Polygon
+                                    </button>
+                                )}
+                                {userLayerSummary && (
+                                    <div className="text-[11px] text-gray-600 dark:text-gray-300">
+                                        Menampilkan <strong>{userLayerSummary.fileName}</strong> ({userLayerSummary.featureCount} fitur)
+                                    </div>
+                                )}
+                            </div>
+                            {userLayerError && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{userLayerError}</p>}
+                            {!userLayerSummary && !userLayerError && (
+                                <p className="mt-2 text-[11px] text-gray-500">
+                                    Data yang diunggah tidak disimpan ke server, hanya ditampilkan sementara pada peta Anda.
+                                </p>
+                            )}
+                        </div>
 
                         {/* Tombol Aksi */}
                         <div className="flex w-full max-w-md gap-3">

@@ -2,7 +2,7 @@ import BaseLayers from '@/components/BaseLayer';
 import SidebarFilter from '@/components/SidebarFilter';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import L, { Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -168,6 +168,14 @@ interface MapViewProps {
 
 type PolygonDisplayMode = 'fill' | 'outline';
 const FEATURE_BATCH_SIZE = 50;
+const USER_LAYER_STYLE = {
+    color: '#ff1f8f',
+    weight: 2.5,
+    dashArray: '6 4',
+    opacity: 0.9,
+    fillColor: '#ff1f8f',
+    fillOpacity: 0.05,
+};
 
 // Component to set mapRef after map is ready
 const MapRefSetter: React.FC<{ mapRef: React.MutableRefObject<LeafletMap | null> }> = ({ mapRef }) => {
@@ -258,6 +266,9 @@ const MapView: React.FC<MapViewProps> = ({
     const [, forceFeatureCacheUpdate] = useState(0);
     const [layerOrder, setLayerOrder] = useState<string[]>([]);
     const [customColors, setCustomColors] = useState<Record<string, string>>(() => readStoredColors());
+    const [userLayer, setUserLayer] = useState<FeatureCollection | null>(null);
+    const [userLayerSummary, setUserLayerSummary] = useState<{ fileName: string; featureCount: number } | null>(null);
+    const userLayerRef = useRef<L.GeoJSON | null>(null);
     const startEdit = (item: (typeof geojsonData)[0]) => {
         setEditingId(String(item.id_geojson));
         const props = { ...(item.geojson?.properties || {}) } as Record<string, any>;
@@ -744,6 +755,41 @@ const MapView: React.FC<MapViewProps> = ({
         },
         [applyLayerColor]
     );
+
+    const handleUserLayerUpload = useCallback(
+        ({ data, fileName }: { data: FeatureCollection; fileName: string }) => {
+            setUserLayer(data);
+            setUserLayerSummary({
+                fileName,
+                featureCount: Array.isArray(data?.features) ? data.features.length : 0,
+            });
+
+            if (mapRef.current) {
+                try {
+                    const tempLayer = L.geoJSON(data as any);
+                    const bounds = tempLayer.getBounds();
+                    if (bounds.isValid()) {
+                        mapRef.current.fitBounds(bounds, { padding: [24, 24] });
+                    }
+                } catch {
+                    /* ignore fit errors */
+                }
+            }
+        },
+        []
+    );
+
+    const handleUserLayerClear = useCallback(() => {
+        setUserLayer(null);
+        setUserLayerSummary(null);
+        userLayerRef.current = null;
+    }, []);
+
+    const handleUserLayerBringToFront = useCallback(() => {
+        if (userLayerRef.current && typeof userLayerRef.current.bringToFront === 'function') {
+            userLayerRef.current.bringToFront();
+        }
+    }, []);
 
     const handleParentRenameStateUpdate = useCallback(
         (oldName: string, newName: string) => {
@@ -1456,6 +1502,41 @@ const MapView: React.FC<MapViewProps> = ({
                                 );
                             });
                         })}
+                    {userLayer && (
+                        <GeoJSON
+                            data={userLayer as any}
+                            key="user-uploaded-layer"
+                            style={USER_LAYER_STYLE}
+                            ref={(ref) => {
+                                if (ref) {
+                                    userLayerRef.current = ref;
+                                } else {
+                                    userLayerRef.current = null;
+                                }
+                            }}
+                        >
+                            <Popup maxWidth={320}>
+                                <div className="text-sm">
+                                    <p className="font-semibold text-pink-600">Lapisan Unggahan</p>
+                                    {userLayerSummary ? (
+                                        <>
+                                            <p className="text-gray-700">
+                                                <strong>Berkas:</strong> {userLayerSummary.fileName}
+                                            </p>
+                                            <p className="text-gray-700">
+                                                <strong>Fitur:</strong> {userLayerSummary.featureCount}
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <p>Lapisan unggahan sementara ditampilkan.</p>
+                                    )}
+                                    <p className="mt-2 text-xs text-gray-500">
+                                        Data ini hanya terlihat oleh Anda dan tidak tersimpan permanen di server.
+                                    </p>
+                                </div>
+                            </Popup>
+                        </GeoJSON>
+                    )}
                 </MapContainer>
             </div>
 
@@ -1486,6 +1567,10 @@ const MapView: React.FC<MapViewProps> = ({
                 onFillOpacityChange={(v) => setFillOpacity(v)}
                 onOutlineHiddenChange={(h) => setOutlineHidden(h)}
                 onParentRename={handleParentRenameStateUpdate}
+                onUserLayerUpload={handleUserLayerUpload}
+                onUserLayerClear={handleUserLayerClear}
+                userLayerSummary={userLayerSummary}
+                onUserLayerBringToFront={handleUserLayerBringToFront}
                 readOnly={readOnly}
             />
         </div>
