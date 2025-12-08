@@ -285,7 +285,16 @@ const MapView: React.FC<MapViewProps> = ({
         return groups;
     }, [sortedData]);
 
-    // Grouped children per 3-level hierarchy with flattened key: "main_category - category" > parent > child
+    // Helper to normalize displayed main category
+    const getDisplayMainCategory = useCallback(
+        (mainCategory?: string | null) => {
+            const trimmed = (mainCategory ?? '').trim();
+            return trimmed !== '' ? trimmed : 'Uncategorized';
+        },
+        []
+    );
+
+    // Grouped children per main category: Main category > parent > child
     const groupedByCategory = useMemo(() => {
         const groups: Record<string, Record<string, Array<{ id: string; label: string }>>> = {};
 
@@ -293,16 +302,7 @@ const MapView: React.FC<MapViewProps> = ({
         const mainCategoryOrder = ['RDTR', 'RTRW', 'KKPR', 'GANTI RUGI', 'Uncategorized'];
 
         sourceData.forEach((item) => {
-            // Level 1: Main Category (langsung dari geojson.main_category)
-            const mainCategory = item.main_category || 'Uncategorized';
-
-            // Level 2: Category dari kategori (orde0)
-            const categoryName = item.kategori?.orde0 || 'Tanpa Kategori';
-
-            // Combine main_category and categoryName for flattened 3-level structure
-            const flattenedCategory = `${mainCategory} - ${categoryName}`;
-
-            // Level 2: Parent (source_name)
+            const mainCategory = getDisplayMainCategory(item.main_category);
             const parent = item.source_name || 'Unknown';
 
             // Level 3: Individual GeoJSON items - use helper for performance
@@ -310,20 +310,18 @@ const MapView: React.FC<MapViewProps> = ({
             const id = String(item.id_geojson || label);
 
             // Build hierarchy
-            if (!groups[flattenedCategory]) groups[flattenedCategory] = {};
-            if (!groups[flattenedCategory][parent]) groups[flattenedCategory][parent] = [];
-            if (!groups[flattenedCategory][parent].find((c) => c.id === id)) {
-                groups[flattenedCategory][parent].push({ id, label });
+            if (!groups[mainCategory]) groups[mainCategory] = {};
+            if (!groups[mainCategory][parent]) groups[mainCategory][parent] = [];
+            if (!groups[mainCategory][parent].find((c) => c.id === id)) {
+                groups[mainCategory][parent].push({ id, label });
             }
         });
 
         // Sort groups by predefined main category order
         const sortedGroups: typeof groups = {};
         const sortedKeys = Object.keys(groups).sort((a, b) => {
-            const aMain = a.split(' - ')[0];
-            const bMain = b.split(' - ')[0];
-            const aIndex = mainCategoryOrder.indexOf(aMain);
-            const bIndex = mainCategoryOrder.indexOf(bMain);
+            const aIndex = mainCategoryOrder.indexOf(a);
+            const bIndex = mainCategoryOrder.indexOf(b);
             if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
             if (aIndex !== -1) return -1;
             if (bIndex !== -1) return 1;
@@ -341,27 +339,27 @@ const MapView: React.FC<MapViewProps> = ({
     const categoryToCodes = useMemo(() => {
         const mapping: Record<string, string> = {};
         sourceData.forEach((item) => {
-            const categoryName = item.kategori?.orde0 || 'Uncategorized';
-            const uniqueCode = item.kategori?.kode || 'N/A';
-            if (!mapping[categoryName]) {
-                mapping[categoryName] = uniqueCode;
+            const mainCategory = getDisplayMainCategory(item.main_category);
+            const uniqueCode = item.kategori?.kode;
+            if (!mapping[mainCategory]) {
+                mapping[mainCategory] = uniqueCode || 'N/A';
             }
         });
         return mapping;
-    }, [sourceData])
+    }, [sourceData, getDisplayMainCategory]);
 
     // Create category colors mapping (still needed for visual indicators)
     const categoryColors = useMemo(() => {
         const colors: Record<string, string> = {};
         sourceData.forEach((item) => {
-            const categoryName = item.kategori?.orde0 || 'Uncategorized';
-            if (!colors[categoryName]) {
+            const mainCategory = getDisplayMainCategory(item.main_category);
+            if (!colors[mainCategory]) {
                 // Use kode_warna from kategori if available, otherwise from item
-                colors[categoryName] = item.kategori?.kode_warna || item.kode_warna || '#3388ff';
+                colors[mainCategory] = item.kategori?.kode_warna || item.kode_warna || '#3388ff';
             }
         });
         return colors;
-    }, [sourceData]);
+    }, [sourceData, getDisplayMainCategory]);
 
     // Utility functions for using unique codes as differentiators
     const getCategoryByCode = useCallback((code: string): string => {
@@ -1246,11 +1244,6 @@ const MapView: React.FC<MapViewProps> = ({
 
     // Handler for View (fly to location) - updated for three-level hierarchy
     const handleViewLocation = (category: string, parent: string, childId: string) => {
-        // category di Sidebar adalah key gabungan: "<main_category> f <orde0>"
-        const [mainPartRaw, orde0Raw] = (category || '').split(' f ').map((s) => s?.trim());
-        const mainPart = mainPartRaw || 'Uncategorized';
-        const orde0 = orde0Raw || 'Tanpa Kategori';
-
         // Cari item terutama berdasarkan id (paling andal). Parent dipakai sebagai verifikasi tambahan.
         const item =
             geojsonData.find(
@@ -1334,22 +1327,19 @@ const MapView: React.FC<MapViewProps> = ({
                     {groupedBySourceName &&
                         Object.entries(groupedBySourceName).map(([sourceName, items]) => {
                             return items.map((item) => {
-                                // Build flattened category key
-                                const mainCategory = item.main_category || 'Uncategorized';
-                                const categoryName = item.kategori?.orde0 || 'Tanpa Kategori';
-                                const flattenedCategory = `${mainCategory} - ${categoryName}`;
-
+                                const mainCategoryKey = getDisplayMainCategory(item.main_category);
                                 const parent = item.source_name || 'Unknown';
                                 const childId = String(item.id_geojson);
 
                                 // Check visibility with flattened category
-                                const isVisible = activeCategoryFilters[flattenedCategory] &&
-                                                activeParentFilters[flattenedCategory]?.[parent] &&
-                                                activeChildFilters[flattenedCategory]?.[parent]?.[childId];
+                                const isVisible =
+                                    activeCategoryFilters[mainCategoryKey] &&
+                                    activeParentFilters[mainCategoryKey]?.[parent] &&
+                                    activeChildFilters[mainCategoryKey]?.[parent]?.[childId];
 
                                 if (!isVisible) return null;
 
-                                const refKey = `${flattenedCategory}-${parent}-${childId}`;
+                                const refKey = `${mainCategoryKey}-${parent}-${childId}`;
                                 const baseColor =
                                     (typeof item.kategori?.kode_warna === 'string' ? item.kategori?.kode_warna : undefined) ||
                                     (typeof item.kode_warna === 'string' ? item.kode_warna : undefined) ||
@@ -1396,7 +1386,7 @@ const MapView: React.FC<MapViewProps> = ({
                                         >
                                             {renderPopupContent(item, {
                                                 refKey,
-                                                categoryKey: flattenedCategory,
+                                                categoryKey: mainCategoryKey,
                                                 parentKey: parent,
                                                 childId,
                                             })}

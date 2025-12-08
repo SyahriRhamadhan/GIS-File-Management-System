@@ -65,6 +65,11 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [coordY, setCoordY] = useState('');
     const [showCategoryInfo, setShowCategoryInfo] = useState<Record<string, boolean>>({});
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const formatCategoryLabel = (category: string) => {
+        if (!category) return category;
+        const [firstPart] = category.split('-');
+        return (firstPart ?? category).trim();
+    };
 
     const handleToggleCategory = (category: string) => {
         setExpandedCategories((prev) => ({
@@ -309,12 +314,9 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                 title={`Warna kategori: ${categoryColors[category]}`}
                                             ></div>
                                         )}
-                                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{category}</span>
-                                        {categoryCodes[category] && (
-                                            <span className="ml-2 rounded border bg-gray-100 px-2 py-1 font-mono text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                                {categoryCodes[category]}
-                                            </span>
-                                        )}
+                                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                            {formatCategoryLabel(category)}
+                                        </span>
                                     </div>
                                     {/* Info Icon */}
                                     <button
@@ -334,7 +336,9 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                 {showCategoryInfo[category] && (
                                     <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm dark:border-blue-700 dark:bg-blue-900/20">
                                         <div className="mb-2 flex items-start justify-between">
-                                            <h4 className="font-semibold text-blue-800 dark:text-blue-200">Informasi Kategori: {category}</h4>
+                                            <h4 className="font-semibold text-blue-800 dark:text-blue-200">
+                                                Informasi Kategori: {formatCategoryLabel(category)}
+                                            </h4>
                                             <button
                                                 type="button"
                                                 onClick={() => handleToggleCategoryInfo(category)}
@@ -345,9 +349,6 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                             </button>
                                         </div>
                                         <div className="text-sm text-gray-700 dark:text-gray-300">
-                                            <p className="mb-2">
-                                                <strong>Kode Kategori:</strong> {categoryCodes[category] || 'Tidak tersedia'}
-                                            </p>
                                             <p className="mb-2">
                                                 <strong>Warna:</strong>
                                                 <span className="ml-2 inline-flex items-center gap-2">
