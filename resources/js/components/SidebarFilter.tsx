@@ -74,6 +74,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [parentRenameError, setParentRenameError] = useState<string | null>(null);
     const [parentRenameSuccess, setParentRenameSuccess] = useState<string | null>(null);
     const [parentRenameLoading, setParentRenameLoading] = useState(false);
+    const checkboxBaseClass = 'size-[18px] shrink-0 rounded border border-gray-300 text-blue-600 focus:ring-blue-500';
     const formatCategoryLabel = (category: string) => {
         if (!category) return category;
         const [firstPart] = category.split('-');
@@ -401,7 +402,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                             e.stopPropagation();
                                             toggleCategoryFilter(category);
                                         }}
-                                        className="mr-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className={`mr-2 ${checkboxBaseClass}`}
                                     />
                                     <span className="mx-2 cursor-pointer text-xl" onClick={() => handleToggleCategory(category)}>
                                         {expandedCategories[category] ? <IoChevronDown /> : <IoChevronForward />}
@@ -499,7 +500,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                                 e.stopPropagation();
                                                                 toggleParentFilter(category, parent);
                                                             }}
-                                                            className="mr-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                            className={`mr-2 ${checkboxBaseClass}`}
                                                         />
                                                         <span
                                                             className="mx-2 cursor-pointer text-lg"
@@ -603,16 +604,16 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                                     {filteredChildren.map((child) => (
                                                                         <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
                                                                             <td className="p-1">
-                                                                                <input
-                                                                                    type="checkbox"
-                                                                                    id={`child-${category}-${parent}-${child.id}`}
-                                                                                    checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
-                                                                                    onChange={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        toggleChildFilter(category, parent, child.id);
-                                                                                    }}
-                                                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                                                />
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                id={`child-${category}-${parent}-${child.id}`}
+                                                                                checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
+                                                                                onChange={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    toggleChildFilter(category, parent, child.id);
+                                                                                }}
+                                                                                className={checkboxBaseClass}
+                                                                            />
                                                                             </td>
                                                                             <td className="p-1">
                                                                                 <button
