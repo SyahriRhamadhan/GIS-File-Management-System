@@ -651,6 +651,63 @@ class GeojsonController extends Controller
     }
 
     /**
+     * Rename a source_name group that is used as the tree parent label.
+     * Accepts payload: { old_name: string, new_name: string }
+     */
+    public function renameSourceGroup(Request $request)
+    {
+        $validated = $request->validate([
+            'old_name' => 'required|string|max:255',
+            'new_name' => 'required|string|max:255|different:old_name',
+        ]);
+
+        $oldName = trim($validated['old_name']);
+        $newName = trim($validated['new_name']);
+
+        if ($oldName === '' || $newName === '') {
+            $message = 'Nama sumber tidak boleh kosong.';
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json(['message' => $message], 422);
+            }
+            return back()->withErrors(['new_name' => $message])->withInput();
+        }
+
+        if ($oldName === $newName) {
+            $message = 'Nama sumber baru harus berbeda dari nama sebelumnya.';
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json(['message' => $message], 422);
+            }
+            return back()->withErrors(['new_name' => $message])->withInput();
+        }
+
+        $query = Geojson::where('source_name', $oldName);
+        $count = (clone $query)->count();
+
+        if ($count === 0) {
+            $message = 'Nama sumber tidak ditemukan.';
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json(['message' => $message], 404);
+            }
+            return back()->withErrors(['old_name' => $message])->withInput();
+        }
+
+        $query->update(['source_name' => $newName]);
+
+        $payload = [
+            'message' => "Nama sumber diperbarui dari '{$oldName}' menjadi '{$newName}'.",
+            'updated' => $count,
+            'old_name' => $oldName,
+            'new_name' => $newName,
+        ];
+
+        if ($request->wantsJson() || $request->is('api/*')) {
+            return response()->json($payload);
+        }
+
+        return back()->with('success', $payload['message']);
+    }
+
+    /**
      * Utility: Sinkronisasi file fitur di storage ke DB jika baris hilang.
      * GET /dashboard/geojson/sync-storage
      */

@@ -24,3 +24,6 @@ Route::get('rtrw-categories', [DashboardController::class, 'getRtrwCategories'])
 
 // Update GeoJSON properties via API (expects JSON body: { properties: { ... } })
 Route::put('geojson/{id}/properties', [GeojsonController::class, 'updateProperties'])->name('api.geojson.properties.update');
+
+// Rename a source_name group (body: { old_name: string, new_name: string })
+Route::put('geojson/source-groups/rename', [GeojsonController::class, 'renameSourceGroup'])->name('api.geojson.source-groups.rename');

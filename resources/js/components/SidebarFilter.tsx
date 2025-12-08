@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 // Tree-shakeable icon imports for better bundle size
 import { IoChevronDown, IoChevronForward, IoInformationCircleOutline } from 'react-icons/io5';
-import { MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
+import { MdOutlineEdit, MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
 
 interface SidebarFilterProps {
     sidebarOpen: boolean;
@@ -29,6 +29,7 @@ interface SidebarFilterProps {
     outlineHidden: boolean;
     onFillOpacityChange: (value: number) => void;
     onOutlineHiddenChange: (hidden: boolean) => void;
+    onParentRename?: (oldParent: string, newParent: string) => void;
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -57,6 +58,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     outlineHidden,
     onFillOpacityChange,
     onOutlineHiddenChange,
+    onParentRename,
 }) => {
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
     const [expandedParents, setExpandedParents] = useState<Record<string, Record<string, boolean>>>({});
@@ -65,6 +67,11 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [coordY, setCoordY] = useState('');
     const [showCategoryInfo, setShowCategoryInfo] = useState<Record<string, boolean>>({});
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [editingParent, setEditingParent] = useState<{ category: string; parent: string } | null>(null);
+    const [parentRenameValue, setParentRenameValue] = useState('');
+    const [parentRenameError, setParentRenameError] = useState<string | null>(null);
+    const [parentRenameSuccess, setParentRenameSuccess] = useState<string | null>(null);
+    const [parentRenameLoading, setParentRenameLoading] = useState(false);
     const formatCategoryLabel = (category: string) => {
         if (!category) return category;
         const [firstPart] = category.split('-');
@@ -93,6 +100,96 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             ...prev,
             [category]: !prev[category],
         }));
+    };
+
+    const startEditParent = (category: string, parent: string) => {
+        setEditingParent({ category, parent });
+        setParentRenameValue(parent);
+        setParentRenameError(null);
+        setParentRenameSuccess(null);
+    };
+
+    const cancelParentEdit = () => {
+        setEditingParent(null);
+        setParentRenameValue('');
+        setParentRenameError(null);
+        setParentRenameSuccess(null);
+        setParentRenameLoading(false);
+    };
+
+    const handleParentRenameSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!editingParent) return;
+
+        const newValue = parentRenameValue.trim();
+        if (!newValue) {
+            setParentRenameError('Nama baru tidak boleh kosong.');
+            setParentRenameSuccess(null);
+            return;
+        }
+        if (newValue === editingParent.parent) {
+            setParentRenameError('Nama baru harus berbeda dari nama lama.');
+            setParentRenameSuccess(null);
+            return;
+        }
+
+        try {
+            setParentRenameLoading(true);
+            setParentRenameError(null);
+            const token = (document.querySelector('meta[name=\"csrf-token\"]') as HTMLMetaElement)?.content;
+            const response = await fetch('/dashboard/geojson/source-groups/rename', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(token ? { 'X-CSRF-TOKEN': token } : {}),
+                },
+                body: JSON.stringify({
+                    old_name: editingParent.parent,
+                    new_name: newValue,
+                }),
+            });
+            let payload: Record<string, any> | null = null;
+            try {
+                payload = await response.json();
+            } catch (err) {
+                payload = null;
+            }
+            if (!response.ok) {
+                throw new Error(payload?.message || 'Gagal memperbarui nama sumber.');
+            }
+            const { category, parent: previousName } = editingParent;
+            setParentRenameValue(newValue);
+            setParentRenameSuccess(payload?.message || 'Nama sumber berhasil diperbarui.');
+            setExpandedParents((prev) => {
+                let changed = false;
+                const next: typeof prev = {};
+                Object.entries(prev).forEach(([catKey, parents]) => {
+                    if (parents && Object.prototype.hasOwnProperty.call(parents, previousName)) {
+                        changed = true;
+                        const updatedParents = { ...parents };
+                        const wasExpanded = updatedParents[previousName];
+                        delete updatedParents[previousName];
+                        updatedParents[newValue] = wasExpanded;
+                        next[catKey] = updatedParents;
+                    } else {
+                        next[catKey] = parents;
+                    }
+                });
+                return changed ? next : prev;
+            });
+            onParentRename?.(previousName, newValue);
+            setEditingParent({ category, parent: newValue });
+            setTimeout(() => {
+                cancelParentEdit();
+            }, 1200);
+        } catch (error) {
+            setParentRenameError((error as Error).message);
+            setParentRenameSuccess(null);
+        } finally {
+            setParentRenameLoading(false);
+        }
     };
 
     // Function to get category description based on category name
@@ -407,17 +504,82 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                         >
                                                             {expandedParents[category]?.[parent] ? <IoChevronDown /> : <IoChevronForward />}
                                                         </span>
-                                                        <span
-                                                            className="cursor-pointer font-semibold text-gray-800 dark:text-gray-100"
-                                                            onClick={() => handleToggleParent(category, parent)}
-                                                        >
-                                                            {parent}
-                                                        </span>
-                                                    </div>
+                                                    <span
+                                                        className="cursor-pointer font-semibold text-gray-800 dark:text-gray-100"
+                                                        onClick={() => handleToggleParent(category, parent)}
+                                                    >
+                                                        {parent}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        className="ml-2 text-gray-400 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                                        title="Ubah nama sumber"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            startEditParent(category, parent);
+                                                        }}
+                                                    >
+                                                        <MdOutlineEdit />
+                                                    </button>
+                                                </div>
 
-                                                    {/* Children Level */}
-                                                    {expandedParents[category]?.[parent] && filteredChildren.length > 0 && (
-                                                        <div className="mt-2 ml-6">
+                                                {editingParent?.category === category && editingParent.parent === parent && (
+                                                    <form
+                                                        className="mt-2 rounded-md border border-dashed border-blue-300 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-900/10"
+                                                        onSubmit={handleParentRenameSubmit}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <label
+                                                            htmlFor="parent-rename-input"
+                                                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-200"
+                                                        >
+                                                            Nama Baru
+                                                        </label>
+                                                        <input
+                                                            id="parent-rename-input"
+                                                            type="text"
+                                                            value={parentRenameValue}
+                                                            onChange={(e) => {
+                                                                setParentRenameValue(e.target.value);
+                                                                setParentRenameError(null);
+                                                                setParentRenameSuccess(null);
+                                                            }}
+                                                            className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-gray-600 dark:bg-[#1c1c21]"
+                                                            placeholder="Masukkan nama sumber baru"
+                                                            autoFocus
+                                                            disabled={parentRenameLoading}
+                                                        />
+                                                        <div className="mt-2 flex gap-2">
+                                                            <button
+                                                                type="submit"
+                                                                className="flex-1 rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+                                                                disabled={parentRenameLoading}
+                                                            >
+                                                                {parentRenameLoading ? 'Menyimpan...' : 'Simpan'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="flex-1 rounded border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700/40"
+                                                                onClick={cancelParentEdit}
+                                                                disabled={parentRenameLoading}
+                                                            >
+                                                                Batal
+                                                            </button>
+                                                        </div>
+                                                        {parentRenameError && (
+                                                            <p className="mt-2 text-xs text-red-600 dark:text-red-400">{parentRenameError}</p>
+                                                        )}
+                                                        {parentRenameSuccess && (
+                                                            <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+                                                                {parentRenameSuccess}
+                                                            </p>
+                                                        )}
+                                                    </form>
+                                                )}
+
+                                                {/* Children Level */}
+                                                {expandedParents[category]?.[parent] && filteredChildren.length > 0 && (
+                                                    <div className="mt-2 ml-6">
                                                             <table className="min-w-full rounded border bg-gray-50 text-xs dark:border-[#393e41] dark:bg-[#232329]">
                                                                 <thead>
                                                                     <tr>

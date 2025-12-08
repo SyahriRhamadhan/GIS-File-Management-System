@@ -95,6 +95,47 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (..
     };
 }
 
+const renameParentKey = <T,>(
+    state: Record<string, Record<string, T>>,
+    oldName: string,
+    newName: string
+): Record<string, Record<string, T>> => {
+    let changed = false;
+    const next: Record<string, Record<string, T>> = {};
+    Object.entries(state || {}).forEach(([category, parents]) => {
+        if (parents && Object.prototype.hasOwnProperty.call(parents, oldName)) {
+            changed = true;
+            const updatedParents = { ...parents };
+            updatedParents[newName] = updatedParents[oldName];
+            delete updatedParents[oldName];
+            next[category] = updatedParents;
+        } else {
+            next[category] = parents;
+        }
+    });
+    return changed ? next : state;
+};
+
+const replaceParentSegmentInKey = (key: string, oldName: string, newName: string) => {
+    const needle = `-${oldName}-`;
+    if (!key.includes(needle)) return key;
+    return key.replace(needle, `-${newName}-`);
+};
+
+const renameLayerKeyCollection = (record: Record<string, string>, oldName: string, newName: string) => {
+    let changed = false;
+    const next: Record<string, string> = {};
+    Object.entries(record || {}).forEach(([key, value]) => {
+        if (key.includes(`-${oldName}-`)) {
+            changed = true;
+            next[replaceParentSegmentInKey(key, oldName, newName)] = value;
+        } else {
+            next[key] = value;
+        }
+    });
+    return { changed, next };
+};
+
 interface MapViewProps {
     geojsonData: Array<{
         id_geojson: number | string;
@@ -253,12 +294,11 @@ const MapView: React.FC<MapViewProps> = ({
         }
     };
 
-    // Data sumber: gunakan props jika disediakan, jika tidak ambil via API lazy-load
-    const [data, setData] = useState<typeof geojsonData>(() => (Array.isArray(geojsonData) ? geojsonData : []));
+    // Data sumber dapat dimodifikasi lokal (misal rename source_name) tanpa reload
+    const [sourceData, setSourceData] = useState<typeof geojsonData>(() => (Array.isArray(geojsonData) ? geojsonData : []));
     useEffect(() => {
-        setData(Array.isArray(geojsonData) ? geojsonData : []);
+        setSourceData(Array.isArray(geojsonData) ? geojsonData : []);
     }, [geojsonData]);
-    const sourceData = useMemo(() => (Array.isArray(geojsonData) && geojsonData.length ? geojsonData : data), [geojsonData, data]);
 
     // Sort & Group data
     const sortedData = useMemo(() => {
@@ -703,6 +743,31 @@ const MapView: React.FC<MapViewProps> = ({
             applyLayerColor(key, color ?? base);
         },
         [applyLayerColor]
+    );
+
+    const handleParentRenameStateUpdate = useCallback(
+        (oldName: string, newName: string) => {
+            if (!oldName || !newName || oldName === newName) return;
+            setSourceData((prev) =>
+                prev.map((item) => (item.source_name === oldName ? { ...item, source_name: newName } : item))
+            );
+            setActiveParentFilters((prev) => renameParentKey(prev, oldName, newName));
+            setActiveChildFilters((prev) => renameParentKey(prev, oldName, newName));
+            setLayerOrder((prev) => {
+                const needle = `-${oldName}-`;
+                if (!prev.some((key) => key.includes(needle))) return prev;
+                return prev.map((key) => (key.includes(needle) ? replaceParentSegmentInKey(key, oldName, newName) : key));
+            });
+            setCustomColors((prev) => {
+                const { changed, next } = renameLayerKeyCollection(prev, oldName, newName);
+                return changed ? next : prev;
+            });
+            const renamedPreview = renameLayerKeyCollection(previewColorsRef.current, oldName, newName);
+            if (renamedPreview.changed) {
+                previewColorsRef.current = renamedPreview.next;
+            }
+        },
+        [setSourceData, setActiveParentFilters, setActiveChildFilters, setLayerOrder, setCustomColors, previewColorsRef]
     );
 
     const applyLayerOrder = useCallback(
@@ -1244,11 +1309,7 @@ const MapView: React.FC<MapViewProps> = ({
 
     // Handler for View (fly to location) - updated for three-level hierarchy
     const handleViewLocation = (category: string, parent: string, childId: string) => {
-        // Cari item terutama berdasarkan id (paling andal). Parent dipakai sebagai verifikasi tambahan.
-        const item =
-            geojsonData.find(
-                (i) => String(i.id_geojson) === String(childId) && (!parent || i.source_name === parent)
-            ) || geojsonData.find((i) => String(i.id_geojson) === String(childId));
+        const item = geojsonLookup.get(String(childId));
 
         if (!item || !mapRef.current) return;
 
@@ -1424,6 +1485,7 @@ const MapView: React.FC<MapViewProps> = ({
                 outlineHidden={outlineHidden}
                 onFillOpacityChange={(v) => setFillOpacity(v)}
                 onOutlineHiddenChange={(h) => setOutlineHidden(h)}
+                onParentRename={handleParentRenameStateUpdate}
             />
         </div>
     );

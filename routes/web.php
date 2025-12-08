@@ -155,6 +155,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/api/geojson/{id}/data', [GeojsonController::class, 'getGeojsonData'])->name('geojson.data');
         // Update only properties from popup/editor
         Route::put('/geojson/{id}/properties', [GeojsonController::class, 'updateProperties'])->name('geojson.properties.update');
+        // Rename parent/source_name grouping
+        Route::put('/geojson/source-groups/rename', [GeojsonController::class, 'renameSourceGroup'])->name('geojson.source-groups.rename');
         // Sync storage files to DB
         Route::get('/geojson/sync-storage', [GeojsonController::class, 'syncStorage'])->name('geojson.sync_storage');
 
