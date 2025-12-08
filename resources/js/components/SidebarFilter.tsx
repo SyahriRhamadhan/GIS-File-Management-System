@@ -30,6 +30,7 @@ interface SidebarFilterProps {
     onFillOpacityChange: (value: number) => void;
     onOutlineHiddenChange: (hidden: boolean) => void;
     onParentRename?: (oldParent: string, newParent: string) => void;
+    readOnly?: boolean;
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -59,6 +60,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     onFillOpacityChange,
     onOutlineHiddenChange,
     onParentRename,
+    readOnly = false,
 }) => {
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
     const [expandedParents, setExpandedParents] = useState<Record<string, Record<string, boolean>>>({});
@@ -103,6 +105,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     };
 
     const startEditParent = (category: string, parent: string) => {
+        if (readOnly) return;
         setEditingParent({ category, parent });
         setParentRenameValue(parent);
         setParentRenameError(null);
@@ -510,20 +513,22 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                     >
                                                         {parent}
                                                     </span>
-                                                    <button
-                                                        type="button"
-                                                        className="ml-2 text-gray-400 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                                                        title="Ubah nama sumber"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            startEditParent(category, parent);
-                                                        }}
-                                                    >
-                                                        <MdOutlineEdit />
-                                                    </button>
+                                                    {!readOnly && (
+                                                        <button
+                                                            type="button"
+                                                            className="ml-2 text-gray-400 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                                            title="Ubah nama sumber"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                startEditParent(category, parent);
+                                                            }}
+                                                        >
+                                                            <MdOutlineEdit />
+                                                        </button>
+                                                    )}
                                                 </div>
 
-                                                {editingParent?.category === category && editingParent.parent === parent && (
+                                                {!readOnly && editingParent?.category === category && editingParent.parent === parent && (
                                                     <form
                                                         className="mt-2 rounded-md border border-dashed border-blue-300 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-900/10"
                                                         onSubmit={handleParentRenameSubmit}

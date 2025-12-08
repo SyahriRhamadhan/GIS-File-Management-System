@@ -1486,6 +1486,7 @@ const MapView: React.FC<MapViewProps> = ({
                 onFillOpacityChange={(v) => setFillOpacity(v)}
                 onOutlineHiddenChange={(h) => setOutlineHidden(h)}
                 onParentRename={handleParentRenameStateUpdate}
+                readOnly={readOnly}
             />
         </div>
     );
