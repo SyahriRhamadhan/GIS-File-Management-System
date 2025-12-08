@@ -138,9 +138,31 @@ export default function GeojsonIndex() {
     const lastPage = geojsons.last_page;
     const total = geojsons.total;
 
-    const handleView = (g: Geojson) => {
-        setSelectedGeojson(g);
-        setIsModalOpen(true);
+    const handleView = async (g: Geojson) => {
+        try {
+            // Always fetch the hydrated GeoJSON to avoid invalid placeholder objects
+            const response = await fetch(`/dashboard/api/geojson/${g.id_geojson}/data`, {
+                headers: { Accept: 'application/json' },
+            });
+            if (!response.ok) {
+                throw new Error('Gagal memuat data GeoJSON.');
+            }
+            const payload = await response.json();
+            let parsedGeojson = payload.geojson;
+            if (typeof parsedGeojson === 'string') {
+                try {
+                    parsedGeojson = JSON.parse(parsedGeojson);
+                } catch (err) {
+                    console.error('Failed to parse GeoJSON string', err);
+                }
+            }
+            setSelectedGeojson({ ...g, geojson: parsedGeojson });
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching GeoJSON data:', error);
+            toast.error('Gagal membuka preview GeoJSON');
+            setIsModalOpen(false);
+        }
     };
 
     const handleDelete = (id: number) => {
@@ -225,12 +247,25 @@ export default function GeojsonIndex() {
         setShowBulkModal(true);
     };
     const confirmBulkDelete = () => {
-        Promise.all(selectedIds.map((id) => router.delete(`/dashboard/geojson/${id}`, { preserveScroll: true }))).then(() => {
-            toast.success('Items terhapus');
-            setSelectedIds([]);
-            navigateWithFilters({ page: 1 });
-            setShowBulkModal(false);
-        });
+        if (!selectedIds.length) return;
+        const idsToDelete = [...selectedIds];
+
+        router.post(
+            '/dashboard/geojson/bulk-delete',
+            { ids: idsToDelete },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(`${idsToDelete.length} GeoJSON terhapus`);
+                    setSelectedIds([]);
+                    navigateWithFilters({ page: 1 });
+                    setShowBulkModal(false);
+                },
+                onError: () => {
+                    toast.error('Gagal menghapus beberapa GeoJSON. Coba lagi.');
+                },
+            }
+        );
     };
 
     // Clear all filters function

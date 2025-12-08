@@ -32,6 +32,26 @@ class KategoriSeeder extends Seeder
         ],
         [
             'nama' => 'Kawasan Lindung',
+            'orde1' => 'Kawasan Sumber Daya Air',
+            'orde2' => null,
+            'orde3' => null,
+            'orde4' => null,
+            'kode' => 'KSBA',
+            'rgb' => [151, 219, 242],
+            'ket_warna' => 'Biru muda',
+        ],
+        [
+            'nama' => 'Kawasan Lindung',
+            'orde1' => 'Sungai',
+            'orde2' => null,
+            'orde3' => null,
+            'orde4' => null,
+            'kode' => 'SUNGAI',
+            'rgb' => [151, 219, 242],
+            'ket_warna' => 'Biru muda',
+        ],
+        [
+            'nama' => 'Kawasan Lindung',
             'orde1' => 'Kawasan yang Memberikan Perlindungan terhadap Kawasan Bawahannya **',
             'orde2' => null,
             'orde3' => null,
@@ -312,7 +332,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [45, 150, 110],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Hutan Produksi',
             'orde2' => 'Kawasan Hutan Produksi Terbatas',
             'orde3' => '',
@@ -321,7 +341,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [75, 155, 55],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Hutan Produksi',
             'orde2' => 'Kawasan Hutan Produksi Tetap',
             'orde3' => '',
@@ -330,7 +350,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [125, 180, 55],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Hutan Produksi',
             'orde2' => 'Kawasan Hutan Produksi yang dapat Dikonversi',
             'orde3' => '',
@@ -339,7 +359,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [155, 225, 55],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Perkebunan Rakyat',
             'orde2' => '',
             'orde3' => '',
@@ -348,7 +368,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [155, 200, 155],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertanian',
             'orde2' => 'Kawasan Tanaman Pangan',
             'orde3' => '',
@@ -357,7 +377,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [200, 245, 70],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertanian',
             'orde2' => 'Kawasan Hortikultura',
             'orde3' => '',
@@ -366,7 +386,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [230, 255, 75],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertanian',
             'orde2' => 'Kawasan Perkebunan',
             'orde3' => '',
@@ -375,7 +395,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [175, 175, 55],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertanian',
             'orde2' => 'Kawasan Peternakan',
             'orde3' => '',
@@ -384,7 +404,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [185, 235, 185],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Perikanan',
             'orde2' => 'Kawasan Perikanan Tangkap',
             'orde3' => '',
@@ -393,7 +413,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [100, 155, 210],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Perikanan',
             'orde2' => 'Kawasan Perikanan Budidaya',
             'orde3' => '',
@@ -402,7 +422,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [130, 185, 210],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pergaraman',
             'orde2' => '',
             'orde3' => '',
@@ -411,7 +431,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [180, 150, 120],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertambangan dan Energi',
             'orde2' => 'Kawasan Pertambangan Mineral',
             'orde3' => 'Kawasan Pertambangan Mineral Radioaktif',
@@ -420,7 +440,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [25, 45, 75],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertambangan dan Energi',
             'orde2' => 'Kawasan Pertambangan Mineral',
             'orde3' => 'Kawasan Pertambangan Mineral Logam',
@@ -429,7 +449,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [45, 65, 95],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertambangan dan Energi',
             'orde2' => 'Kawasan Pertambangan Mineral',
             'orde3' => 'Kawasan Pertambangan Mineral Bukan Logam',
@@ -438,7 +458,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [65, 85, 115],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertambangan dan Energi',
             'orde2' => 'Kawasan Pertambangan Mineral',
             'orde3' => 'Kawasan Pertambangan Batuan',
@@ -447,7 +467,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [95, 115, 145],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertambangan dan Energi',
             'orde2' => 'Kawasan Pertambangan Batubara',
             'orde3' => '',
@@ -456,7 +476,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [125, 145, 175],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertambangan dan Energi',
             'orde2' => 'Kawasan Pertambangan Minyak dan Gas Bumi',
             'orde3' => '',
@@ -465,7 +485,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [155, 175, 205],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertambangan dan Energi',
             'orde2' => 'Kawasan Panas Bumi',
             'orde3' => '',
@@ -474,7 +494,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [205, 0, 0],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertambangan dan Energi',
             'orde2' => 'Kawasan Pembangkit Tenaga Listrik',
             'orde3' => '',
@@ -483,7 +503,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [0, 255, 205],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Permukiman',
             'orde2' => 'Kawasan Permukiman Perkotaan',
             'orde3' => '',
@@ -492,7 +512,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [245, 155, 30],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Permukiman',
             'orde2' => 'Kawasan Permukiman Perdesaan',
             'orde3' => '',
@@ -501,7 +521,25 @@ class KategoriSeeder extends Seeder
             'rgb'   => [235, 155, 60],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
+            'orde1' => 'Kawasan Pariwisata',
+            'orde2' => '',
+            'orde3' => '',
+            'orde4' => '',
+            'kode'  => 'W',
+            'rgb'   => [255, 165, 255],
+        ],
+        [
+            'nama'  => 'Kawasan Budidaya',
+            'orde1' => 'Kawasan Industri',
+            'orde2' => '',
+            'orde3' => '',
+            'orde4' => '',
+            'kode'  => 'KI',
+            'rgb'   => [105, 0, 0],
+        ],
+        [
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Transportasi',
             'orde2' => '',
             'orde3' => '',
@@ -510,7 +548,7 @@ class KategoriSeeder extends Seeder
             'rgb'   => [215, 55, 0],
         ],
         [
-            'nama'  => 'Kawasan Budi Daya',
+            'nama'  => 'Kawasan Budidaya',
             'orde1' => 'Kawasan Pertahanan dan Keamanan',
             'orde2' => '',
             'orde3' => '',

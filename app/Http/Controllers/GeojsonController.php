@@ -554,6 +554,31 @@ class GeojsonController extends Controller
     }
 
     /**
+     * Delete multiple GeoJSON records in one request.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', 'exists:geojson,id_geojson'],
+        ]);
+
+        $ids = array_unique($validated['ids']);
+        $deleted = Geojson::whereIn('id_geojson', $ids)->delete();
+
+        if ($request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'deleted' => $deleted,
+                'ids' => $ids,
+            ]);
+        }
+
+        return redirect()
+            ->route('dashboard.geojson.index')
+            ->with('success', "{$deleted} GeoJSON berhasil dihapus.");
+    }
+
+    /**
      * Update only the properties object inside stored GeoJSON.
      * Accepts: { properties: { key: value, ... } }
      * Returns JSON on API calls, or redirects back with flash on web calls.

@@ -1,8 +1,65 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { IoClose } from 'react-icons/io5';
 import { GeoJSON, MapContainer, TileLayer, useMap } from 'react-leaflet';
+import type { Feature, FeatureCollection, GeoJsonObject, Geometry } from 'geojson';
+
+/**
+ * Ensure any incoming payload becomes a valid GeoJSON object for Leaflet.
+ */
+function normalizeGeojsonData(input: any): GeoJsonObject | null {
+    if (!input) return null;
+
+    let data = input;
+    if (typeof data === 'string') {
+        try {
+            data = JSON.parse(data);
+        } catch (error) {
+            console.error('Invalid GeoJSON string passed to Modal:', error);
+            return null;
+        }
+    }
+
+    if (data.type === 'FeatureCollection' && Array.isArray(data.features)) {
+        return data as FeatureCollection;
+    }
+
+    if (data.type === 'Feature' && data.geometry) {
+        return {
+            type: 'FeatureCollection',
+            features: [data as Feature],
+        };
+    }
+
+    if (data.type && data.coordinates) {
+        return {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    geometry: data as Geometry,
+                    properties: {},
+                },
+            ],
+        };
+    }
+
+    if (data.geometry) {
+        return {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    geometry: data.geometry as Geometry,
+                    properties: data.properties ?? {},
+                },
+            ],
+        };
+    }
+
+    return null;
+}
 
 function FitToBounds({ data }: { data: any }) {
     const map = useMap();
@@ -23,6 +80,10 @@ function FitToBounds({ data }: { data: any }) {
 export default function Modal({ geojson, onClose }: { geojson: any; onClose: () => void }) {
     const [centre] = useState<[number, number]>([1.0, 104.521117]);
     const MAX_VISIBLE_PROPERTIES = 8;
+    const normalizedGeojson = useMemo(
+        () => normalizeGeojsonData(geojson?.geojson ?? geojson),
+        [geojson]
+    );
 
     const onEachFeature = (feature: any, layer: L.Layer) => {
         if (feature.properties) {
@@ -66,10 +127,10 @@ export default function Modal({ geojson, onClose }: { geojson: any; onClose: () 
                     <MapContainer className="h-full w-full" center={centre} zoom={11} scrollWheelZoom>
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-                        {geojson?.geojson && (
+                        {normalizedGeojson && (
                             <>
-                                <GeoJSON data={geojson.geojson} onEachFeature={onEachFeature} />
-                                <FitToBounds data={geojson.geojson} />
+                                <GeoJSON data={normalizedGeojson} onEachFeature={onEachFeature} />
+                                <FitToBounds data={normalizedGeojson} />
                             </>
                         )}
                     </MapContainer>

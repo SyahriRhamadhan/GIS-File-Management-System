@@ -148,6 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/geojson', [GeojsonController::class, 'index'])->name('geojson.index');
         Route::get('/geojson/create', [GeojsonController::class, 'create'])->name('geojson.create');
         Route::post('/geojson', [GeojsonController::class, 'store'])->name('geojson.store');
+        Route::post('/geojson/bulk-delete', [GeojsonController::class, 'bulkDelete'])->name('geojson.bulk-delete');
         Route::get('/geojson/{id}/edit', [GeojsonController::class, 'edit'])->name('geojson.edit');
         Route::put('/geojson/{id}', [GeojsonController::class, 'update'])->name('geojson.update');
         Route::delete('/geojson/{id}', [GeojsonController::class, 'destroy'])->name('geojson.destroy');
