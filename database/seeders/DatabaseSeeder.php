@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             OwnerSeeder::class,
             KategoriSeeder::class,
             PewarnaanRdtrSeeder::class,
+            GeojsonRekomSeeder::class,
         ]);
     }
 }
