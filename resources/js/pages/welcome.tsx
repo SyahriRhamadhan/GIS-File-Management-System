@@ -3,6 +3,8 @@ import MapView from '@/components/MapView';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Geometry } from 'geojson';
 
+const PUBLIC_FILTER_PER_PAGE_OPTIONS = [150, 500, 1000, 1500, 3000, 5000];
+
 const Welcome = ({
     geojsons,
 }: {
@@ -40,8 +42,18 @@ const Welcome = ({
                 : [],
         [geojsons]
     );
-    const [publicData, setPublicData] = useState<typeof baseData>([]);
+    const [geojsonMeta, setGeojsonMeta] = useState<typeof baseData>(baseData);
+    const [isMetaLoading, setIsMetaLoading] = useState(baseData.length === 0);
+    const [filterSearch, setFilterSearch] = useState('');
+    const [perPage, setPerPage] = useState(PUBLIC_FILTER_PER_PAGE_OPTIONS[0]);
+    const [filterPagination, setFilterPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        per_page: perPage,
+        total: baseData.length,
+    });
     const mountedRef = useRef(true);
+    const isFetchingMetaRef = useRef(false);
 
     useEffect(() => {
         return () => {
@@ -49,46 +61,87 @@ const Welcome = ({
         };
     }, []);
 
-    useEffect(() => {
-        const fetchMetadata = async () => {
-            try {
-                const perPage = 300;
-                let page = 1;
-                const aggregated: any[] = [];
-                let keepFetching = true;
-                while (keepFetching) {
-                    const res = await fetch(`/api/public/geojsons?mode=meta&per_page=${perPage}&page=${page}`);
-                    if (!res.ok) break;
-                    const json = await res.json();
-                    const items = Array.isArray(json?.data) ? json.data : [];
-                    aggregated.push(...items);
-                    const meta = json?.meta ?? {};
-                    const current = meta.current_page ?? page;
-                    const last = meta.last_page ?? current;
-                    if (!meta.last_page || current >= last) {
-                        keepFetching = false;
-                    } else {
-                        page = current + 1;
-                    }
-                }
-                if (mountedRef.current && aggregated.length > 0) {
-                    const normalized = aggregated.map((item: any) => ({
-                        id_geojson: item.id_geojson,
-                        source_name: item.source_name,
-                        main_category: item.main_category,
-                        kategori: item.kategori ?? undefined,
-                        geojson: item.geojson,
-                        geojson_bbox: item.geojson_bbox ?? null,
-                        kode_warna: item.kode_warna ?? '#3388ff',
-                    })) as typeof baseData;
-                    setPublicData(normalized);
-                }
-            } catch {
-                // ignore
+    const fetchMetadataPage = useCallback(
+        async (page: number = 1, searchValue: string = filterSearch, perPageOverride?: number) => {
+            if (isFetchingMetaRef.current) return;
+            const effectivePerPage = perPageOverride ?? perPage;
+            isFetchingMetaRef.current = true;
+            if (mountedRef.current) {
+                setIsMetaLoading(true);
             }
-        };
-        fetchMetadata();
+            try {
+                const params = new URLSearchParams({
+                    mode: 'meta',
+                    per_page: effectivePerPage.toString(),
+                    page: page.toString(),
+                });
+                if (searchValue.trim() !== '') {
+                    params.set('search', searchValue.trim());
+                }
+                const res = await fetch(`/api/public/geojsons?${params.toString()}`);
+                if (!res.ok) {
+                    throw new Error('Gagal memuat data peta.');
+                }
+                const payload = await res.json();
+                const items = Array.isArray(payload?.data) ? payload.data : [];
+                const meta = payload?.meta ?? {};
+                if (mountedRef.current) {
+                    setGeojsonMeta(items);
+                    setFilterPagination({
+                        current_page: meta.current_page ?? page,
+                        last_page: meta.last_page ?? page,
+                        per_page: meta.per_page ?? effectivePerPage,
+                        total: meta.total ?? items.length,
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                if (mountedRef.current) {
+                    setIsMetaLoading(false);
+                }
+                isFetchingMetaRef.current = false;
+            }
+        },
+        [filterSearch, perPage]
+    );
+
+    useEffect(() => {
+        fetchMetadataPage(1);
+    }, [fetchMetadataPage]);
+
+    const handleSearchChange = useCallback((value: string) => {
+        setFilterSearch(value);
+        setFilterPagination((prev) => ({
+            ...prev,
+            current_page: 1,
+        }));
     }, []);
+
+    const handleFilterPageChange = useCallback(
+        (page: number) => {
+            if (page < 1 || page > filterPagination.last_page) {
+                return;
+            }
+            fetchMetadataPage(page);
+        },
+        [fetchMetadataPage, filterPagination.last_page]
+    );
+
+    const handleFilterPerPageChange = useCallback(
+        (value: number) => {
+            if (value === perPage) {
+                return;
+            }
+            setPerPage(value);
+            setFilterPagination((prev) => ({
+                ...prev,
+                current_page: 1,
+                per_page: value,
+            }));
+        },
+        [perPage]
+    );
 
     const fetchGeojsonBatch = useCallback(async (ids: Array<string | number>) => {
         if (!ids || ids.length === 0) return {};
@@ -109,7 +162,21 @@ const Welcome = ({
         }
     }, []);
 
-    const geojsonData = publicData.length > 0 ? publicData : baseData;
+    const geojsonData = geojsonMeta;
+
+    const sharedMapProps = {
+        geojsonData,
+        readOnly: true,
+        showLayerControls: true,
+        fetchGeojsonBatch,
+        filterSearch,
+        onFilterSearch: handleSearchChange,
+        filterPagination,
+        onFilterPageChange: handleFilterPageChange,
+        filterPerPageOptions: PUBLIC_FILTER_PER_PAGE_OPTIONS,
+        onFilterPerPageChange: handleFilterPerPageChange,
+        isMetaLoading,
+    };
 
     if (isFullscreen) {
         return (
@@ -119,7 +186,7 @@ const Welcome = ({
                     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
                 </Head>
                 <div className="min-h-screen bg-black">
-                    <MapView geojsonData={geojsonData} readOnly showLayerControls fetchGeojsonBatch={fetchGeojsonBatch} />
+                    <MapView {...sharedMapProps} />
                 </div>
             </>
         );
@@ -189,7 +256,7 @@ const Welcome = ({
                 <section className="px-4 pb-8">
                     <div className="mx-auto max-w-6xl rounded-lg bg-white p-2 shadow">
                         <div className="h-[80vh] overflow-hidden rounded-md border">
-                            <MapView geojsonData={geojsonData} readOnly showLayerControls fetchGeojsonBatch={fetchGeojsonBatch} />
+                            <MapView {...sharedMapProps} />
                         </div>
                     </div>
                 </section>

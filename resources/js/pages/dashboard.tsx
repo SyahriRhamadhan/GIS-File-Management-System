@@ -1,17 +1,14 @@
 import MapView from '@/components/MapView';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
-    BarChart, Bar, XAxis, YAxis, CartesianGrid,
-    LineChart, Line,
-    AreaChart, Area
-} from 'recharts';
-import { Map, Layers, Users, FileText, Building2, FolderTree, BarChart3 } from 'lucide-react';
+import { BarChart3, Building2, FileText, FolderTree, Layers, Map, Users } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+const FILTER_PER_PAGE_OPTIONS = [150, 500, 1000, 1500, 3000, 5000];
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -64,7 +61,7 @@ const Dashboard = ({
     timeline,
     topUsers,
     reportBySifat,
-    recentGeojsons
+    recentGeojsons,
 }: DashboardProps) => {
     const [activeTab, setActiveTab] = useState('statistics');
     const initialGeojsons = useMemo(() => (Array.isArray(geojsons) ? geojsons : []), [geojsons]);
@@ -73,10 +70,13 @@ const Dashboard = ({
     const [metaError, setMetaError] = useState<string | null>(null);
     const isMountedRef = useRef(true);
     const isFetchingMetaRef = useRef(false);
-    const autoFetchTriggeredRef = useRef(false);
-    const [metaProgress, setMetaProgress] = useState<{ loaded: number; total: number | null }>({
-        loaded: initialGeojsons.length,
-        total: null,
+    const [perPage, setPerPage] = useState(FILTER_PER_PAGE_OPTIONS[0]);
+    const [filterSearch, setFilterSearch] = useState('');
+    const [filterPagination, setFilterPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        per_page: perPage,
+        total: 0,
     });
 
     useEffect(() => {
@@ -87,95 +87,107 @@ const Dashboard = ({
 
     useEffect(() => {
         if (initialGeojsons.length > 0) {
-            autoFetchTriggeredRef.current = false;
             setGeojsonMeta(initialGeojsons);
             setIsLoadingMeta(false);
             setMetaError(null);
+            setFilterPagination((prev) => ({
+                ...prev,
+                total: initialGeojsons.length,
+            }));
         }
     }, [initialGeojsons]);
 
-    const fetchMetadataPages = useCallback(async () => {
-        if (isFetchingMetaRef.current) return;
-        isFetchingMetaRef.current = true;
-        if (isMountedRef.current) {
-            setIsLoadingMeta(true);
-            setMetaError(null);
-            setGeojsonMeta([]);
-            setMetaProgress({ loaded: 0, total: null });
-        }
+    const fetchMetadataPage = useCallback(
+        async (page: number = 1, search: string = '', perPageOverride?: number) => {
+            const effectivePerPage = perPageOverride ?? perPage;
+            if (isFetchingMetaRef.current) return;
+            isFetchingMetaRef.current = true;
+            if (isMountedRef.current) {
+                setIsLoadingMeta(true);
+                setMetaError(null);
+                if (page === 1) {
+                    setGeojsonMeta([]);
+                }
+            }
 
-        try {
-            const perPage = 300;
-            let page = 1;
-            let keepFetching = true;
-            let expectedTotal: number | null = null;
-            const aggregated: any[] = [];
+            try {
+                const params = new URLSearchParams({
+                    mode: 'meta',
+                    per_page: effectivePerPage.toString(),
+                    page: page.toString(),
+                });
+                if (search.trim() !== '') {
+                    params.set('search', search.trim());
+                }
 
-            while (keepFetching) {
-                const response = await fetch(`/api/dashboard/geojsons?mode=meta&per_page=${perPage}&page=${page}`);
+                const response = await fetch(`/api/dashboard/geojsons?${params.toString()}`);
                 if (!response.ok) {
                     throw new Error('Gagal memuat metadata GeoJSON.');
                 }
                 const payload = await response.json();
                 const pageData = Array.isArray(payload?.data) ? payload.data : [];
                 const meta = payload?.meta ?? {};
-                aggregated.push(...pageData);
-
-                if (typeof meta.total === 'number') {
-                    expectedTotal = meta.total;
-                }
 
                 if (isMountedRef.current) {
-                    setGeojsonMeta(aggregated.slice());
-                    setMetaProgress({
-                        loaded: aggregated.length,
-                        total: expectedTotal,
+                    setGeojsonMeta(pageData);
+                    setFilterPagination({
+                        current_page: meta.current_page ?? page,
+                        last_page: meta.last_page ?? page,
+                        per_page: meta.per_page ?? effectivePerPage,
+                        total: meta.total ?? pageData.length,
                     });
+                    setMetaError(null);
                 }
-
-                const currentPage = meta.current_page ?? page;
-                const lastPage = meta.last_page ?? currentPage;
-                if (!meta.last_page || currentPage >= lastPage) {
-                    keepFetching = false;
-                } else {
-                    page = currentPage + 1;
+            } catch (error: any) {
+                console.error(error);
+                if (isMountedRef.current) {
+                    setGeojsonMeta([]);
+                    setMetaError(error?.message ?? 'Gagal memuat metadata GeoJSON.');
                 }
+            } finally {
+                if (isMountedRef.current) {
+                    setIsLoadingMeta(false);
+                }
+                isFetchingMetaRef.current = false;
             }
-
-            if (isMountedRef.current) {
-                setGeojsonMeta(aggregated);
-                setMetaError(null);
-            }
-        } catch (error: any) {
-            console.error(error);
-            if (isMountedRef.current) {
-                setGeojsonMeta([]);
-                setMetaError(error?.message ?? 'Gagal memuat metadata GeoJSON.');
-                setMetaProgress({ loaded: 0, total: null });
-            }
-        } finally {
-            if (isMountedRef.current) {
-                setIsLoadingMeta(false);
-            }
-            isFetchingMetaRef.current = false;
-        }
-    }, []);
+        },
+        [perPage],
+    );
 
     useEffect(() => {
-        if (initialGeojsons.length > 0) {
-            return;
-        }
-        if (autoFetchTriggeredRef.current) {
-            return;
-        }
-        autoFetchTriggeredRef.current = true;
-        fetchMetadataPages();
-    }, [initialGeojsons, fetchMetadataPages]);
+        fetchMetadataPage(1, filterSearch);
+    }, [fetchMetadataPage]);
 
-    const handleReloadGeojsons = () => {
-        autoFetchTriggeredRef.current = true;
-        fetchMetadataPages();
-    };
+    const handleSearchChange = useCallback(
+        (value: string) => {
+            setFilterSearch(value);
+            fetchMetadataPage(1, value);
+        },
+        [fetchMetadataPage],
+    );
+
+    const handleFilterPageChange = useCallback(
+        (page: number) => {
+            if (page < 1 || page > filterPagination.last_page) {
+                return;
+            }
+            fetchMetadataPage(page, filterSearch);
+        },
+        [fetchMetadataPage, filterPagination.last_page, filterSearch],
+    );
+
+    const handleReloadGeojsons = useCallback(() => {
+        fetchMetadataPage(filterPagination.current_page, filterSearch);
+    }, [fetchMetadataPage, filterPagination.current_page, filterSearch]);
+
+    const handleFilterPerPageChange = useCallback(
+        (value: number) => {
+            if (value === perPage) return;
+            setPerPage(value);
+            fetchMetadataPage(1, filterSearch, value);
+        },
+        [fetchMetadataPage, filterSearch, perPage],
+    );
 
     const fetchFullGeojsonBatch = useCallback(async (ids: Array<string | number>) => {
         if (!ids || ids.length === 0) return {};
@@ -201,35 +213,35 @@ const Dashboard = ({
     const categoryData = byCategory.map((item) => ({
         name: item.orde1,
         value: item.total,
-        color: item.kode_warna || '#3388ff'
+        color: item.kode_warna || '#3388ff',
     }));
 
     // Format owner type data
     const ownerTypeColors: Record<string, string> = {
-        'PT': '#0088FE',
-        'CV': '#00C49F',
+        PT: '#0088FE',
+        CV: '#00C49F',
         'Yayasan/Lembaga': '#FFBB28',
-        'Perorangan': '#FF8042'
+        Perorangan: '#FF8042',
     };
 
     const ownerTypeData = byOwnerType.map((item) => ({
         name: item.type,
         value: item.total,
-        color: ownerTypeColors[item.type] || '#8884D8'
+        color: ownerTypeColors[item.type] || '#8884D8',
     }));
 
     // Format sifat data
     const sifatColors: Record<string, string> = {
-        'Biasa': '#82CA9D',
-        'Penting': '#FFC658',
-        'Segera': '#FF8042',
-        'Rahasia': '#8884D8'
+        Biasa: '#82CA9D',
+        Penting: '#FFC658',
+        Segera: '#FF8042',
+        Rahasia: '#8884D8',
     };
 
     const sifatData = reportBySifat.map((item) => ({
         name: item.sifat,
         value: item.total,
-        color: sifatColors[item.sifat] || '#3388ff'
+        color: sifatColors[item.sifat] || '#3388ff',
     }));
 
     return (
@@ -253,68 +265,68 @@ const Dashboard = ({
                         {/* Statistics Cards */}
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
+                                <CardHeader className="m-3 flex flex-row items-center justify-between space-y-0">
                                     <CardTitle className="text-sm font-medium">Total Map SHP</CardTitle>
-                                    <Map className="h-4 w-4 text-muted-foreground" />
+                                    <Map className="text-muted-foreground h-4 w-4" />
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{stats.total_geojsons.toLocaleString()}</div>
-                                    <p className="text-xs text-muted-foreground">Fitur spasial dalam database</p>
+                                    <p className="text-muted-foreground text-xs">Fitur spasial dalam database</p>
                                 </CardContent>
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
+                                <CardHeader className="m-3 flex flex-row items-center justify-between space-y-0">
                                     <CardTitle className="text-sm font-medium">Total Kategori</CardTitle>
-                                    <Layers className="h-4 w-4 text-muted-foreground" />
+                                    <Layers className="text-muted-foreground h-4 w-4" />
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{stats.total_kategoris}</div>
-                                    <p className="text-xs text-muted-foreground">Kategori layer</p>
+                                    <p className="text-muted-foreground text-xs">Kategori layer</p>
                                 </CardContent>
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
+                                <CardHeader className="m-3 flex flex-row items-center justify-between space-y-0">
                                     <CardTitle className="text-sm font-medium">Total Wilayah</CardTitle>
-                                    <FolderTree className="h-4 w-4 text-muted-foreground" />
+                                    <FolderTree className="text-muted-foreground h-4 w-4" />
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{stats.total_regions}</div>
-                                    <p className="text-xs text-muted-foreground">Lokasi geografis</p>
+                                    <p className="text-muted-foreground text-xs">Lokasi geografis</p>
                                 </CardContent>
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
+                                <CardHeader className="m-3 flex flex-row items-center justify-between space-y-0">
                                     <CardTitle className="text-sm font-medium">Total Laporan PDF</CardTitle>
-                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                    <FileText className="text-muted-foreground h-4 w-4" />
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{stats.total_reports}</div>
-                                    <p className="text-xs text-muted-foreground">Dokumen yang dihasilkan</p>
+                                    <p className="text-muted-foreground text-xs">Dokumen yang dihasilkan</p>
                                 </CardContent>
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
+                                <CardHeader className="m-3 flex flex-row items-center justify-between space-y-0">
                                     <CardTitle className="text-sm font-medium">Total Pemilik</CardTitle>
-                                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                                    <Building2 className="text-muted-foreground h-4 w-4" />
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{stats.total_owners}</div>
-                                    <p className="text-xs text-muted-foreground">Pemilik lahan/sumber daya</p>
+                                    <p className="text-muted-foreground text-xs">Pemilik lahan/sumber daya</p>
                                 </CardContent>
                             </Card>
 
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 m-3">
+                                <CardHeader className="m-3 flex flex-row items-center justify-between space-y-0">
                                     <CardTitle className="text-sm font-medium">Total Pengguna</CardTitle>
-                                    <Users className="h-4 w-4 text-muted-foreground" />
+                                    <Users className="text-muted-foreground h-4 w-4" />
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{stats.total_users}</div>
-                                    <p className="text-xs text-muted-foreground">Pengguna sistem</p>
+                                    <p className="text-muted-foreground text-xs">Pengguna sistem</p>
                                 </CardContent>
                             </Card>
                         </div>
@@ -322,7 +334,7 @@ const Dashboard = ({
                         {/* Charts Row 1 */}
                         <div className="grid gap-4 md:grid-cols-2">
                             {/* Category Distribution */}
-                            <Card className='p-3'>
+                            <Card className="p-3">
                                 <CardHeader>
                                     <CardTitle>GeoJSON per Kategori</CardTitle>
                                     <CardDescription>Distribusi fitur berdasarkan kategori</CardDescription>
@@ -352,7 +364,7 @@ const Dashboard = ({
                             </Card>
 
                             {/* Regional Distribution */}
-                            <Card className='p-3'>
+                            <Card className="p-3">
                                 <CardHeader>
                                     <CardTitle>GeoJSON per Wilayah</CardTitle>
                                     <CardDescription>10 wilayah teratas berdasarkan jumlah fitur</CardDescription>
@@ -374,7 +386,7 @@ const Dashboard = ({
                         {/* Charts Row 2 */}
                         <div className="grid gap-4 md:grid-cols-2">
                             {/* Owner Type Distribution */}
-                            <Card className='p-3'>
+                            <Card className="p-3">
                                 <CardHeader>
                                     <CardTitle>GeoJSON per Tipe Pemilik</CardTitle>
                                     <CardDescription>Distribusi berdasarkan kategori kepemilikan</CardDescription>
@@ -398,7 +410,7 @@ const Dashboard = ({
 
                             {/* Report by Sifat */}
                             {sifatData.length > 0 && (
-                                <Card className='p-3'>
+                                <Card className="p-3">
                                     <CardHeader>
                                         <CardTitle>Laporan per Prioritas</CardTitle>
                                         <CardDescription>Distribusi dokumen berdasarkan tingkat urgensi</CardDescription>
@@ -431,7 +443,7 @@ const Dashboard = ({
 
                         {/* Timeline Chart */}
                         {timeline.length > 0 && (
-                            <Card className='p-3'>
+                            <Card className="p-3">
                                 <CardHeader>
                                     <CardTitle>Tren Pembuatan GeoJSON</CardTitle>
                                     <CardDescription>Fitur yang dibuat dalam 30 hari terakhir</CardDescription>
@@ -454,7 +466,7 @@ const Dashboard = ({
                         <div className="grid gap-4 md:grid-cols-2">
                             {/* Top Users */}
                             {topUsers.length > 0 && (
-                                <Card className='p-3'>
+                                <Card className="p-3">
                                     <CardHeader>
                                         <CardTitle>10 Kontributor Teratas</CardTitle>
                                         <CardDescription>Pengguna dengan fitur GeoJSON terbanyak</CardDescription>
@@ -462,14 +474,17 @@ const Dashboard = ({
                                     <CardContent>
                                         <div className="space-y-2">
                                             {topUsers.map((user, index) => (
-                                                <div key={index} className="flex items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                                                <div
+                                                    key={index}
+                                                    className="flex items-center justify-between rounded p-2 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                                >
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
                                                             {index + 1}
                                                         </div>
                                                         <span className="font-medium">{user.name}</span>
                                                     </div>
-                                                    <span className="text-sm text-muted-foreground">{user.total} fitur</span>
+                                                    <span className="text-muted-foreground text-sm">{user.total} fitur</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -478,7 +493,7 @@ const Dashboard = ({
                             )}
 
                             {/* Recent GeoJSON */}
-                            <Card className='p-3'>
+                            <Card className="p-3">
                                 <CardHeader>
                                     <CardTitle>GeoJSON Terbaru</CardTitle>
                                     <CardDescription>10 fitur terakhir yang ditambahkan</CardDescription>
@@ -490,14 +505,14 @@ const Dashboard = ({
                                                 <div className="flex items-start justify-between">
                                                     <div className="space-y-1">
                                                         <p className="text-sm font-medium">{item.source_name || `ID: ${item.id_geojson}`}</p>
-                                                        <div className="flex gap-2 text-xs text-muted-foreground">
+                                                        <div className="text-muted-foreground flex gap-2 text-xs">
                                                             <span className="rounded bg-blue-100 px-2 py-0.5 dark:bg-blue-900">{item.category}</span>
                                                             <span>{item.region}</span>
                                                         </div>
                                                     </div>
-                                                    <span className="text-xs text-muted-foreground">{item.created_at}</span>
+                                                    <span className="text-muted-foreground text-xs">{item.created_at}</span>
                                                 </div>
-                                                <p className="mt-1 text-xs text-muted-foreground">Oleh {item.user}</p>
+                                                <p className="text-muted-foreground mt-1 text-xs">Oleh {item.user}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -518,16 +533,19 @@ const Dashboard = ({
                                     <div className="relative h-full w-full">
                                         {(isLoadingMeta || metaError) && (
                                             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white/80 p-6 text-center">
-                                                <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
                                                 {isLoadingMeta && (
-                                                    <div className="text-sm text-gray-700">
-                                                        <p className="font-semibold">Menyiapkan data peta…</p>
-                                                        {metaProgress.total !== null && (
+                                                    <>
+                                                        <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
+                                                        <div className="text-sm text-gray-700">
+                                                            <p className="font-semibold">Menyiapkan data peta...</p>
                                                             <p className="mt-1 text-xs text-gray-500">
-                                                                {metaProgress.loaded.toLocaleString()} / {metaProgress.total.toLocaleString()} metadata
+                                                                Halaman {filterPagination.current_page} dari {filterPagination.last_page}
+                                                                {filterPagination.total > 0 && (
+                                                                    <> ? {filterPagination.total.toLocaleString()} hasil</>
+                                                                )}
                                                             </p>
-                                                        )}
-                                                    </div>
+                                                        </div>
+                                                    </>
                                                 )}
                                                 {metaError && (
                                                     <>
@@ -548,6 +566,13 @@ const Dashboard = ({
                                             geojsonData={geojsonMeta}
                                             initialVisibleIds={selectedIds ?? []}
                                             fetchGeojsonBatch={fetchFullGeojsonBatch}
+                                            filterSearch={filterSearch}
+                                            onFilterSearch={handleSearchChange}
+                                            filterPagination={filterPagination}
+                                            onFilterPageChange={handleFilterPageChange}
+                                            filterPerPageOptions={FILTER_PER_PAGE_OPTIONS}
+                                            onFilterPerPageChange={handleFilterPerPageChange}
+                                            isMetaLoading={isLoadingMeta}
                                         />
                                     </div>
                                 </div>

@@ -17,6 +17,7 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
+    private const FILTER_PER_PAGE_CHOICES = [150, 500, 1000, 1500, 3000, 5000];
     public function index(Request $request)
     {
         // Optional filter berdasarkan query param id atau ids (comma-separated)
@@ -75,7 +76,7 @@ class DashboardController extends Controller
                     return $geojson;
                 });
 
-            $rdtr = PewarnaanRdtr::select('kode','sub_zona','kode_warna','rgb')->get();
+            $rdtr = PewarnaanRdtr::select('kode', 'sub_zona', 'kode_warna', 'rgb')->get();
             $bySubZona = [];
             $byKode = [];
             foreach ($rdtr as $r) {
@@ -140,11 +141,11 @@ class DashboardController extends Controller
 
         // Geojsons by category (grouped by orde1, get color from most used kategori per orde1)
         $byCategory = Geojson::select(
-                'kategori.orde1',
-                'kategori.id_kategori',
-                'kategori.kode_warna',
-                DB::raw('COUNT(*) as total')
-            )
+            'kategori.orde1',
+            'kategori.id_kategori',
+            'kategori.kode_warna',
+            DB::raw('COUNT(*) as total')
+        )
             ->leftJoin('kategori', 'geojson.id_kategori', '=', 'kategori.id_kategori')
             ->groupBy('kategori.orde1', 'kategori.id_kategori', 'kategori.kode_warna')
             ->orderByDesc('total')
@@ -166,11 +167,11 @@ class DashboardController extends Controller
 
         // Geojsons by region (using name, kecamatan, or desa - whichever is filled)
         $byRegion = Geojson::select(
-                'region.name',
-                'region.kecamatan',
-                'region.desa',
-                DB::raw('COUNT(*) as total')
-            )
+            'region.name',
+            'region.kecamatan',
+            'region.desa',
+            DB::raw('COUNT(*) as total')
+        )
             ->leftJoin('region', 'geojson.id_region', '=', 'region.id_region')
             ->groupBy('region.name', 'region.kecamatan', 'region.desa')
             ->orderByDesc('total')
@@ -270,10 +271,11 @@ class DashboardController extends Controller
     public function getGeojsons(Request $request)
     {
         $mode = $request->query('mode', 'meta');
-        $perPage = (int) $request->query('per_page', 100);
+        $perPage = $this->resolvePerPage((int) $request->query('per_page', self::FILTER_PER_PAGE_CHOICES[0]));
         $categoryFilter = $request->query('category');
         $mainCategoryFilter = $request->query('main_category');
         $idsParam = $request->query('ids');
+        $search = trim((string) $request->query('search', ''));
 
         $query = Geojson::with('kategori');
 
@@ -291,6 +293,16 @@ class DashboardController extends Controller
             });
         }
 
+        if ($mode !== 'full' && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $like = '%' . $search . '%';
+                $q->where('geojson.source_name', 'ilike', $like)
+                    ->orWhere('geojson.main_category', 'ilike', $like)
+                    ->orWhereRaw('CAST(geojson.id_geojson AS TEXT) ilike ?', [$like])
+                    ->orWhereRaw('geojson.properties_snapshot::text ilike ?', [$like]);
+            });
+        }
+
         if ($mode === 'full') {
             $ids = $this->parseIds($idsParam);
             if (empty($ids)) {
@@ -302,7 +314,7 @@ class DashboardController extends Controller
             $geojsons = $query
                 ->whereIn('geojson.id_geojson', $ids)
                 ->get()
-                ->map(fn ($geojson) => $this->formatGeojsonForPayload($geojson, true));
+                ->map(fn($geojson) => $this->formatGeojsonForPayload($geojson, true));
 
             return response()->json([
                 'data' => $geojsons,
@@ -323,7 +335,7 @@ class DashboardController extends Controller
             ])
             ->paginate($perPage);
 
-        $collection = $result->getCollection()->map(fn ($geojson) => $this->formatGeojsonForPayload($geojson, false));
+        $collection = $result->getCollection()->map(fn($geojson) => $this->formatGeojsonForPayload($geojson, false));
         $result->setCollection($collection);
 
         return response()->json([
@@ -335,6 +347,25 @@ class DashboardController extends Controller
                 'total' => $result->total(),
             ],
         ]);
+    }
+
+    private function resolvePerPage(int $perPage): int
+    {
+        $min = min(self::FILTER_PER_PAGE_CHOICES);
+        $max = max(self::FILTER_PER_PAGE_CHOICES);
+
+        if ($perPage < $min) {
+            return $min;
+        }
+        if ($perPage > $max) {
+            return $max;
+        }
+
+        if (in_array($perPage, self::FILTER_PER_PAGE_CHOICES, true)) {
+            return $perPage;
+        }
+
+        return self::FILTER_PER_PAGE_CHOICES[0];
     }
 
     public function showGeojson(Request $request, Geojson $geojson)
@@ -401,16 +432,16 @@ class DashboardController extends Controller
     {
         if (is_array($idsParam)) {
             return collect($idsParam)
-                ->map(fn ($v) => (int) $v)
-                ->filter(fn ($v) => $v > 0)
+                ->map(fn($v) => (int) $v)
+                ->filter(fn($v) => $v > 0)
                 ->values()
                 ->all();
         }
 
         if (is_string($idsParam)) {
             return collect(explode(',', $idsParam))
-                ->map(fn ($v) => (int) trim($v))
-                ->filter(fn ($v) => $v > 0)
+                ->map(fn($v) => (int) trim($v))
+                ->filter(fn($v) => $v > 0)
                 ->values()
                 ->all();
         }
@@ -813,7 +844,7 @@ class DashboardController extends Controller
         return $cached;
     }
 
-                /**
+    /**
 
      * API endpoint to get minimal category/hierarchy data
 
@@ -872,10 +903,9 @@ class DashboardController extends Controller
                     'meta' => $meta,
 
                 ];
-
             })
 
-            ->groupBy(fn ($entry) => "{$entry['main_category']} - {$entry['category_name']}")
+            ->groupBy(fn($entry) => "{$entry['main_category']} - {$entry['category_name']}")
 
             ->map(function ($entries, $key) {
 
@@ -910,11 +940,9 @@ class DashboardController extends Controller
                             'kategori' => $entry['meta']['kategori'],
 
                         ];
-
                     })->values(),
 
                 ];
-
             })
 
             ->values();
@@ -922,7 +950,6 @@ class DashboardController extends Controller
 
 
         return response()->json(['data' => $categories]);
-
     }
 
 
@@ -943,25 +970,25 @@ class DashboardController extends Controller
 
         $categories = Kategori::select([
 
-                'id_kategori',
+            'id_kategori',
 
-                'orde0',
+            'orde0',
 
-                'orde1',
+            'orde1',
 
-                'orde2',
+            'orde2',
 
-                'orde3',
+            'orde3',
 
-                'orde4',
+            'orde4',
 
-                'kode',
+            'kode',
 
-                'kode_warna',
+            'kode_warna',
 
-                'layer_order',
+            'layer_order',
 
-            ])
+        ])
 
             ->orderBy('orde0')
 
@@ -994,12 +1021,11 @@ class DashboardController extends Controller
                     'display_name' => $this->resolveKategoriDisplayName($kategori),
 
                 ];
-
             })
 
             ->groupBy('orde0')
 
-            ->map(fn ($items, $orde0) => [
+            ->map(fn($items, $orde0) => [
 
                 'orde0' => $orde0,
 
@@ -1015,5 +1041,4 @@ class DashboardController extends Controller
             'data' => $categories,
         ]);
     }
-
 }

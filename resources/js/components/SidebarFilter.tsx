@@ -1,10 +1,9 @@
-import React, { memo, useMemo, useRef, useState } from 'react';
+import React, { memo, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 // Tree-shakeable icon imports for better bundle size
+import type { FeatureCollection, Geometry } from 'geojson';
 import { IoChevronDown, IoChevronForward, IoInformationCircleOutline } from 'react-icons/io5';
 import { MdOutlineEdit, MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
-import type { FeatureCollection, Geometry } from 'geojson';
-import shp from 'shpjs';
-import * as shpNamespace from 'shpjs';
+import shp, * as shpNamespace from 'shpjs';
 
 interface SidebarFilterProps {
     sidebarOpen: boolean;
@@ -38,6 +37,18 @@ interface SidebarFilterProps {
     onUserLayerClear?: () => void;
     userLayerSummary?: { fileName: string; featureCount: number } | null;
     onUserLayerBringToFront?: () => void;
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
+    pagination?: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    onPageChange?: (page: number) => void;
+    paginationPerPageOptions?: number[];
+    onPerPageChange?: (perPage: number) => void;
+    isPaginationLoading?: boolean;
 }
 
 const SidebarFilter: React.FC<SidebarFilterProps> = ({
@@ -72,10 +83,17 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     onUserLayerClear,
     userLayerSummary,
     onUserLayerBringToFront,
+    searchTerm,
+    onSearchChange,
+    pagination,
+    onPageChange,
+    paginationPerPageOptions,
+    onPerPageChange,
+    isPaginationLoading = false,
 }) => {
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
     const [expandedParents, setExpandedParents] = useState<Record<string, Record<string, boolean>>>({});
-    const [search, setSearch] = useState('');
+    const [searchInput, setSearchInput] = useState(searchTerm ?? '');
     const [coordX, setCoordX] = useState('');
     const [coordY, setCoordY] = useState('');
     const [showCategoryInfo, setShowCategoryInfo] = useState<Record<string, boolean>>({});
@@ -88,6 +106,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [uploadingUserLayer, setUploadingUserLayer] = useState(false);
     const [userLayerError, setUserLayerError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const checkboxBaseClass = 'size-[18px] shrink-0 rounded border border-gray-300 text-blue-600 focus:ring-blue-500';
     const parseShpFn = useMemo(() => {
         const fn = (shpNamespace as any).parseShp;
@@ -103,6 +122,16 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         }
         return fn as (buffer: ArrayBuffer, cpg?: ArrayBuffer | string) => Record<string, any>[];
     }, []);
+    const perPageOptions = useMemo(() => {
+        const fallback = [150, 500, 1000, 1500, 3000, 5000];
+        const raw = Array.isArray(paginationPerPageOptions) && paginationPerPageOptions.length > 0 ? paginationPerPageOptions : fallback;
+        const numeric = raw.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0);
+        const unique = Array.from(new Set(numeric));
+        if (pagination?.per_page && !unique.includes(pagination.per_page)) {
+            unique.push(pagination.per_page);
+        }
+        return unique.sort((a, b) => a - b);
+    }, [pagination?.per_page, paginationPerPageOptions]);
     const combineFn = useMemo(() => {
         const fn = (shpNamespace as any).combine;
         if (typeof fn !== 'function') {
@@ -114,6 +143,30 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         if (!category) return category;
         const [firstPart] = category.split('-');
         return (firstPart ?? category).trim();
+    };
+
+    useEffect(() => {
+        if (typeof searchTerm === 'string' && searchTerm !== searchInput) {
+            setSearchInput(searchTerm);
+        }
+    }, [searchTerm, searchInput]);
+
+    useEffect(() => {
+        return () => {
+            if (searchDebounceRef.current) {
+                clearTimeout(searchDebounceRef.current);
+            }
+        };
+    }, []);
+
+    const handleSearchInputChange = (value: string) => {
+        setSearchInput(value);
+        if (onSearchChange) {
+            if (searchDebounceRef.current) {
+                clearTimeout(searchDebounceRef.current);
+            }
+            searchDebounceRef.current = setTimeout(() => onSearchChange(value), 400);
+        }
     };
 
     const handleToggleCategory = (category: string) => {
@@ -380,13 +433,17 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
             ),
     );
 
+    const deferredSearch = useDeferredValue(searchInput);
+    const normalizedSearch = deferredSearch.trim().toLowerCase();
+
     // Filter categories based on search
     const filteredCategories = uniqueCategoryNames.filter((category) => {
-        if (category.toLowerCase().includes(search.toLowerCase())) return true;
+        if (normalizedSearch === '') return true;
+        if (category.toLowerCase().includes(normalizedSearch)) return true;
 
         return Object.entries(groupedByCategory[category] || {}).some(([parent, children]) => {
-            if (parent.toLowerCase().includes(search.toLowerCase())) return true;
-            return children.some((child) => child.label.toLowerCase().includes(search.toLowerCase()));
+            if (parent.toLowerCase().includes(normalizedSearch)) return true;
+            return children.some((child) => child.label.toLowerCase().includes(normalizedSearch));
         });
     });
 
@@ -432,12 +489,62 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                         {/* Search Bar */}
                         <input
                             type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            value={searchInput}
+                            onChange={(e) => handleSearchInputChange(e.target.value)}
                             className="w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-[#393e41] dark:bg-[#232329] dark:text-gray-100"
-                            placeholder="Cari layer atau label…"
+                            placeholder="Cari layer atau label?"
                         />
-
+                        {pagination && (
+                            <div className="w-full max-w-md text-xs text-gray-600 dark:text-gray-300">
+                                <div className="mb-2 flex items-center justify-between">
+                                    <button
+                                        type="button"
+                                        className="rounded border border-gray-300 px-2 py-1 transition hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800/60"
+                                        onClick={() => onPageChange?.(pagination.current_page - 1)}
+                                        disabled={!onPageChange || pagination.current_page <= 1 || isPaginationLoading}
+                                    >
+                                        Sebelumnya
+                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        {isPaginationLoading && (
+                                            <div className="h-3 w-3 animate-spin rounded-full border border-gray-300 border-t-blue-500" />
+                                        )}
+                                        <span>
+                                            Halaman {pagination.current_page} / {pagination.last_page}
+                                            {pagination.total > 0 && <> ? {pagination.total.toLocaleString()} items</>}
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="rounded border border-gray-300 px-2 py-1 transition hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800/60"
+                                        onClick={() => onPageChange?.(pagination.current_page + 1)}
+                                        disabled={!onPageChange || pagination.current_page >= pagination.last_page || isPaginationLoading}
+                                    >
+                                        Selanjutnya
+                                    </button>
+                                </div>
+                                <div className="flex flex-col gap-1 border-t border-gray-200 pt-2 text-[11px] text-gray-600 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 dark:text-gray-300">
+                                    <span className="font-medium text-gray-700 dark:text-gray-200">Tampilkan per halaman</span>
+                                    <select
+                                        className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none sm:w-auto dark:border-gray-600 dark:bg-[#1c1c1f] dark:text-gray-100"
+                                        value={(pagination.per_page ?? perPageOptions[0] ?? 150).toString()}
+                                        onChange={(event) => {
+                                            const next = Number(event.target.value);
+                                            if (!Number.isFinite(next)) return;
+                                            onPerPageChange?.(next);
+                                        }}
+                                        disabled={!onPerPageChange || isPaginationLoading}
+                                        aria-label="Jumlah item per halaman"
+                                    >
+                                        {perPageOptions.map((option) => (
+                                            <option key={option} value={option}>
+                                                {option.toLocaleString('id-ID')}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
                         {/* Search by Koordinat */}
                         <form
                             className="w-full max-w-md"
@@ -477,13 +584,11 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
 
                         {/* Upload user SHP/GeoJSON */}
                         <div className="w-full max-w-md rounded-lg border border-dashed border-blue-300 bg-blue-50/60 p-3 text-xs text-gray-700 dark:border-blue-800 dark:bg-blue-900/10 dark:text-gray-200">
-                            <p className="mb-2 font-semibold text-sm text-blue-700 dark:text-blue-200">
-                                Unggah SHP / GeoJSON Lahan Anda
-                            </p>
+                            <p className="mb-2 text-sm font-semibold text-blue-700 dark:text-blue-200">Unggah SHP / GeoJSON Lahan Anda</p>
                             <p className="mb-3 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
                                 Pilih berkas <strong>.zip</strong>, <strong>.geojson</strong>, atau sepasang <strong>.shp</strong> +
-                                <strong>.dbf</strong> (boleh tambahkan <strong>.prj</strong>) dengan nama yang sama untuk menampilkan batas
-                                lahan sementara di peta.
+                                <strong>.dbf</strong> (boleh tambahkan <strong>.prj</strong>) dengan nama yang sama untuk menampilkan batas lahan
+                                sementara di peta.
                             </p>
                             <input
                                 type="file"
@@ -610,9 +715,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                 title={`Warna kategori: ${categoryColors[category]}`}
                                             ></div>
                                         )}
-                                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                            {formatCategoryLabel(category)}
-                                        </span>
+                                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{formatCategoryLabel(category)}</span>
                                     </div>
                                     {/* Info Icon */}
                                     <button
@@ -671,7 +774,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                 {expandedCategories[category] && groupedByCategory[category] && (
                                     <div className="mt-2 ml-6">
                                         {Object.entries(groupedByCategory[category]).map(([parent, children]) => {
-                                            const q = search.toLowerCase();
+                                            const q = normalizedSearch;
                                             const filteredChildren = (children || []).filter(
                                                 (child) =>
                                                     child.label.toLowerCase().includes(q) ||
@@ -679,7 +782,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                     category.toLowerCase().includes(q),
                                             );
                                             const showParent =
-                                                !search.trim() ||
+                                                normalizedSearch === '' ||
                                                 filteredChildren.length > 0 ||
                                                 parent.toLowerCase().includes(q) ||
                                                 category.toLowerCase().includes(q);
@@ -703,84 +806,84 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                         >
                                                             {expandedParents[category]?.[parent] ? <IoChevronDown /> : <IoChevronForward />}
                                                         </span>
-                                                    <span
-                                                        className="cursor-pointer font-semibold text-gray-800 dark:text-gray-100"
-                                                        onClick={() => handleToggleParent(category, parent)}
-                                                    >
-                                                        {parent}
-                                                    </span>
-                                                    {!readOnly && (
-                                                        <button
-                                                            type="button"
-                                                            className="ml-2 text-gray-400 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                                                            title="Ubah nama sumber"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                startEditParent(category, parent);
-                                                            }}
+                                                        <span
+                                                            className="cursor-pointer font-semibold text-gray-800 dark:text-gray-100"
+                                                            onClick={() => handleToggleParent(category, parent)}
                                                         >
-                                                            <MdOutlineEdit />
-                                                        </button>
-                                                    )}
-                                                </div>
-
-                                                {!readOnly && editingParent?.category === category && editingParent.parent === parent && (
-                                                    <form
-                                                        className="mt-2 rounded-md border border-dashed border-blue-300 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-900/10"
-                                                        onSubmit={handleParentRenameSubmit}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    >
-                                                        <label
-                                                            htmlFor="parent-rename-input"
-                                                            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-200"
-                                                        >
-                                                            Nama Baru
-                                                        </label>
-                                                        <input
-                                                            id="parent-rename-input"
-                                                            type="text"
-                                                            value={parentRenameValue}
-                                                            onChange={(e) => {
-                                                                setParentRenameValue(e.target.value);
-                                                                setParentRenameError(null);
-                                                                setParentRenameSuccess(null);
-                                                            }}
-                                                            className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 dark:border-gray-600 dark:bg-[#1c1c21]"
-                                                            placeholder="Masukkan nama sumber baru"
-                                                            autoFocus
-                                                            disabled={parentRenameLoading}
-                                                        />
-                                                        <div className="mt-2 flex gap-2">
-                                                            <button
-                                                                type="submit"
-                                                                className="flex-1 rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
-                                                                disabled={parentRenameLoading}
-                                                            >
-                                                                {parentRenameLoading ? 'Menyimpan...' : 'Simpan'}
-                                                            </button>
+                                                            {parent}
+                                                        </span>
+                                                        {!readOnly && (
                                                             <button
                                                                 type="button"
-                                                                className="flex-1 rounded border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700/40"
-                                                                onClick={cancelParentEdit}
-                                                                disabled={parentRenameLoading}
+                                                                className="ml-2 text-gray-400 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                                                title="Ubah nama sumber"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    startEditParent(category, parent);
+                                                                }}
                                                             >
-                                                                Batal
+                                                                <MdOutlineEdit />
                                                             </button>
-                                                        </div>
-                                                        {parentRenameError && (
-                                                            <p className="mt-2 text-xs text-red-600 dark:text-red-400">{parentRenameError}</p>
                                                         )}
-                                                        {parentRenameSuccess && (
-                                                            <p className="mt-2 text-xs text-green-600 dark:text-green-400">
-                                                                {parentRenameSuccess}
-                                                            </p>
-                                                        )}
-                                                    </form>
-                                                )}
+                                                    </div>
 
-                                                {/* Children Level */}
-                                                {expandedParents[category]?.[parent] && filteredChildren.length > 0 && (
-                                                    <div className="mt-2 ml-6">
+                                                    {!readOnly && editingParent?.category === category && editingParent.parent === parent && (
+                                                        <form
+                                                            className="mt-2 rounded-md border border-dashed border-blue-300 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-900/10"
+                                                            onSubmit={handleParentRenameSubmit}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <label
+                                                                htmlFor="parent-rename-input"
+                                                                className="mb-1 block text-xs font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-200"
+                                                            >
+                                                                Nama Baru
+                                                            </label>
+                                                            <input
+                                                                id="parent-rename-input"
+                                                                type="text"
+                                                                value={parentRenameValue}
+                                                                onChange={(e) => {
+                                                                    setParentRenameValue(e.target.value);
+                                                                    setParentRenameError(null);
+                                                                    setParentRenameSuccess(null);
+                                                                }}
+                                                                className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-[#1c1c21]"
+                                                                placeholder="Masukkan nama sumber baru"
+                                                                autoFocus
+                                                                disabled={parentRenameLoading}
+                                                            />
+                                                            <div className="mt-2 flex gap-2">
+                                                                <button
+                                                                    type="submit"
+                                                                    className="flex-1 rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+                                                                    disabled={parentRenameLoading}
+                                                                >
+                                                                    {parentRenameLoading ? 'Menyimpan...' : 'Simpan'}
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    className="flex-1 rounded border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700/40"
+                                                                    onClick={cancelParentEdit}
+                                                                    disabled={parentRenameLoading}
+                                                                >
+                                                                    Batal
+                                                                </button>
+                                                            </div>
+                                                            {parentRenameError && (
+                                                                <p className="mt-2 text-xs text-red-600 dark:text-red-400">{parentRenameError}</p>
+                                                            )}
+                                                            {parentRenameSuccess && (
+                                                                <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+                                                                    {parentRenameSuccess}
+                                                                </p>
+                                                            )}
+                                                        </form>
+                                                    )}
+
+                                                    {/* Children Level */}
+                                                    {expandedParents[category]?.[parent] && filteredChildren.length > 0 && (
+                                                        <div className="mt-2 ml-6">
                                                             <table className="min-w-full rounded border bg-gray-50 text-xs dark:border-[#393e41] dark:bg-[#232329]">
                                                                 <thead>
                                                                     <tr>
@@ -799,16 +902,16 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                                                     {filteredChildren.map((child) => (
                                                                         <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
                                                                             <td className="p-1">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                id={`child-${category}-${parent}-${child.id}`}
-                                                                                checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
-                                                                                onChange={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    toggleChildFilter(category, parent, child.id);
-                                                                                }}
-                                                                                className={checkboxBaseClass}
-                                                                            />
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    id={`child-${category}-${parent}-${child.id}`}
+                                                                                    checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
+                                                                                    onChange={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        toggleChildFilter(category, parent, child.id);
+                                                                                    }}
+                                                                                    className={checkboxBaseClass}
+                                                                                />
                                                                             </td>
                                                                             <td className="p-1">
                                                                                 <button
@@ -837,14 +940,8 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                 </>
             )}
             {settingsOpen && (
-                <div
-                    className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/40"
-                    onClick={() => setSettingsOpen(false)}
-                >
-                    <div
-                        className="w-[360px] max-w-[90vw] rounded-lg bg-white p-4 shadow-lg dark:bg-[#232329]"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/40" onClick={() => setSettingsOpen(false)}>
+                    <div className="w-[360px] max-w-[90vw] rounded-lg bg-white p-4 shadow-lg dark:bg-[#232329]" onClick={(e) => e.stopPropagation()}>
                         <div className="mb-3 flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Pengaturan Tampilan</h3>
                             <button
@@ -871,11 +968,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                                 </div>
                             </div>
                             <label className="flex items-center gap-2 text-xs font-medium text-gray-700 dark:text-gray-200">
-                                <input
-                                    type="checkbox"
-                                    checked={!!outlineHidden}
-                                    onChange={(e) => onOutlineHiddenChange(e.target.checked)}
-                                />
+                                <input type="checkbox" checked={!!outlineHidden} onChange={(e) => onOutlineHiddenChange(e.target.checked)} />
                                 Hilangkan Outline
                             </label>
                         </div>

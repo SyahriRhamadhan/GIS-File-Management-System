@@ -164,6 +164,18 @@ interface MapViewProps {
     fetchGeojsonBatch?: (ids: Array<string | number>) => Promise<Record<string, GeoJSON.Feature | null>>;
     readOnly?: boolean;
     showLayerControls?: boolean;
+    filterSearch?: string;
+    onFilterSearch?: (value: string) => void;
+    filterPagination?: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    onFilterPageChange?: (page: number) => void;
+    filterPerPageOptions?: number[];
+    onFilterPerPageChange?: (value: number) => void;
+    isMetaLoading?: boolean;
 }
 
 type PolygonDisplayMode = 'fill' | 'outline';
@@ -245,6 +257,13 @@ const MapView: React.FC<MapViewProps> = ({
     fetchGeojsonBatch,
     readOnly = false,
     showLayerControls = false,
+    filterSearch = '',
+    onFilterSearch,
+    filterPagination,
+    onFilterPageChange,
+    filterPerPageOptions,
+    onFilterPerPageChange,
+    isMetaLoading = false,
 }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
@@ -1572,6 +1591,13 @@ const MapView: React.FC<MapViewProps> = ({
                 userLayerSummary={userLayerSummary}
                 onUserLayerBringToFront={handleUserLayerBringToFront}
                 readOnly={readOnly}
+                searchTerm={filterSearch}
+                onSearchChange={onFilterSearch}
+                pagination={filterPagination}
+                onPageChange={onFilterPageChange}
+                paginationPerPageOptions={filterPerPageOptions}
+                onPerPageChange={onFilterPerPageChange}
+                isPaginationLoading={isMetaLoading}
             />
         </div>
     );
