@@ -2,6 +2,13 @@
 
 Sistem manajemen laporan berbasis GIS (Geographic Information System) yang dibangun dengan Laravel dan React menggunakan Inertia.js.
 
+## Dokumentasi
+
+- Manual penggunaan aplikasi: `MANUAL_GUIDE.md`
+- Mengaktifkan kembali fitur register: `REGISTER_RESTORE_INSTRUCTIONS.md`
+- Upload limit GeoJSON (100MB): `UPLOAD_LIMIT_GUIDE.md`
+- Konverter ArcGIS `.style` (simbolisasi): `ARCGIS_STYLE_CONVERSION.md` dan `scripts/README.md`
+
 ## Fitur Utama
 
 - ✅ CRUD Owner
