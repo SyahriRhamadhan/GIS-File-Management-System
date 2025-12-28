@@ -120,11 +120,12 @@ export default function ReportIndex() {
 
     const handleConfirmDelete = () => {
         if (selectedId !== null) {
-            router.delete(`/dashboard/report/${selectedId}`, {
+            router.delete(`/dashboard/tambah-pdf/${selectedId}`, {
                 onSuccess: () => {
                     toast.success('Laporan berhasil dihapus!');
                     setShowConfirm(false);
                     setSelectedId(null);
+                    router.reload({ only: ['reports'] });
                 },
                 onError: () => toast.error('Gagal menghapus laporan'),
             });
@@ -315,6 +316,21 @@ export default function ReportIndex() {
                                             >
                                                 Delete
                                             </button>
+                                            {report.geojson?.id_geojson ? (
+                                                <Link
+                                                    href={`/dashboard/geojson/${report.geojson.id_geojson}/edit`}
+                                                    className="rounded bg-blue-600 px-2 py-1 text-white hover:bg-blue-700"
+                                                >
+                                                    View GeoJSON
+                                                </Link>
+                                            ) : (
+                                                <Link
+                                                    href={`/dashboard/tambah-pdf/${report.id_report}/edit`}
+                                                    className="rounded bg-green-600 px-2 py-1 text-white hover:bg-green-700"
+                                                >
+                                                    Tambah GeoJSON
+                                                </Link>
+                                            )}
                                             {showConfirm && selectedId === report.id_report && (
                                                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                                                     <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">

@@ -1,11 +1,15 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import 'leaflet/dist/leaflet.css';
+import type { Feature, FeatureCollection, GeoJsonObject, Geometry } from 'geojson';
+import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 import OwnerSearchInput from '@/components/OwnerSearchInput';
 import RegionSearchInput from '@/components/RegionSearchInput';
+import { calculateGeojsonCenter } from '@/utils/geojsonUtils';
 import { saveAs } from 'file-saver';
 import shp from 'shpjs';
 import JSZip from 'jszip';
@@ -121,11 +125,65 @@ interface FormValues {
     orde4?: string;
 }
 
+const normalizeGeojsonData = (input: any): GeoJsonObject | null => {
+    if (!input) return null;
+
+    let data = input;
+    if (typeof data === 'string') {
+        try {
+            data = JSON.parse(data);
+        } catch {
+            return null;
+        }
+    }
+
+    if (data.type === 'FeatureCollection' && Array.isArray(data.features)) {
+        return data as FeatureCollection;
+    }
+
+    if (data.type === 'Feature' && data.geometry) {
+        return {
+            type: 'FeatureCollection',
+            features: [data as Feature],
+        };
+    }
+
+    if (data.type && data.coordinates) {
+        return {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    geometry: data as Geometry,
+                    properties: {},
+                },
+            ],
+        };
+    }
+
+    if (data.geometry) {
+        return {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    geometry: data.geometry as Geometry,
+                    properties: data.properties ?? {},
+                },
+            ],
+        };
+    }
+
+    return null;
+};
+
 export default function GeojsonEdit() {
     const { geojson, user_name, user_id, regions, owner, kategoris, flash } = usePage<PageProps>().props;
     const [fileList, setFileList] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const normalizedGeojson = useMemo(() => normalizeGeojsonData(geojson?.geojson), [geojson?.geojson]);
+    const mapBounds = useMemo(() => calculateGeojsonCenter(normalizedGeojson), [normalizedGeojson]);
 
     // SHP/KML/KMZ to GeoJSON states
     const [shpGeojson, setShpGeojson] = useState<any>(null);
@@ -611,6 +669,27 @@ export default function GeojsonEdit() {
 
             <div className="bg-white p-6 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
                 <h1 className="mb-4 text-2xl font-bold">Edit Geojson</h1>
+                <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Preview Map</h2>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">GeoJSON ID: {geojson.id_geojson}</span>
+                    </div>
+                    {normalizedGeojson ? (
+                        <div className="h-64 w-full overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
+                            <MapContainer center={mapBounds.center} zoom={mapBounds.zoom} style={{ height: '100%', width: '100%' }}>
+                                <TileLayer
+                                    attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <GeoJSON data={normalizedGeojson} />
+                            </MapContainer>
+                        </div>
+                    ) : (
+                        <div className="rounded-md border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-500 dark:border-gray-600 dark:text-gray-400">
+                            Preview GeoJSON tidak tersedia.
+                        </div>
+                    )}
+                </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     {/* GeoJSON Text */}

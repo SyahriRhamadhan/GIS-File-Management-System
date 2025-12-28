@@ -39,18 +39,32 @@ class PdfGeojson  extends Controller
 
     public function createFromGeojson($id)
     {
-        $geojson = Geojson::findOrFail($id);
-        if (is_string($geojson->geojson)) {
-            $geojson->geojson = json_decode($geojson->geojson, true);
+        $geojson = Geojson::with(['region', 'owner'])->findOrFail($id);
+        $geojsonData = null;
+        if ($geojson->geojson_path && Storage::exists($geojson->geojson_path)) {
+            $geojsonData = json_decode(Storage::get($geojson->geojson_path), true);
+        }
+        if (!$geojsonData) {
+            $geojsonData = $geojson->geojson;
+            if (is_string($geojsonData)) {
+                $geojsonData = json_decode($geojsonData, true);
+            }
+        }
+        if (is_array($geojsonData) && isset($geojsonData['__stored_in_file'])) {
+            $geojsonData = null;
         }
 
-        $regions = Region::all();
-        $user = Auth::user();
-
         return Inertia::render('pdf/create', [
-            'geojsonSelected' => $geojson,
-            'regions' => $regions,
-            'user' => $user,
+            'geojsonSelected' => [
+                'id_geojson' => $geojson->id_geojson,
+                'source_name' => $geojson->source_name,
+                'region_name' => $geojson->region->name ?? '-',
+                'owner_name' => $geojson->owner->name ?? '-',
+                'geojson' => $geojsonData,
+            ],
+            'regions' => Region::select('id_region', 'name')->get(),
+            'owners' => Owner::select('id_owner', 'name')->get(),
+            'user_id' => Auth::id(),
         ]);
     }
 

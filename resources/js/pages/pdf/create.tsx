@@ -1,10 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
 import { useForm } from '@inertiajs/react';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet';
-import CoordinateDisplay from '@/components/CoordinateDisplay';
-import { calculateGeojsonCenter, formatCoordinates, toDMS } from '@/utils/geojsonUtils';
+import type { Feature, FeatureCollection, GeoJsonObject, Geometry } from 'geojson';
+import { calculateGeojsonCenter } from '@/utils/geojsonUtils';
 
 type CreateProps = {
     geojsonSelected?: {
@@ -29,6 +29,58 @@ type FormData = {
     file_path: File | null;
 };
 
+const normalizeGeojsonData = (input: any): GeoJsonObject | null => {
+    if (!input) return null;
+
+    let data = input;
+    if (typeof data === 'string') {
+        try {
+            data = JSON.parse(data);
+        } catch {
+            return null;
+        }
+    }
+
+    if (data.type === 'FeatureCollection' && Array.isArray(data.features)) {
+        return data as FeatureCollection;
+    }
+
+    if (data.type === 'Feature' && data.geometry) {
+        return {
+            type: 'FeatureCollection',
+            features: [data as Feature],
+        };
+    }
+
+    if (data.type && data.coordinates) {
+        return {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    geometry: data as Geometry,
+                    properties: {},
+                },
+            ],
+        };
+    }
+
+    if (data.geometry) {
+        return {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    geometry: data.geometry as Geometry,
+                    properties: data.properties ?? {},
+                },
+            ],
+        };
+    }
+
+    return null;
+};
+
 export default function Create({ geojsonSelected, regions, owners, user_id }: CreateProps) {
     const { data, setData, post, errors } = useForm<FormData>({
         id_geojson: geojsonSelected?.id_geojson || '',
@@ -42,20 +94,17 @@ export default function Create({ geojsonSelected, regions, owners, user_id }: Cr
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        post(route('dashboard.report.store'));
+        post(route('dashboard.report.store'), { forceFormData: true });
     };
-    useEffect(() => {
-        console.log('GeoJSON data:', geojsonSelected?.geojson);
-    }, [geojsonSelected]);
+    const normalizedGeojson = useMemo(
+        () => normalizeGeojsonData(geojsonSelected?.geojson),
+        [geojsonSelected?.geojson]
+    );
 
     // Calculate center coordinates from GeoJSON data
     const mapBounds = useMemo(() => {
-        if (geojsonSelected?.geojson) {
-            return calculateGeojsonCenter(geojsonSelected.geojson);
-        }
-        // Default center (Indonesia center)
-        return { center: [1.0, 104.521117] as [number, number], zoom: 11 };
-    }, [geojsonSelected?.geojson]);
+        return calculateGeojsonCenter(normalizedGeojson);
+    }, [normalizedGeojson]);
 
     const center = mapBounds.center;
     const zoom = mapBounds.zoom;
@@ -83,7 +132,7 @@ export default function Create({ geojsonSelected, regions, owners, user_id }: Cr
                             </p>
                         </div>
 
-                        {geojsonSelected.geojson && (
+                        {normalizedGeojson ? (
                             <>
                                 {/* Map */}
                                 <div className="mb-6 h-64 w-full rounded border">
@@ -92,10 +141,14 @@ export default function Create({ geojsonSelected, regions, owners, user_id }: Cr
                                             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
                                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                         />
-                                        <GeoJSON data={geojsonSelected.geojson} />
+                                        <GeoJSON data={normalizedGeojson} />
                                     </MapContainer>
                                 </div>
                             </>
+                        ) : (
+                            <div className="mb-6 rounded border border-dashed px-4 py-6 text-sm text-gray-500">
+                                GeoJSON belum tersedia untuk ditampilkan.
+                            </div>
                         )}
                     </>
                 )}

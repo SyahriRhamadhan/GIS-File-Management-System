@@ -179,9 +179,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/tambah-pdf', [ReportController::class, 'index'])->name('report.index');
         Route::get('/tambah-pdf/create', [ReportController::class, 'create'])->name('report.create');
         Route::post('/tambah-pdf', [ReportController::class, 'store'])->name('report.store');
-        Route::get('/tambah-pdf/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
-        Route::put('/tambah-pdf/{id}', [ReportController::class, 'update'])->name('report.update');
-        Route::delete('/tambah-pdf/{id}', [ReportController::class, 'destroy'])->name('report.destroy');
+        Route::get('/tambah-pdf/{report}/edit', [ReportController::class, 'edit'])->name('report.edit');
+        Route::put('/tambah-pdf/{report}', [ReportController::class, 'update'])->name('report.update');
+        Route::delete('/tambah-pdf/{report}', [ReportController::class, 'destroy'])->name('report.destroy');
 
         // --- KATEGORI ROUTES ---
         Route::get('/kategori', [KategoriController::class, 'index'])->name('kategori.index');
