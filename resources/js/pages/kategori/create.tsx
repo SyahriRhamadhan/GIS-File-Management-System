@@ -31,13 +31,13 @@ export default function Create() {
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
                 { title: 'Kategori', href: '/dashboard/kategori' },
-                { title: 'Tambah Kategori', href: '/dashboard/kategori/create' },
+                { title: 'Tambah Kategori / Pewarnaan RTRW', href: '/dashboard/kategori/create' },
             ]}
         >
-            <Head title="Tambah Kategori" />
+            <Head title="Tambah Kategori / Pewarnaan RTRW" />
 
             <div className="p-6">
-                <h1 className="text-2xl font-bold">Tambah Kategori</h1>
+                <h1 className="text-2xl font-bold">Tambah Kategori / Pewarnaan RTRW</h1>
 
                 <form onSubmit={handleSubmit} className="mt-4 space-y-6">
                     {/* Nama & Kode */}

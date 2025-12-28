@@ -101,24 +101,21 @@ export default function Index({ kategoris }: IndexProps) {
     }, []);
 
     // ???????????????????? FILTER & SORT
-    const filtered = useMemo(
-        () => {
-            const term = search.trim().toLowerCase();
-            return kategoris
-                .slice()
-                .sort((a, b) => a.layer_order - b.layer_order)
-                .filter(
-                    (k) =>
-                        matchesSearch(k, term) &&
-                        (!namaFilter || k.orde0 === namaFilter) &&
-                        (!orde1Filter || k.orde1 === orde1Filter) &&
-                        (!orde2Filter || k.orde2 === orde2Filter) &&
-                        (!orde3Filter || k.orde3 === orde3Filter) &&
-                        (!layerFilter || k.layer_order === layerFilter),
-                );
-        },
-        [kategoris, search, matchesSearch, namaFilter, orde1Filter, orde2Filter, orde3Filter, layerFilter],
-    );
+    const filtered = useMemo(() => {
+        const term = search.trim().toLowerCase();
+        return kategoris
+            .slice()
+            .sort((a, b) => a.layer_order - b.layer_order)
+            .filter(
+                (k) =>
+                    matchesSearch(k, term) &&
+                    (!namaFilter || k.orde0 === namaFilter) &&
+                    (!orde1Filter || k.orde1 === orde1Filter) &&
+                    (!orde2Filter || k.orde2 === orde2Filter) &&
+                    (!orde3Filter || k.orde3 === orde3Filter) &&
+                    (!layerFilter || k.layer_order === layerFilter),
+            );
+    }, [kategoris, search, matchesSearch, namaFilter, orde1Filter, orde2Filter, orde3Filter, layerFilter]);
 
     // total halaman
     const pages = Math.ceil(filtered.length / perPage);
@@ -159,7 +156,7 @@ export default function Index({ kategoris }: IndexProps) {
                 <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <h1 className="text-2xl font-bold">Daftar Kategori</h1>
                     <Link href="/dashboard/kategori/create" className="rounded bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700">
-                        + Tambah Kategori
+                        + Tambah Kategori / Pewarnaan RTRW
                     </Link>
                 </div>
 

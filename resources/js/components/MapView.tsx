@@ -176,9 +176,14 @@ interface MapViewProps {
     filterPerPageOptions?: number[];
     onFilterPerPageChange?: (value: number) => void;
     isMetaLoading?: boolean;
+    mainCategoryOptions?: string[];
+    activeMainCategory?: string | null;
+    categoryLoadState?: Record<string, CategoryLoadState>;
+    onCategoryLoad?: (category: string) => void;
 }
 
 type PolygonDisplayMode = 'fill' | 'outline';
+type CategoryLoadState = 'idle' | 'loading' | 'loaded';
 const FEATURE_BATCH_SIZE = 50;
 const USER_LAYER_STYLE = {
     color: '#ff1f8f',
@@ -264,6 +269,10 @@ const MapView: React.FC<MapViewProps> = ({
     filterPerPageOptions,
     onFilterPerPageChange,
     isMetaLoading = false,
+    mainCategoryOptions,
+    activeMainCategory = null,
+    categoryLoadState,
+    onCategoryLoad,
 }) => {
     const center: [number, number] = [1.0, 104.521117];
     const zoom = 11;
@@ -282,6 +291,7 @@ const MapView: React.FC<MapViewProps> = ({
     const featureCacheRef = useRef<Record<string, Feature | null>>({});
     const pendingFeatureIdsRef = useRef<Set<string>>(new Set());
     const isBatchFetchingRef = useRef(false);
+    const isMountedRef = useRef(true);
     const [, forceFeatureCacheUpdate] = useState(0);
     const [layerOrder, setLayerOrder] = useState<string[]>([]);
     const [customColors, setCustomColors] = useState<Record<string, string>>(() => readStoredColors());
@@ -369,7 +379,18 @@ const MapView: React.FC<MapViewProps> = ({
         const groups: Record<string, Record<string, Array<{ id: string; label: string }>>> = {};
 
         // Define the order of main categories
-        const mainCategoryOrder = ['RDTR', 'RTRW', 'KKPR', 'GANTI RUGI', 'Uncategorized'];
+        const mainCategoryOrder = (() => {
+            if (mainCategoryOptions && mainCategoryOptions.length > 0) {
+                const normalized = Array.from(
+                    new Set(mainCategoryOptions.map((item) => getDisplayMainCategory(item)).filter(Boolean))
+                );
+                if (!normalized.includes('Uncategorized')) {
+                    normalized.push('Uncategorized');
+                }
+                return normalized;
+            }
+            return ['KKPR', 'GANTI RUGI', 'RTRW', 'RDTR', 'Uncategorized'];
+        })();
 
         sourceData.forEach((item) => {
             const mainCategory = getDisplayMainCategory(item.main_category);
@@ -403,7 +424,7 @@ const MapView: React.FC<MapViewProps> = ({
         });
 
         return sortedGroups;
-    }, [sourceData]);
+    }, [sourceData, getDisplayMainCategory, mainCategoryOptions]);
 
     // Create category to unique code mapping for better performance
     const categoryToCodes = useMemo(() => {
@@ -442,8 +463,16 @@ const MapView: React.FC<MapViewProps> = ({
 
     // Get unique category names
     const uniqueCategoryNames = useMemo(() => {
-        return Object.keys(groupedByCategory);
-    }, [groupedByCategory]);
+        const dataKeys = Object.keys(groupedByCategory);
+        if (!mainCategoryOptions || mainCategoryOptions.length === 0) {
+            return dataKeys;
+        }
+        const ordered = Array.from(
+            new Set(mainCategoryOptions.map((item) => getDisplayMainCategory(item)).filter(Boolean))
+        );
+        const extras = dataKeys.filter((key) => !ordered.includes(key)).sort((a, b) => a.localeCompare(b));
+        return [...ordered, ...extras];
+    }, [groupedByCategory, getDisplayMainCategory, mainCategoryOptions]);
 
     const groupedChildren = useMemo(() => {
         const groups: Record<string, Array<{ id: string; label: string }>> = {};
@@ -476,14 +505,22 @@ const MapView: React.FC<MapViewProps> = ({
     const [outlineHidden, setOutlineHidden] = useState<boolean>(false);
     const toggleSidebar = () => setSidebarOpen((open) => !open);
 
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false;
+            pendingFeatureIdsRef.current.clear();
+        };
+    }, []);
+
     const processFeatureQueue = useCallback(() => {
-        if (!fetchGeojsonBatch || isBatchFetchingRef.current) return;
+        if (!fetchGeojsonBatch || isBatchFetchingRef.current || !isMountedRef.current) return;
         const ids = Array.from(pendingFeatureIdsRef.current).slice(0, FEATURE_BATCH_SIZE);
         if (ids.length === 0) return;
         isBatchFetchingRef.current = true;
 
         fetchGeojsonBatch(ids)
             .then((features) => {
+                if (!isMountedRef.current) return;
                 const received = new Set(Object.keys(features || {}));
                 ids.forEach((id) => {
                     const key = String(id);
@@ -502,6 +539,7 @@ const MapView: React.FC<MapViewProps> = ({
                 forceFeatureCacheUpdate((prev) => prev + 1);
             })
             .catch(() => {
+                if (!isMountedRef.current) return;
                 ids.forEach((id) => {
                     pendingFeatureIdsRef.current.delete(String(id));
                     featureCacheRef.current[String(id)] = null;
@@ -509,6 +547,9 @@ const MapView: React.FC<MapViewProps> = ({
             })
             .finally(() => {
                 isBatchFetchingRef.current = false;
+                if (!isMountedRef.current) {
+                    return;
+                }
                 if (pendingFeatureIdsRef.current.size > 0) {
                     processFeatureQueue();
                 }
@@ -568,16 +609,18 @@ const MapView: React.FC<MapViewProps> = ({
 
     // Auto-initialize filter state for three levels
     useEffect(() => {
-        if (initialFiltersAppliedRef.current && !(Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0)) {
+        const hasInitial = Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0;
+
+        if (initialFiltersAppliedRef.current && !hasInitial) {
             return;
         }
 
-        const hasInitial = Array.isArray(initialVisibleIds) && initialVisibleIds.length > 0;
         const initialSet = new Set(initialVisibleIds.map((v) => String(v)));
 
         const categoryState: Record<string, boolean> = {};
         for (const category of uniqueCategoryNames) {
-            categoryState[category] = !hasInitial;
+            const hasCategoryData = Object.keys(groupedByCategory[category] || {}).length > 0;
+            categoryState[category] = hasCategoryData && !hasInitial;
         }
 
         const parentState: Record<string, Record<string, boolean>> = {};
@@ -861,6 +904,9 @@ const MapView: React.FC<MapViewProps> = ({
 
     // Category toggle logic: toggle ALL parents and children in category
     const toggleCategoryFilter = (category: string) => {
+        if (!groupedByCategory[category] || Object.keys(groupedByCategory[category]).length === 0) {
+            return;
+        }
         setActiveCategoryFilters((prev) => {
             const newCategoryState = !prev[category];
             const updated = { ...prev, [category]: newCategoryState };
@@ -1567,6 +1613,9 @@ const MapView: React.FC<MapViewProps> = ({
                 categoryColors={categoryColors}
                 categoryCodes={categoryToCodes}
                 isLoading={isLoading}
+                activeMainCategory={activeMainCategory}
+                categoryLoadState={categoryLoadState}
+                onCategoryLoad={onCategoryLoad}
                 activeCategoryFilters={activeCategoryFilters}
                 activeParentFilters={activeParentFilters}
                 activeChildFilters={activeChildFilters}

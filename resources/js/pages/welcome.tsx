@@ -1,9 +1,9 @@
-import { Head, Link, usePage } from '@inertiajs/react';
 import MapView from '@/components/MapView';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import type { Geometry } from 'geojson';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-const PUBLIC_FILTER_PER_PAGE_OPTIONS = [150, 500, 1000, 1500, 3000, 5000];
+const PUBLIC_FILTER_PER_PAGE_OPTIONS = [150, 500, 1000, 1500, 3000, 5000, 10000, 15000];
 
 const Welcome = ({
     geojsons,
@@ -40,7 +40,7 @@ const Welcome = ({
                       kategori: item.kategori ?? undefined,
                   }))
                 : [],
-        [geojsons]
+        [geojsons],
     );
     const [geojsonMeta, setGeojsonMeta] = useState<typeof baseData>(baseData);
     const [isMetaLoading, setIsMetaLoading] = useState(baseData.length === 0);
@@ -103,7 +103,7 @@ const Welcome = ({
                 isFetchingMetaRef.current = false;
             }
         },
-        [filterSearch, perPage]
+        [filterSearch, perPage],
     );
 
     useEffect(() => {
@@ -125,7 +125,7 @@ const Welcome = ({
             }
             fetchMetadataPage(page);
         },
-        [fetchMetadataPage, filterPagination.last_page]
+        [fetchMetadataPage, filterPagination.last_page],
     );
 
     const handleFilterPerPageChange = useCallback(
@@ -140,7 +140,7 @@ const Welcome = ({
                 per_page: value,
             }));
         },
-        [perPage]
+        [perPage],
     );
 
     const fetchGeojsonBatch = useCallback(async (ids: Array<string | number>) => {
@@ -226,26 +226,26 @@ const Welcome = ({
                 <section className="bg-gradient-to-r from-blue-50 to-white py-12">
                     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 lg:flex-row lg:items-center">
                         <div className="flex-1">
-                            <p className="text-sm uppercase text-blue-600">Informasi Publik</p>
+                            <p className="text-sm text-blue-600 uppercase">Informasi Publik</p>
                             <h2 className="mt-2 text-2xl font-semibold text-slate-800">Eksplorasi Peta RDTR Bintan</h2>
                             <p className="mt-3 text-slate-600">
-                                Visualisasi interaktif rencana tata ruang dan infrastruktur. Akses cepat untuk masyarakat
-                                dan pemangku kepentingan tanpa harus masuk ke sistem dashboard.
+                                Visualisasi interaktif rencana tata ruang dan infrastruktur. Akses cepat untuk masyarakat dan pemangku kepentingan
+                                tanpa harus masuk ke sistem dashboard.
                             </p>
                         </div>
                         <div className="flex-1 rounded-lg border border-blue-100 bg-white p-4 shadow-sm">
                             <p className="text-sm font-semibold text-slate-700">Fitur Perkembangan</p>
                             <p className="mt-1 text-sm text-slate-500">
-                                Area ini disiapkan untuk modul informasi tambahan (berita, agenda, publikasi). Konten akan
-                                diperbarui pada iterasi berikutnya.
+                                Area ini disiapkan untuk modul informasi tambahan (berita, agenda, publikasi). Konten akan diperbarui pada iterasi
+                                berikutnya.
                             </p>
                             <div className="mt-3 grid gap-3 text-sm text-slate-600 lg:grid-cols-2">
                                 <div className="rounded border border-slate-200 p-3">
-                                    <p className="text-xs uppercase text-slate-400">Berita</p>
+                                    <p className="text-xs text-slate-400 uppercase">Berita</p>
                                     <p>Pengembangan modul berita lapangan.</p>
                                 </div>
                                 <div className="rounded border border-slate-200 p-3">
-                                    <p className="text-xs uppercase text-slate-400">Agenda</p>
+                                    <p className="text-xs text-slate-400 uppercase">Agenda</p>
                                     <p>Rencana agenda publik segera tersedia.</p>
                                 </div>
                             </div>

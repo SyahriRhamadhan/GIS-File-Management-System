@@ -17,7 +17,7 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    private const FILTER_PER_PAGE_CHOICES = [150, 500, 1000, 1500, 3000, 5000];
+    private const FILTER_PER_PAGE_CHOICES = [150, 500, 1000, 1500, 3000, 5000, 10000, 15000];
     public function index(Request $request)
     {
         // Optional filter berdasarkan query param id atau ids (comma-separated)
@@ -273,7 +273,7 @@ class DashboardController extends Controller
         $mode = $request->query('mode', 'meta');
         $perPage = $this->resolvePerPage((int) $request->query('per_page', self::FILTER_PER_PAGE_CHOICES[0]));
         $categoryFilter = $request->query('category');
-        $mainCategoryFilter = $request->query('main_category');
+        $mainCategoryFilters = $this->parseMainCategories($request->query('main_category'));
         $idsParam = $request->query('ids');
         $search = trim((string) $request->query('search', ''));
 
@@ -283,8 +283,8 @@ class DashboardController extends Controller
             $this->applyPublicVisibilityScope($query);
         }
 
-        if ($mainCategoryFilter) {
-            $query->where('geojson.main_category', $mainCategoryFilter);
+        if (!empty($mainCategoryFilters)) {
+            $query->whereIn('geojson.main_category', $mainCategoryFilters);
         }
 
         if ($categoryFilter) {
@@ -447,6 +447,23 @@ class DashboardController extends Controller
         }
 
         return [];
+    }
+
+    private function parseMainCategories($value): array
+    {
+        $raw = [];
+        if (is_array($value)) {
+            $raw = $value;
+        } elseif (is_string($value)) {
+            $raw = explode(',', $value);
+        }
+
+        return collect($raw)
+            ->map(fn($entry) => is_string($entry) ? trim($entry) : '')
+            ->filter(fn($entry) => $entry !== '')
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function normalizeProperties($properties): array

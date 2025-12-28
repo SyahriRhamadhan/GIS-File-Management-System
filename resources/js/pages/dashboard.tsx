@@ -8,7 +8,14 @@ import { BarChart3, Building2, FileText, FolderTree, Layers, Map, Users } from '
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-const FILTER_PER_PAGE_OPTIONS = [150, 500, 1000, 1500, 3000, 5000];
+const FILTER_PER_PAGE_OPTIONS = [150, 500, 1000, 1500, 3000, 5000, 10000, 15000];
+const MAIN_CATEGORY_OPTIONS = ['KKPR', 'GANTI RUGI', 'RTRW', 'RDTR'];
+type CategoryLoadState = 'idle' | 'loading' | 'loaded';
+
+const normalizeCategoryList = (categories: Array<string | null | undefined>) => {
+    const cleaned = categories.map((category) => (typeof category === 'string' ? category.trim() : '')).filter((category) => category !== '');
+    return Array.from(new Set(cleaned));
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -66,10 +73,21 @@ const Dashboard = ({
     const [activeTab, setActiveTab] = useState('statistics');
     const initialGeojsons = useMemo(() => (Array.isArray(geojsons) ? geojsons : []), [geojsons]);
     const [geojsonMeta, setGeojsonMeta] = useState(initialGeojsons);
-    const [isLoadingMeta, setIsLoadingMeta] = useState(initialGeojsons.length === 0);
+    const [isLoadingMeta, setIsLoadingMeta] = useState(false);
     const [metaError, setMetaError] = useState<string | null>(null);
     const isMountedRef = useRef(true);
-    const isFetchingMetaRef = useRef(false);
+    const metaAbortRef = useRef<AbortController | null>(null);
+    const latestRequestRef = useRef(0);
+    const fullGeojsonControllersRef = useRef<Set<AbortController>>(new Set());
+    const [activeMainCategory, setActiveMainCategory] = useState<string | null>(null);
+    const [loadedMainCategories, setLoadedMainCategories] = useState<string[]>(() => []);
+    const [categoryLoadState, setCategoryLoadState] = useState<Record<string, CategoryLoadState>>(() => {
+        const initial: Record<string, CategoryLoadState> = {};
+        MAIN_CATEGORY_OPTIONS.forEach((category) => {
+            initial[category] = 'idle';
+        });
+        return initial;
+    });
     const [perPage, setPerPage] = useState(FILTER_PER_PAGE_OPTIONS[0]);
     const [filterSearch, setFilterSearch] = useState('');
     const [filterPagination, setFilterPagination] = useState({
@@ -78,10 +96,21 @@ const Dashboard = ({
         per_page: perPage,
         total: 0,
     });
+    const categoryLoadStateRef = useRef(categoryLoadState);
+    const normalizedLoadedCategories = useMemo(() => normalizeCategoryList(loadedMainCategories), [loadedMainCategories]);
+
+    useEffect(() => {
+        categoryLoadStateRef.current = categoryLoadState;
+    }, [categoryLoadState]);
 
     useEffect(() => {
         return () => {
             isMountedRef.current = false;
+            if (metaAbortRef.current) {
+                metaAbortRef.current.abort();
+            }
+            fullGeojsonControllersRef.current.forEach((controller) => controller.abort());
+            fullGeojsonControllersRef.current.clear();
         };
     }, []);
 
@@ -94,14 +123,47 @@ const Dashboard = ({
                 ...prev,
                 total: initialGeojsons.length,
             }));
+            const categoriesFromData = normalizeCategoryList(
+                initialGeojsons.map((item: any) => item?.main_category),
+            );
+            if (categoriesFromData.length > 0) {
+                setLoadedMainCategories(categoriesFromData);
+                setCategoryLoadState((prev) => {
+                    const next: Record<string, CategoryLoadState> = { ...prev };
+                    categoriesFromData.forEach((category) => {
+                        next[category] = 'loaded';
+                    });
+                    return next;
+                });
+            }
         }
     }, [initialGeojsons]);
 
     const fetchMetadataPage = useCallback(
-        async (page: number = 1, search: string = '', perPageOverride?: number) => {
-            const effectivePerPage = perPageOverride ?? perPage;
-            if (isFetchingMetaRef.current) return;
-            isFetchingMetaRef.current = true;
+        async (page: number = 1, search: string = '', categoriesOverride?: string[]) => {
+            const effectivePerPage = perPage;
+            const normalizedCategories = normalizeCategoryList(categoriesOverride ?? loadedMainCategories);
+            if (normalizedCategories.length === 0) {
+                if (isMountedRef.current) {
+                    setGeojsonMeta([]);
+                    setFilterPagination((prev) => ({
+                        ...prev,
+                        current_page: 1,
+                        last_page: 1,
+                        total: 0,
+                    }));
+                    setIsLoadingMeta(false);
+                }
+                return;
+            }
+
+            if (metaAbortRef.current) {
+                metaAbortRef.current.abort();
+            }
+            const controller = new AbortController();
+            metaAbortRef.current = controller;
+            const requestId = latestRequestRef.current + 1;
+            latestRequestRef.current = requestId;
             if (isMountedRef.current) {
                 setIsLoadingMeta(true);
                 setMetaError(null);
@@ -109,6 +171,14 @@ const Dashboard = ({
                     setGeojsonMeta([]);
                 }
             }
+            const previousCategoryState = categoryLoadStateRef.current;
+            setCategoryLoadState((prev) => {
+                const next: Record<string, CategoryLoadState> = { ...prev };
+                normalizedCategories.forEach((category) => {
+                    next[category] = 'loading';
+                });
+                return next;
+            });
 
             try {
                 const params = new URLSearchParams({
@@ -119,8 +189,13 @@ const Dashboard = ({
                 if (search.trim() !== '') {
                     params.set('search', search.trim());
                 }
+                if (normalizedCategories.length > 0) {
+                    params.set('main_category', normalizedCategories.join(','));
+                }
 
-                const response = await fetch(`/api/dashboard/geojsons?${params.toString()}`);
+                const response = await fetch(`/api/dashboard/geojsons?${params.toString()}`, {
+                    signal: controller.signal,
+                });
                 if (!response.ok) {
                     throw new Error('Gagal memuat metadata GeoJSON.');
                 }
@@ -128,7 +203,7 @@ const Dashboard = ({
                 const pageData = Array.isArray(payload?.data) ? payload.data : [];
                 const meta = payload?.meta ?? {};
 
-                if (isMountedRef.current) {
+                if (isMountedRef.current && latestRequestRef.current === requestId) {
                     setGeojsonMeta(pageData);
                     setFilterPagination({
                         current_page: meta.current_page ?? page,
@@ -137,57 +212,99 @@ const Dashboard = ({
                         total: meta.total ?? pageData.length,
                     });
                     setMetaError(null);
+                    setCategoryLoadState((prev) => {
+                        const next: Record<string, CategoryLoadState> = { ...prev };
+                        normalizedCategories.forEach((category) => {
+                            next[category] = 'loaded';
+                        });
+                        return next;
+                    });
                 }
             } catch (error: any) {
+                if (controller.signal.aborted) {
+                    return;
+                }
                 console.error(error);
-                if (isMountedRef.current) {
+                if (isMountedRef.current && latestRequestRef.current === requestId) {
                     setGeojsonMeta([]);
                     setMetaError(error?.message ?? 'Gagal memuat metadata GeoJSON.');
+                    setCategoryLoadState((prev) => {
+                        const next: Record<string, CategoryLoadState> = { ...prev };
+                        normalizedCategories.forEach((category) => {
+                            next[category] = previousCategoryState[category] ?? 'idle';
+                        });
+                        return next;
+                    });
                 }
             } finally {
-                if (isMountedRef.current) {
+                if (isMountedRef.current && latestRequestRef.current === requestId) {
                     setIsLoadingMeta(false);
                 }
-                isFetchingMetaRef.current = false;
             }
         },
-        [perPage],
+        [perPage, loadedMainCategories],
     );
 
     useEffect(() => {
-        fetchMetadataPage(1, filterSearch);
-    }, [fetchMetadataPage]);
+        fetchMetadataPage(filterPagination.current_page, filterSearch, normalizedLoadedCategories);
+    }, [fetchMetadataPage, filterPagination.current_page, filterSearch, normalizedLoadedCategories]);
 
-    const handleSearchChange = useCallback(
-        (value: string) => {
-            setFilterSearch(value);
-            fetchMetadataPage(1, value);
-        },
-        [fetchMetadataPage],
-    );
+    const handleSearchChange = useCallback((value: string) => {
+        setFilterSearch(value);
+        setFilterPagination((prev) => ({
+            ...prev,
+            current_page: 1,
+        }));
+    }, []);
 
     const handleFilterPageChange = useCallback(
         (page: number) => {
             if (page < 1 || page > filterPagination.last_page) {
                 return;
             }
-            fetchMetadataPage(page, filterSearch);
+            setFilterPagination((prev) => ({
+                ...prev,
+                current_page: page,
+            }));
         },
-        [fetchMetadataPage, filterPagination.last_page, filterSearch],
+        [filterPagination.last_page],
     );
 
     const handleReloadGeojsons = useCallback(() => {
-        fetchMetadataPage(filterPagination.current_page, filterSearch);
-    }, [fetchMetadataPage, filterPagination.current_page, filterSearch]);
+        fetchMetadataPage(filterPagination.current_page, filterSearch, normalizedLoadedCategories);
+    }, [fetchMetadataPage, filterPagination.current_page, filterSearch, normalizedLoadedCategories]);
 
     const handleFilterPerPageChange = useCallback(
         (value: number) => {
             if (value === perPage) return;
             setPerPage(value);
-            fetchMetadataPage(1, filterSearch, value);
+            setFilterPagination((prev) => ({
+                ...prev,
+                current_page: 1,
+                per_page: value,
+            }));
         },
-        [fetchMetadataPage, filterSearch, perPage],
+        [perPage],
     );
+
+    const handleCategoryLoad = useCallback((category: string) => {
+        if (!category) return;
+        setActiveMainCategory(category);
+        setFilterPagination((prev) => ({
+            ...prev,
+            current_page: 1,
+        }));
+        setLoadedMainCategories((prev) => normalizeCategoryList([...prev, category]));
+        setCategoryLoadState((prev) => {
+            if (prev[category] === 'loaded') {
+                return prev;
+            }
+            return {
+                ...prev,
+                [category]: 'loading',
+            };
+        });
+    }, []);
 
     const fetchFullGeojsonBatch = useCallback(async (ids: Array<string | number>) => {
         if (!ids || ids.length === 0) return {};
@@ -195,18 +312,31 @@ const Dashboard = ({
             mode: 'full',
             ids: ids.join(','),
         });
-        const response = await fetch(`/api/dashboard/geojsons?${params.toString()}`);
-        if (!response.ok) {
-            throw new Error('Gagal memuat detail GeoJSON.');
-        }
-        const payload = await response.json();
-        const map: Record<string, any> = {};
-        (payload?.data ?? []).forEach((item: any) => {
-            if (item?.id_geojson && item?.geojson) {
-                map[String(item.id_geojson)] = item.geojson;
+        const controller = new AbortController();
+        fullGeojsonControllersRef.current.add(controller);
+        try {
+            const response = await fetch(`/api/dashboard/geojsons?${params.toString()}`, {
+                signal: controller.signal,
+            });
+            if (!response.ok) {
+                throw new Error('Gagal memuat detail GeoJSON.');
             }
-        });
-        return map;
+            const payload = await response.json();
+            const map: Record<string, any> = {};
+            (payload?.data ?? []).forEach((item: any) => {
+                if (item?.id_geojson && item?.geojson) {
+                    map[String(item.id_geojson)] = item.geojson;
+                }
+            });
+            return map;
+        } catch (error) {
+            if (controller.signal.aborted) {
+                return {};
+            }
+            throw error;
+        } finally {
+            fullGeojsonControllersRef.current.delete(controller);
+        }
     }, []);
 
     // Format category data for pie chart
@@ -573,6 +703,10 @@ const Dashboard = ({
                                             filterPerPageOptions={FILTER_PER_PAGE_OPTIONS}
                                             onFilterPerPageChange={handleFilterPerPageChange}
                                             isMetaLoading={isLoadingMeta}
+                                            mainCategoryOptions={MAIN_CATEGORY_OPTIONS}
+                                            activeMainCategory={activeMainCategory}
+                                            categoryLoadState={categoryLoadState}
+                                            onCategoryLoad={handleCategoryLoad}
                                         />
                                     </div>
                                 </div>

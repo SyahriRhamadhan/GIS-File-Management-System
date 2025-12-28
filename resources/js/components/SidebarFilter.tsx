@@ -5,6 +5,8 @@ import { IoChevronDown, IoChevronForward, IoInformationCircleOutline } from 'rea
 import { MdOutlineEdit, MdOutlineFilterAlt, MdOutlineFilterAltOff } from 'react-icons/md';
 import shp, * as shpNamespace from 'shpjs';
 
+type CategoryLoadState = 'idle' | 'loading' | 'loaded';
+
 interface SidebarFilterProps {
     sidebarOpen: boolean;
     toggleSidebar: () => void;
@@ -13,6 +15,9 @@ interface SidebarFilterProps {
     categoryColors?: Record<string, string>;
     categoryCodes?: Record<string, string>;
     isLoading?: boolean;
+    activeMainCategory?: string | null;
+    categoryLoadState?: Record<string, CategoryLoadState>;
+    onCategoryLoad?: (category: string) => void;
     activeCategoryFilters: Record<string, boolean>;
     activeParentFilters: Record<string, Record<string, boolean>>;
     activeChildFilters: Record<string, Record<string, Record<string, boolean>>>;
@@ -59,6 +64,9 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     categoryColors = {},
     categoryCodes = {},
     isLoading = false,
+    activeMainCategory = null,
+    categoryLoadState,
+    onCategoryLoad,
     activeCategoryFilters,
     activeParentFilters,
     activeChildFilters,
@@ -94,6 +102,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
     const [expandedParents, setExpandedParents] = useState<Record<string, Record<string, boolean>>>({});
     const [searchInput, setSearchInput] = useState(searchTerm ?? '');
+    const [appliedSearch, setAppliedSearch] = useState(searchTerm ?? '');
     const [coordX, setCoordX] = useState('');
     const [coordY, setCoordY] = useState('');
     const [showCategoryInfo, setShowCategoryInfo] = useState<Record<string, boolean>>({});
@@ -106,7 +115,6 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     const [uploadingUserLayer, setUploadingUserLayer] = useState(false);
     const [userLayerError, setUserLayerError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const checkboxBaseClass = 'size-[18px] shrink-0 rounded border border-gray-300 text-blue-600 focus:ring-blue-500';
     const parseShpFn = useMemo(() => {
         const fn = (shpNamespace as any).parseShp;
@@ -123,7 +131,7 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         return fn as (buffer: ArrayBuffer, cpg?: ArrayBuffer | string) => Record<string, any>[];
     }, []);
     const perPageOptions = useMemo(() => {
-        const fallback = [150, 500, 1000, 1500, 3000, 5000];
+        const fallback = [150, 500, 1000, 1500, 3000, 5000, 10000, 15000];
         const raw = Array.isArray(paginationPerPageOptions) && paginationPerPageOptions.length > 0 ? paginationPerPageOptions : fallback;
         const numeric = raw.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0);
         const unique = Array.from(new Set(numeric));
@@ -141,35 +149,58 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
     }, []);
     const formatCategoryLabel = (category: string) => {
         if (!category) return category;
-        const [firstPart] = category.split('-');
-        return (firstPart ?? category).trim();
+        const trimmed = category.trim();
+        const normalized = trimmed.toUpperCase();
+        const labelMap: Record<string, string> = {
+            KKPR: 'KKPR',
+            'GANTI RUGI': 'GANTI RUGI LAHAN',
+            RTRW: 'RTRW',
+            RDTR: 'RDTR',
+            UNCATEGORIZED: 'Uncategorized',
+        };
+        if (labelMap[normalized]) {
+            return labelMap[normalized];
+        }
+        const [firstPart] = trimmed.split('-');
+        return (firstPart ?? trimmed).trim();
+    };
+
+    const resolveCategoryState = (category: string): CategoryLoadState => {
+        if (categoryLoadState && Object.prototype.hasOwnProperty.call(categoryLoadState, category)) {
+            return categoryLoadState[category] ?? 'idle';
+        }
+        const hasData = Object.keys(groupedByCategory[category] || {}).length > 0;
+        return hasData ? 'loaded' : 'idle';
     };
 
     useEffect(() => {
-        if (typeof searchTerm === 'string' && searchTerm !== searchInput) {
-            setSearchInput(searchTerm);
-        }
-    }, [searchTerm, searchInput]);
-
-    useEffect(() => {
-        return () => {
-            if (searchDebounceRef.current) {
-                clearTimeout(searchDebounceRef.current);
-            }
-        };
-    }, []);
+        if (typeof searchTerm !== 'string') return;
+        setSearchInput(searchTerm);
+        setAppliedSearch(searchTerm);
+    }, [searchTerm]);
 
     const handleSearchInputChange = (value: string) => {
         setSearchInput(value);
-        if (onSearchChange) {
-            if (searchDebounceRef.current) {
-                clearTimeout(searchDebounceRef.current);
-            }
-            searchDebounceRef.current = setTimeout(() => onSearchChange(value), 400);
-        }
     };
 
-    const handleToggleCategory = (category: string) => {
+    const handleSearchSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
+        event?.preventDefault();
+        const nextValue = searchInput.trim();
+        setAppliedSearch(nextValue);
+        onSearchChange?.(nextValue);
+    };
+
+    const handleToggleCategory = (category: string, loadState?: CategoryLoadState) => {
+        if (loadState && loadState !== 'loaded') {
+            if (loadState !== 'loading') {
+                onCategoryLoad?.(category);
+            }
+            setExpandedCategories((prev) => ({
+                ...prev,
+                [category]: true,
+            }));
+            return;
+        }
         setExpandedCategories((prev) => ({
             ...prev,
             [category]: !prev[category],
@@ -411,29 +442,35 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         );
     };
 
-    // Check if all items are checked
-    const allChecked = uniqueCategoryNames.every(
-        (category) =>
-            activeCategoryFilters[category] &&
-            Object.keys(groupedByCategory[category] || {}).every(
-                (parent) =>
-                    activeParentFilters[category]?.[parent] &&
-                    groupedByCategory[category][parent]?.every((child) => activeChildFilters[category]?.[parent]?.[child.id]),
-            ),
-    );
+    const loadedCategories = uniqueCategoryNames.filter((category) => resolveCategoryState(category) === 'loaded');
 
-    // Check if no items are checked
-    const noneChecked = uniqueCategoryNames.every(
-        (category) =>
-            !activeCategoryFilters[category] ||
-            !Object.keys(groupedByCategory[category] || {}).some(
-                (parent) =>
-                    activeParentFilters[category]?.[parent] &&
-                    groupedByCategory[category][parent]?.some((child) => activeChildFilters[category]?.[parent]?.[child.id]),
-            ),
-    );
+    // Check if all items are checked (only for loaded categories)
+    const allChecked =
+        loadedCategories.length > 0 &&
+        loadedCategories.every(
+            (category) =>
+                activeCategoryFilters[category] &&
+                Object.keys(groupedByCategory[category] || {}).every(
+                    (parent) =>
+                        activeParentFilters[category]?.[parent] &&
+                        groupedByCategory[category][parent]?.every((child) => activeChildFilters[category]?.[parent]?.[child.id]),
+                ),
+        );
 
-    const deferredSearch = useDeferredValue(searchInput);
+    // Check if no items are checked (only for loaded categories)
+    const noneChecked =
+        loadedCategories.length === 0 ||
+        loadedCategories.every(
+            (category) =>
+                !activeCategoryFilters[category] ||
+                !Object.keys(groupedByCategory[category] || {}).some(
+                    (parent) =>
+                        activeParentFilters[category]?.[parent] &&
+                        groupedByCategory[category][parent]?.some((child) => activeChildFilters[category]?.[parent]?.[child.id]),
+                ),
+        );
+
+    const deferredSearch = useDeferredValue(appliedSearch);
     const normalizedSearch = deferredSearch.trim().toLowerCase();
 
     // Filter categories based on search
@@ -487,13 +524,21 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
                     </div>
                     <div className="mb-4 flex flex-col items-center gap-3 px-4">
                         {/* Search Bar */}
-                        <input
-                            type="text"
-                            value={searchInput}
-                            onChange={(e) => handleSearchInputChange(e.target.value)}
-                            className="w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-[#393e41] dark:bg-[#232329] dark:text-gray-100"
-                            placeholder="Cari layer atau label?"
-                        />
+                        <form className="flex w-full max-w-md gap-2" onSubmit={handleSearchSubmit}>
+                            <input
+                                type="text"
+                                value={searchInput}
+                                onChange={(e) => handleSearchInputChange(e.target.value)}
+                                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-[#393e41] dark:bg-[#232329] dark:text-gray-100"
+                                placeholder="Cari layer atau label?"
+                            />
+                            <button
+                                type="submit"
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                            >
+                                Cari
+                            </button>
+                        </form>
                         {pagination && (
                             <div className="w-full max-w-md text-xs text-gray-600 dark:text-gray-300">
                                 <div className="mb-2 flex items-center justify-between">
@@ -690,252 +735,303 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
 
                     <div>
                         <small>*click checkbox 2x jika tak tampil</small>
-                        {filteredCategories.map((category) => (
-                            <div key={category} className="mb-4">
-                                {/* Category Level */}
-                                <div className="group flex cursor-pointer items-center">
-                                    <input
-                                        type="checkbox"
-                                        id={`category-${category}`}
-                                        checked={isCategoryChecked(category)}
-                                        onChange={(e) => {
-                                            e.stopPropagation();
-                                            toggleCategoryFilter(category);
-                                        }}
-                                        className={`mr-2 ${checkboxBaseClass}`}
-                                    />
-                                    <span className="mx-2 cursor-pointer text-xl" onClick={() => handleToggleCategory(category)}>
-                                        {expandedCategories[category] ? <IoChevronDown /> : <IoChevronForward />}
-                                    </span>
-                                    <div className="flex cursor-pointer items-center gap-2" onClick={() => handleToggleCategory(category)}>
-                                        {categoryColors[category] && (
-                                            <div
-                                                className="h-4 w-4 flex-shrink-0 rounded border border-gray-300 dark:border-gray-600"
-                                                style={{ backgroundColor: categoryColors[category] }}
-                                                title={`Warna kategori: ${categoryColors[category]}`}
-                                            ></div>
-                                        )}
-                                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{formatCategoryLabel(category)}</span>
-                                    </div>
-                                    {/* Info Icon */}
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleToggleCategoryInfo(category);
-                                        }}
-                                        className="ml-2 p-1 text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                                        title="Lihat informasi kategori"
-                                    >
-                                        <IoInformationCircleOutline className="text-lg" />
-                                    </button>
-                                </div>
+                        {filteredCategories.map((category) => {
+                            const categoryState = resolveCategoryState(category);
+                            const isLoadedCategory = categoryState === 'loaded';
+                            const isLoadingCategory = categoryState === 'loading';
+                            const isActiveCategory = activeMainCategory ? activeMainCategory === category : false;
 
-                                {/* Category Information Popup */}
-                                {showCategoryInfo[category] && (
-                                    <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm dark:border-blue-700 dark:bg-blue-900/20">
-                                        <div className="mb-2 flex items-start justify-between">
-                                            <h4 className="font-semibold text-blue-800 dark:text-blue-200">
-                                                Informasi Kategori: {formatCategoryLabel(category)}
-                                            </h4>
+                            return (
+                                <div key={category} className="mb-4">
+                                    {/* Category Level */}
+                                    <div
+                                        className={`group flex cursor-pointer items-center ${
+                                            isActiveCategory ? 'rounded-md bg-blue-50 px-2 py-1 dark:bg-blue-900/20' : ''
+                                        }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            id={`category-${category}`}
+                                            checked={isLoadedCategory ? isCategoryChecked(category) : false}
+                                            onChange={(e) => {
+                                                e.stopPropagation();
+                                                if (!isLoadedCategory) {
+                                                    handleToggleCategory(category, categoryState);
+                                                    return;
+                                                }
+                                                toggleCategoryFilter(category);
+                                            }}
+                                            disabled={isLoadingCategory}
+                                            className={`mr-2 ${checkboxBaseClass}`}
+                                        />
+                                        <span className="mx-2 cursor-pointer text-xl" onClick={() => handleToggleCategory(category, categoryState)}>
+                                            {expandedCategories[category] ? <IoChevronDown /> : <IoChevronForward />}
+                                        </span>
+                                        <div
+                                            className="flex cursor-pointer items-center gap-2"
+                                            onClick={() => handleToggleCategory(category, categoryState)}
+                                        >
+                                            {categoryColors[category] && (
+                                                <div
+                                                    className="h-4 w-4 flex-shrink-0 rounded border border-gray-300 dark:border-gray-600"
+                                                    style={{ backgroundColor: categoryColors[category] }}
+                                                    title={`Warna kategori: ${categoryColors[category]}`}
+                                                ></div>
+                                            )}
+                                            <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                                {formatCategoryLabel(category)}
+                                            </span>
+                                        </div>
+                                        {/* Info Icon */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleToggleCategoryInfo(category);
+                                            }}
+                                            className="ml-2 p-1 text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                            title="Lihat informasi kategori"
+                                        >
+                                            <IoInformationCircleOutline className="text-lg" />
+                                        </button>
+                                        {!isLoadedCategory && (
                                             <button
                                                 type="button"
-                                                onClick={() => handleToggleCategoryInfo(category)}
-                                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                                title="Tutup informasi"
+                                                className="ml-2 rounded-full border border-blue-200 px-2 py-0.5 text-[10px] font-semibold text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-blue-600 dark:text-blue-200"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (!isLoadingCategory) {
+                                                        onCategoryLoad?.(category);
+                                                    }
+                                                }}
+                                                disabled={isLoadingCategory}
                                             >
-                                                ×
+                                                {isLoadingCategory ? 'Memuat...' : 'Muat Data'}
                                             </button>
-                                        </div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-300">
-                                            <p className="mb-2">
-                                                <strong>Warna:</strong>
-                                                <span className="ml-2 inline-flex items-center gap-2">
-                                                    {categoryColors[category] && (
-                                                        <div
-                                                            className="h-4 w-4 rounded border border-gray-300 dark:border-gray-600"
-                                                            style={{ backgroundColor: categoryColors[category] }}
-                                                        ></div>
-                                                    )}
-                                                    {categoryColors[category] || 'Tidak tersedia'}
-                                                </span>
-                                            </p>
-                                            <p className="mb-2">
-                                                <strong>Deskripsi:</strong>
-                                            </p>
-                                            <div className="rounded border bg-white p-3 text-sm dark:bg-gray-800">
-                                                {getCategoryDescription(category)}
+                                        )}
+                                    </div>
+
+                                    {/* Category Information Popup */}
+                                    {showCategoryInfo[category] && (
+                                        <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm dark:border-blue-700 dark:bg-blue-900/20">
+                                            <div className="mb-2 flex items-start justify-between">
+                                                <h4 className="font-semibold text-blue-800 dark:text-blue-200">
+                                                    Informasi Kategori: {formatCategoryLabel(category)}
+                                                </h4>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleToggleCategoryInfo(category)}
+                                                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                                    title="Tutup informasi"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                            <div className="text-sm text-gray-700 dark:text-gray-300">
+                                                <p className="mb-2">
+                                                    <strong>Warna:</strong>
+                                                    <span className="ml-2 inline-flex items-center gap-2">
+                                                        {categoryColors[category] && (
+                                                            <div
+                                                                className="h-4 w-4 rounded border border-gray-300 dark:border-gray-600"
+                                                                style={{ backgroundColor: categoryColors[category] }}
+                                                            ></div>
+                                                        )}
+                                                        {categoryColors[category] || 'Tidak tersedia'}
+                                                    </span>
+                                                </p>
+                                                <p className="mb-2">
+                                                    <strong>Deskripsi:</strong>
+                                                </p>
+                                                <div className="rounded border bg-white p-3 text-sm dark:bg-gray-800">
+                                                    {getCategoryDescription(category)}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {/* Parent Level */}
-                                {expandedCategories[category] && groupedByCategory[category] && (
-                                    <div className="mt-2 ml-6">
-                                        {Object.entries(groupedByCategory[category]).map(([parent, children]) => {
-                                            const q = normalizedSearch;
-                                            const filteredChildren = (children || []).filter(
-                                                (child) =>
-                                                    child.label.toLowerCase().includes(q) ||
-                                                    parent.toLowerCase().includes(q) ||
-                                                    category.toLowerCase().includes(q),
-                                            );
-                                            const showParent =
-                                                normalizedSearch === '' ||
-                                                filteredChildren.length > 0 ||
-                                                parent.toLowerCase().includes(q) ||
-                                                category.toLowerCase().includes(q);
-                                            if (!showParent) return null;
-                                            return (
-                                                <div key={`${category}-${parent}`} className="mb-3">
-                                                    <div className="group flex cursor-pointer items-center">
-                                                        <input
-                                                            type="checkbox"
-                                                            id={`parent-${category}-${parent}`}
-                                                            checked={isParentChecked(category, parent)}
-                                                            onChange={(e) => {
-                                                                e.stopPropagation();
-                                                                toggleParentFilter(category, parent);
-                                                            }}
-                                                            className={`mr-2 ${checkboxBaseClass}`}
-                                                        />
-                                                        <span
-                                                            className="mx-2 cursor-pointer text-lg"
-                                                            onClick={() => handleToggleParent(category, parent)}
-                                                        >
-                                                            {expandedParents[category]?.[parent] ? <IoChevronDown /> : <IoChevronForward />}
-                                                        </span>
-                                                        <span
-                                                            className="cursor-pointer font-semibold text-gray-800 dark:text-gray-100"
-                                                            onClick={() => handleToggleParent(category, parent)}
-                                                        >
-                                                            {parent}
-                                                        </span>
-                                                        {!readOnly && (
-                                                            <button
-                                                                type="button"
-                                                                className="ml-2 text-gray-400 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                                                                title="Ubah nama sumber"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    startEditParent(category, parent);
-                                                                }}
-                                                            >
-                                                                <MdOutlineEdit />
-                                                            </button>
-                                                        )}
-                                                    </div>
-
-                                                    {!readOnly && editingParent?.category === category && editingParent.parent === parent && (
-                                                        <form
-                                                            className="mt-2 rounded-md border border-dashed border-blue-300 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-900/10"
-                                                            onSubmit={handleParentRenameSubmit}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <label
-                                                                htmlFor="parent-rename-input"
-                                                                className="mb-1 block text-xs font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-200"
-                                                            >
-                                                                Nama Baru
-                                                            </label>
-                                                            <input
-                                                                id="parent-rename-input"
-                                                                type="text"
-                                                                value={parentRenameValue}
-                                                                onChange={(e) => {
-                                                                    setParentRenameValue(e.target.value);
-                                                                    setParentRenameError(null);
-                                                                    setParentRenameSuccess(null);
-                                                                }}
-                                                                className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-[#1c1c21]"
-                                                                placeholder="Masukkan nama sumber baru"
-                                                                autoFocus
-                                                                disabled={parentRenameLoading}
-                                                            />
-                                                            <div className="mt-2 flex gap-2">
-                                                                <button
-                                                                    type="submit"
-                                                                    className="flex-1 rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
-                                                                    disabled={parentRenameLoading}
-                                                                >
-                                                                    {parentRenameLoading ? 'Menyimpan...' : 'Simpan'}
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    className="flex-1 rounded border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700/40"
-                                                                    onClick={cancelParentEdit}
-                                                                    disabled={parentRenameLoading}
-                                                                >
-                                                                    Batal
-                                                                </button>
-                                                            </div>
-                                                            {parentRenameError && (
-                                                                <p className="mt-2 text-xs text-red-600 dark:text-red-400">{parentRenameError}</p>
-                                                            )}
-                                                            {parentRenameSuccess && (
-                                                                <p className="mt-2 text-xs text-green-600 dark:text-green-400">
-                                                                    {parentRenameSuccess}
-                                                                </p>
-                                                            )}
-                                                        </form>
-                                                    )}
-
-                                                    {/* Children Level */}
-                                                    {expandedParents[category]?.[parent] && filteredChildren.length > 0 && (
-                                                        <div className="mt-2 ml-6">
-                                                            <table className="min-w-full rounded border bg-gray-50 text-xs dark:border-[#393e41] dark:bg-[#232329]">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">
-                                                                            Checklist
-                                                                        </th>
-                                                                        <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">
-                                                                            Lokasi
-                                                                        </th>
-                                                                        <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">
-                                                                            Label
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {filteredChildren.map((child) => (
-                                                                        <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
-                                                                            <td className="p-1">
-                                                                                <input
-                                                                                    type="checkbox"
-                                                                                    id={`child-${category}-${parent}-${child.id}`}
-                                                                                    checked={!!activeChildFilters[category]?.[parent]?.[child.id]}
-                                                                                    onChange={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        toggleChildFilter(category, parent, child.id);
-                                                                                    }}
-                                                                                    className={checkboxBaseClass}
-                                                                                />
-                                                                            </td>
-                                                                            <td className="p-1">
-                                                                                <button
-                                                                                    type="button"
-                                                                                    className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
-                                                                                    onClick={() => onView(category, parent, child.id)}
-                                                                                >
-                                                                                    View
-                                                                                </button>
-                                                                            </td>
-                                                                            <td className="p-1 text-gray-700 dark:text-gray-200">{child.label}</td>
-                                                                        </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    )}
+                                    {/* Parent Level */}
+                                    {expandedCategories[category] && (
+                                        <div className="mt-2 ml-6">
+                                            {!isLoadedCategory && (
+                                                <div className="rounded border border-dashed border-gray-300 bg-white px-3 py-2 text-xs text-gray-500 dark:border-gray-600 dark:bg-[#1c1c1f] dark:text-gray-300">
+                                                    {isLoadingCategory
+                                                        ? 'Sedang memuat data kategori...'
+                                                        : 'Data kategori belum dimuat. Klik "Muat Data" untuk mengambilnya.'}
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                                            )}
+                                            {isLoadedCategory &&
+                                                groupedByCategory[category] &&
+                                                Object.entries(groupedByCategory[category]).map(([parent, children]) => {
+                                                    const q = normalizedSearch;
+                                                    const filteredChildren = (children || []).filter(
+                                                        (child) =>
+                                                            child.label.toLowerCase().includes(q) ||
+                                                            parent.toLowerCase().includes(q) ||
+                                                            category.toLowerCase().includes(q),
+                                                    );
+                                                    const showParent =
+                                                        normalizedSearch === '' ||
+                                                        filteredChildren.length > 0 ||
+                                                        parent.toLowerCase().includes(q) ||
+                                                        category.toLowerCase().includes(q);
+                                                    if (!showParent) return null;
+                                                    return (
+                                                        <div key={`${category}-${parent}`} className="mb-3">
+                                                            <div className="group flex cursor-pointer items-center">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id={`parent-${category}-${parent}`}
+                                                                    checked={isParentChecked(category, parent)}
+                                                                    onChange={(e) => {
+                                                                        e.stopPropagation();
+                                                                        toggleParentFilter(category, parent);
+                                                                    }}
+                                                                    className={`mr-2 ${checkboxBaseClass}`}
+                                                                />
+                                                                <span
+                                                                    className="mx-2 cursor-pointer text-lg"
+                                                                    onClick={() => handleToggleParent(category, parent)}
+                                                                >
+                                                                    {expandedParents[category]?.[parent] ? <IoChevronDown /> : <IoChevronForward />}
+                                                                </span>
+                                                                <span
+                                                                    className="cursor-pointer font-semibold text-gray-800 dark:text-gray-100"
+                                                                    onClick={() => handleToggleParent(category, parent)}
+                                                                >
+                                                                    {parent}
+                                                                </span>
+                                                                {!readOnly && (
+                                                                    <button
+                                                                        type="button"
+                                                                        className="ml-2 text-gray-400 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                                                        title="Ubah nama sumber"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            startEditParent(category, parent);
+                                                                        }}
+                                                                    >
+                                                                        <MdOutlineEdit />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+
+                                                            {!readOnly && editingParent?.category === category && editingParent.parent === parent && (
+                                                                <form
+                                                                    className="mt-2 rounded-md border border-dashed border-blue-300 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-900/10"
+                                                                    onSubmit={handleParentRenameSubmit}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    <label
+                                                                        htmlFor="parent-rename-input"
+                                                                        className="mb-1 block text-xs font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-200"
+                                                                    >
+                                                                        Nama Baru
+                                                                    </label>
+                                                                    <input
+                                                                        id="parent-rename-input"
+                                                                        type="text"
+                                                                        value={parentRenameValue}
+                                                                        onChange={(e) => {
+                                                                            setParentRenameValue(e.target.value);
+                                                                            setParentRenameError(null);
+                                                                            setParentRenameSuccess(null);
+                                                                        }}
+                                                                        className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-[#1c1c21]"
+                                                                        placeholder="Masukkan nama sumber baru"
+                                                                        autoFocus
+                                                                        disabled={parentRenameLoading}
+                                                                    />
+                                                                    <div className="mt-2 flex gap-2">
+                                                                        <button
+                                                                            type="submit"
+                                                                            className="flex-1 rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+                                                                            disabled={parentRenameLoading}
+                                                                        >
+                                                                            {parentRenameLoading ? 'Menyimpan...' : 'Simpan'}
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="flex-1 rounded border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700/40"
+                                                                            onClick={cancelParentEdit}
+                                                                            disabled={parentRenameLoading}
+                                                                        >
+                                                                            Batal
+                                                                        </button>
+                                                                    </div>
+                                                                    {parentRenameError && (
+                                                                        <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                                                                            {parentRenameError}
+                                                                        </p>
+                                                                    )}
+                                                                    {parentRenameSuccess && (
+                                                                        <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+                                                                            {parentRenameSuccess}
+                                                                        </p>
+                                                                    )}
+                                                                </form>
+                                                            )}
+
+                                                            {/* Children Level */}
+                                                            {expandedParents[category]?.[parent] && filteredChildren.length > 0 && (
+                                                                <div className="mt-2 ml-6">
+                                                                    <table className="min-w-full rounded border bg-gray-50 text-xs dark:border-[#393e41] dark:bg-[#232329]">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">
+                                                                                    Checklist
+                                                                                </th>
+                                                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">
+                                                                                    Lokasi
+                                                                                </th>
+                                                                                <th className="p-1 text-left font-bold text-gray-700 dark:text-gray-200">
+                                                                                    Label
+                                                                                </th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {filteredChildren.map((child) => (
+                                                                                <tr key={child.id} className="dark:hover:bg-[#1a1a1e]">
+                                                                                    <td className="p-1">
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            id={`child-${category}-${parent}-${child.id}`}
+                                                                                            checked={
+                                                                                                !!activeChildFilters[category]?.[parent]?.[child.id]
+                                                                                            }
+                                                                                            onChange={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                toggleChildFilter(category, parent, child.id);
+                                                                                            }}
+                                                                                            className={checkboxBaseClass}
+                                                                                        />
+                                                                                    </td>
+                                                                                    <td className="p-1">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-700"
+                                                                                            onClick={() => onView(category, parent, child.id)}
+                                                                                        >
+                                                                                            View
+                                                                                        </button>
+                                                                                    </td>
+                                                                                    <td className="p-1 text-gray-700 dark:text-gray-200">
+                                                                                        {child.label}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </>
             )}

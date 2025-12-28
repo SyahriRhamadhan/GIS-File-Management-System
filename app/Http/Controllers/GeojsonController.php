@@ -51,15 +51,15 @@ class GeojsonController extends Controller
         // Apply filters
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
-                $q->where('geojson.source_name', 'like', "%{$search}%")
-                  ->orWhere('users.name', 'like', "%{$search}%")
-                  ->orWhere('region.name', 'like', "%{$search}%")
-                  ->orWhere('owner.name', 'like', "%{$search}%")
-                  ->orWhere('kategori.orde0', 'like', "%{$search}%")
-                  ->orWhere('kategori.orde1', 'like', "%{$search}%")
-                  ->orWhere('kategori.orde2', 'like', "%{$search}%")
-                  ->orWhere('kategori.orde3', 'like', "%{$search}%")
-                  ->orWhere('kategori.orde4', 'like', "%{$search}%");
+                $q->where('geojson.source_name', 'ilike', "%{$search}%")
+                  ->orWhere('users.name', 'ilike', "%{$search}%")
+                  ->orWhere('region.name', 'ilike', "%{$search}%")
+                  ->orWhere('owner.name', 'ilike', "%{$search}%")
+                  ->orWhere('kategori.orde0', 'ilike', "%{$search}%")
+                  ->orWhere('kategori.orde1', 'ilike', "%{$search}%")
+                  ->orWhere('kategori.orde2', 'ilike', "%{$search}%")
+                  ->orWhere('kategori.orde3', 'ilike', "%{$search}%")
+                  ->orWhere('kategori.orde4', 'ilike', "%{$search}%");
             });
         }
 
