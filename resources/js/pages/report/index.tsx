@@ -151,7 +151,7 @@ export default function ReportIndex() {
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Laporan', href: '/dashboard/report' },
+                { title: 'Laporan', href: '/dashboard/tambah-pdf' },
             ]}
         >
             <Head title="Laporan" />
@@ -257,7 +257,7 @@ export default function ReportIndex() {
                             <tr>
                                 <th className="border px-4 py-2 text-left">#</th>
                                 <th className="cursor-pointer border px-4 py-2 text-left" onClick={() => toggleSort('nomor')}>
-                                    Nomor {sortBy === 'nomor' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                                    Nomor {sortBy === 'nomor' ? (sortDirection === 'asc' ? '^' : 'v') : ''}
                                 </th>
                                 <th className="border px-4 py-2 text-left">Sifat</th>
                                 <th className="border px-4 py-2 text-left">Hal</th>
@@ -270,16 +270,8 @@ export default function ReportIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedReports.map((report, index) => {
-                                console.log('Sebelumnya:', {
-                                    nomor: report.nomor,
-                                    sifat: report.sifat,
-                                    hal: report.hal,
-                                    kepada: report.kepada,
-                                    deskripsi: report.description,
-                                });
-                                return (
-                                    <tr key={report.id_report}>
+                            {paginatedReports.map((report, index) => (
+                                <tr key={report.id_report}>
                                         <td className="border px-4 py-2">{(currentPage - 1) * perPage + index + 1}</td>
                                         <td className="border px-4 py-2">{report.nomor}</td>
                                         <td className="border px-4 py-2">{report.sifat}</td>
@@ -352,8 +344,7 @@ export default function ReportIndex() {
                                             )}
                                         </td>
                                     </tr>
-                                );
-                            })}
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -375,3 +366,4 @@ export default function ReportIndex() {
         </AppLayout>
     );
 }
+

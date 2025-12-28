@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEvent, useEffect } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export default function UpdateReport() {
@@ -18,7 +18,7 @@ export default function UpdateReport() {
         geojsons: { id_geojson: number; source_name?: string }[];
     }>().props;
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         id_geojson: String(report.id_geojson ?? ''),
         file_path: null as File | null,
         description: report.description ?? '',
@@ -26,7 +26,26 @@ export default function UpdateReport() {
         sifat: report.sifat ?? 'Biasa',
         hal: report.hal ?? '',
         kepada: report.kepada ?? '',
+        _method: 'put',
     });
+
+    const [geojsonInput, setGeojsonInput] = useState('');
+    const [isGeojsonOpen, setIsGeojsonOpen] = useState(false);
+
+    const selectedGeojsonLabel = useMemo(() => {
+        const selected = geojsons.find((g) => String(g.id_geojson) === data.id_geojson);
+        if (!selected) return '';
+        return selected.source_name ?? `Geojson ${selected.id_geojson}`;
+    }, [geojsons, data.id_geojson]);
+
+    const filteredGeojsons = useMemo(() => {
+        const query = geojsonInput.trim().toLowerCase();
+        if (!query) return geojsons;
+        return geojsons.filter((g) => {
+            const label = (g.source_name ?? `Geojson ${g.id_geojson}`).toLowerCase();
+            return label.includes(query) || String(g.id_geojson).includes(query);
+        });
+    }, [geojsons, geojsonInput]);
 
     useEffect(() => {
         setData('id_geojson', String(report.id_geojson ?? ''));
@@ -38,10 +57,15 @@ export default function UpdateReport() {
         setData('kepada', report.kepada ?? '');
     }, [report.id_report]);
 
+    useEffect(() => {
+        if (!isGeojsonOpen) {
+            setGeojsonInput(selectedGeojsonLabel);
+        }
+    }, [selectedGeojsonLabel, isGeojsonOpen]);
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        console.log('Form data:', data);
-        put(route('dashboard.report.update', report.id_report), {
+        post(route('dashboard.report.update', report.id_report), {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
@@ -91,19 +115,61 @@ export default function UpdateReport() {
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label htmlFor="geojson" className="block text-sm font-medium text-gray-700 dark:text-gray-300">GeoJSON</label>
-                            <select
-                                id="geojson"
-                                name="id_geojson"
-                                value={data.id_geojson}
-                                onChange={e => setData('id_geojson', e.target.value)}
-                                className="mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                                required
-                            >
-                                <option value="">Pilih GeoJSON</option>
-                                {geojsons.map(g => (
-                                    <option key={g.id_geojson} value={g.id_geojson}>{g.source_name || `Geojson ${g.id_geojson}`}</option>
-                                ))}
-                            </select>
+                            <div className="relative mt-1">
+                                <input
+                                    id="geojson"
+                                    name="id_geojson_search"
+                                    type="text"
+                                    value={geojsonInput}
+                                    onChange={(e) => {
+                                        const nextValue = e.target.value;
+                                        setGeojsonInput(nextValue);
+                                        setIsGeojsonOpen(true);
+                                    }}
+                                    onFocus={() => setIsGeojsonOpen(true)}
+                                    onBlur={() => {
+                                        setTimeout(() => {
+                                            setIsGeojsonOpen(false);
+                                            if (data.id_geojson) {
+                                                setGeojsonInput(selectedGeojsonLabel);
+                                            }
+                                        }, 120);
+                                    }}
+                                    placeholder="Cari GeoJSON..."
+                                    className="w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                                    autoComplete="off"
+                                />
+                                <input type="hidden" name="id_geojson" value={data.id_geojson} />
+                                {isGeojsonOpen && (
+                                    <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800">
+                                        {filteredGeojsons.length === 0 ? (
+                                            <div className="px-3 py-2 text-sm text-gray-500">Tidak ada hasil</div>
+                                        ) : (
+                                            filteredGeojsons.map((g) => {
+                                                const label = g.source_name ?? `Geojson ${g.id_geojson}`;
+                                                const isSelected = String(g.id_geojson) === data.id_geojson;
+                                                return (
+                                                    <button
+                                                        type="button"
+                                                        key={g.id_geojson}
+                                                        onMouseDown={() => {
+                                                            setData('id_geojson', String(g.id_geojson));
+                                                            setGeojsonInput(label);
+                                                            setIsGeojsonOpen(false);
+                                                        }}
+                                                        className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                                                            isSelected ? 'bg-gray-100 dark:bg-gray-700' : ''
+                                                        }`}
+                                                    >
+                                                        <span className="truncate">{label}</span>
+                                                        <span className="ml-2 text-xs text-gray-500">#{g.id_geojson}</span>
+                                                    </button>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                             {errors.id_geojson && <div className="text-sm text-red-500">{errors.id_geojson}</div>}
                         </div>
 
