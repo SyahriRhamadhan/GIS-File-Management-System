@@ -147,13 +147,17 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         }
         return fn as (arr: [Geometry[], Record<string, any>[]]) => FeatureCollection;
     }, []);
+    const isProjectionError = (err: unknown) => {
+        const message = (err as Error)?.message || String(err || '');
+        return /proj4|projcs|projection|could not get proj/i.test(message);
+    };
     const formatCategoryLabel = (category: string) => {
         if (!category) return category;
         const trimmed = category.trim();
         const normalized = trimmed.toUpperCase();
         const labelMap: Record<string, string> = {
             KKPR: 'KKPR',
-            'GANTI RUGI': 'GANTI RUGI LAHAN',
+            'GANTI RUGI': 'Aset Pemda',
             RTRW: 'RTRW',
             RDTR: 'RDTR',
             UNCATEGORIZED: 'Uncategorized',
@@ -345,7 +349,16 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         for (const [base, entry] of groups.entries()) {
             if (entry.shp && entry.dbf) {
                 const [shpBuffer, dbfBuffer] = await Promise.all([entry.shp.arrayBuffer(), entry.dbf.arrayBuffer()]);
-                const geometries = parseShpFn(shpBuffer, entry.prj ? await entry.prj.text() : undefined);
+                let geometries: Geometry[];
+                try {
+                    geometries = parseShpFn(shpBuffer, entry.prj ? await entry.prj.text() : undefined);
+                } catch (err) {
+                    if (entry.prj && isProjectionError(err)) {
+                        geometries = parseShpFn(shpBuffer);
+                    } else {
+                        throw err;
+                    }
+                }
                 const properties = parseDbfFn(dbfBuffer, undefined);
                 const combined = combineFn([geometries, properties]);
                 if (combined?.type === 'FeatureCollection') {
@@ -369,7 +382,15 @@ const SidebarFilter: React.FC<SidebarFilterProps> = ({
         }
 
         const buffer = await file.arrayBuffer();
-        const output = await shp(buffer);
+        let output: any;
+        try {
+            output = await shp(buffer);
+        } catch (err) {
+            if (isProjectionError(err)) {
+                throw new Error('Gagal membaca proyeksi SHP. Coba unzip dan upload tanpa file .prj, atau ekspor ulang ke WGS84 (EPSG:4326).');
+            }
+            throw err;
+        }
         if (Array.isArray(output)) {
             return {
                 type: 'FeatureCollection',

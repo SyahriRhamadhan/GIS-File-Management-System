@@ -365,11 +365,11 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
     };
 
     // Helper function to create ArrayBuffer from individual SHP files
-    const createShpArrayBuffer = async (group: { [ext: string]: File }) => {
+    const createShpArrayBuffer = async (group: { [ext: string]: File }, includePrj: boolean = true) => {
         const shpBuffer = await group.shp.arrayBuffer();
         const dbfBuffer = await group.dbf.arrayBuffer();
         const shxBuffer = group.shx ? await group.shx.arrayBuffer() : null;
-        const prjBuffer = group.prj ? await group.prj.arrayBuffer() : null;
+        const prjBuffer = includePrj && group.prj ? await group.prj.arrayBuffer() : null;
         
         // Create a simple object structure that shpjs can understand
         const shpData: any = {
@@ -381,6 +381,11 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         if (prjBuffer) shpData.prj = prjBuffer;
         
         return shpData;
+    };
+
+    const isProjectionError = (err: unknown) => {
+        const message = (err as Error)?.message || String(err || '');
+        return /proj4|projcs|projection|could not get proj/i.test(message);
     };
 
     // Normalize: convert closed LineString/MultiLineString to Polygon/MultiPolygon
@@ -456,6 +461,46 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
         return [];
     };
 
+    const applyConvertedGeojson = (payload: any, filename: string) => {
+        const normalized = payload && typeof payload === 'object' ? { ...payload } : payload;
+        if (normalized && typeof normalized === 'object' && !normalized.fileName) {
+            normalized.fileName = filename;
+        }
+        setValue('geojson', JSON.stringify(normalized, null, 2));
+    };
+
+    const applyCombinedGeojson = (items: Array<{ filename: string; data: any }>) => {
+        const combinedFeatures: any[] = [];
+        items.forEach((file) => {
+            const features = extractFeaturesFromGeoJSON(file.data);
+            features.forEach((feature) => {
+                const properties =
+                    feature && typeof feature === 'object' && feature.properties && typeof feature.properties === 'object'
+                        ? feature.properties
+                        : {};
+                combinedFeatures.push({
+                    ...feature,
+                    properties: {
+                        ...properties,
+                        __source_filename: file.filename,
+                    },
+                });
+            });
+        });
+        if (!combinedFeatures.length) {
+            throw new Error('Tidak ada fitur GeoJSON valid dari hasil konversi.');
+        }
+        const combinedCollection = {
+            type: 'FeatureCollection',
+            features: combinedFeatures,
+            fileName:
+                items.length === 1
+                    ? items[0].filename
+                    : `${items.length}-files-batch.geojson`,
+        };
+        setValue('geojson', JSON.stringify(combinedCollection, null, 2));
+    };
+
     // KML/KMZ to GeoJSON conversion helpers
     const parseKmlTextToGeoJSON = (kmlText: string) => {
         const dom = new DOMParser().parseFromString(kmlText, 'text/xml');
@@ -475,8 +520,11 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                 const gj = normalizeClosedLinesToPolygons(parseKmlTextToGeoJSON(text));
                 setShpGeojson(gj);
                 setPreviewGeojsons([]);
-                setConvertedFilename(`${file.name.replace(/\.[^/.]+$/, '')}.geojson`);
+                const outputName = `${file.name.replace(/\.[^/.]+$/, '')}.geojson`;
+                setConvertedFilename(outputName);
                 toast.success('Berhasil mengkonversi KML ke GeoJSON');
+                applyConvertedGeojson(gj, outputName);
+                toast.success(`GeoJSON "${outputName}" siap untuk disimpan`);
             } else if (lower.endsWith('.kmz')) {
                 const buf = await file.arrayBuffer();
                 const zip = await JSZip.loadAsync(buf);
@@ -486,8 +534,11 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                 const gj = normalizeClosedLinesToPolygons(parseKmlTextToGeoJSON(kmlText));
                 setShpGeojson(gj);
                 setPreviewGeojsons([]);
-                setConvertedFilename(`${file.name.replace(/\.[^/.]+$/, '')}.geojson`);
+                const outputName = `${file.name.replace(/\.[^/.]+$/, '')}.geojson`;
+                setConvertedFilename(outputName);
                 toast.success('Berhasil mengkonversi KMZ ke GeoJSON');
+                applyConvertedGeojson(gj, outputName);
+                toast.success(`GeoJSON "${outputName}" siap untuk disimpan`);
             } else {
                 toast.error('Format tidak dikenali. Pilih file .kml atau .kmz');
             }
@@ -510,7 +561,18 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
             if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
                 // Handle ZIP file (existing logic)
                 const arrayBuffer = await files[0].arrayBuffer();
-                const result = await shp(arrayBuffer);
+                let result: any;
+                try {
+                    result = await shp(arrayBuffer);
+                } catch (err) {
+                    if (isProjectionError(err)) {
+                        toast.error(
+                            'Gagal membaca proyeksi SHP. Coba unzip dan upload tanpa file .prj, atau ekspor ulang ke WGS84 (EPSG:4326).'
+                        );
+                        return;
+                    }
+                    throw err;
+                }
 
                 // Multiple parts case
                 if (Array.isArray(result) && result.length > 1) {
@@ -527,6 +589,12 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                     setPreviewGeojsons(previewData);
                     setShpGeojson(null);
                     toast.success(`Berhasil mengkonversi ${previewData.length} file GeoJSON dari ZIP`);
+                    try {
+                        applyCombinedGeojson(previewData);
+                        toast.success(`Semua GeoJSON (${previewData.length} file) siap untuk disimpan`);
+                    } catch (err: any) {
+                        toast.error(err?.message || 'Gagal menerapkan hasil konversi.');
+                    }
                 }
                 // Single file case
                 else {
@@ -538,6 +606,8 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                     setConvertedFilename(name);
                     setPreviewGeojsons([]);
                     toast.success('Berhasil mengkonversi SHP ke GeoJSON dari ZIP');
+                    applyConvertedGeojson(fc, name);
+                    toast.success(`GeoJSON "${name}" siap untuk disimpan`);
                 }
             } else {
                 // Handle individual SHP files
@@ -572,8 +642,18 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                 const results = [];
                 for (const { basename, group } of validGroups) {
                     try {
-                        const shpData = await createShpArrayBuffer(group);
-                        const result = await shp(shpData);
+                        let result: any;
+                        try {
+                            const shpData = await createShpArrayBuffer(group, true);
+                            result = await shp(shpData);
+                        } catch (err) {
+                            if (group.prj && isProjectionError(err)) {
+                                const shpData = await createShpArrayBuffer(group, false);
+                                result = await shp(shpData);
+                            } else {
+                                throw err;
+                            }
+                        }
                         
                         const fc = Array.isArray(result) ? result[0] : result;
                         // Add fileName property for consistency with ZIP file processing
@@ -593,11 +673,19 @@ export default function GeojsonCreate({ user_name, user_id, regions, owner, kate
                     setConvertedFilename(results[0].filename);
                     setPreviewGeojsons([]);
                     toast.success(`Berhasil mengkonversi ${results[0].filename}`);
+                    applyConvertedGeojson(results[0].data, results[0].filename);
+                    toast.success(`GeoJSON "${results[0].filename}" siap untuk disimpan`);
                 } else if (results.length > 1) {
                     // Multiple results
                     setPreviewGeojsons(results);
                     setShpGeojson(null);
                     toast.success(`Berhasil mengkonversi ${results.length} file GeoJSON`);
+                    try {
+                        applyCombinedGeojson(results);
+                        toast.success(`Semua GeoJSON (${results.length} file) siap untuk disimpan`);
+                    } catch (err: any) {
+                        toast.error(err?.message || 'Gagal menerapkan hasil konversi.');
+                    }
                 }
             }
         } catch (err) {

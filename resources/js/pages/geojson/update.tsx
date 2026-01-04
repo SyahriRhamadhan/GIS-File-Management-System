@@ -417,11 +417,11 @@ export default function GeojsonEdit() {
     };
 
     // Helper function to create ArrayBuffer from individual SHP files
-    const createShpArrayBuffer = async (group: { [ext: string]: File }) => {
+    const createShpArrayBuffer = async (group: { [ext: string]: File }, includePrj: boolean = true) => {
         const shpBuffer = await group.shp.arrayBuffer();
         const dbfBuffer = await group.dbf.arrayBuffer();
         const shxBuffer = group.shx ? await group.shx.arrayBuffer() : null;
-        const prjBuffer = group.prj ? await group.prj.arrayBuffer() : null;
+        const prjBuffer = includePrj && group.prj ? await group.prj.arrayBuffer() : null;
         
         // Create a simple object structure that shpjs can understand
         const shpData: any = {
@@ -435,6 +435,11 @@ export default function GeojsonEdit() {
         return shpData;
     };
 
+    const isProjectionError = (err: unknown) => {
+        const message = (err as Error)?.message || String(err || '');
+        return /proj4|projcs|projection|could not get proj/i.test(message);
+    };
+
     // SHP to GeoJSON conversion functions
     const handleShpUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -446,7 +451,18 @@ export default function GeojsonEdit() {
             if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
                 // Handle ZIP file (existing logic)
                 const arrayBuffer = await files[0].arrayBuffer();
-                const result = await shp(arrayBuffer);
+                let result: any;
+                try {
+                    result = await shp(arrayBuffer);
+                } catch (err) {
+                    if (isProjectionError(err)) {
+                        toast.error(
+                            'Gagal membaca proyeksi SHP. Coba unzip dan upload tanpa file .prj, atau ekspor ulang ke WGS84 (EPSG:4326).'
+                        );
+                        return;
+                    }
+                    throw err;
+                }
 
                 // Multiple parts case
                 if (Array.isArray(result) && result.length > 1) {
@@ -508,8 +524,18 @@ export default function GeojsonEdit() {
                 const results = [];
                 for (const { basename, group } of validGroups) {
                     try {
-                        const shpData = await createShpArrayBuffer(group);
-                        const result = await shp(shpData);
+                        let result: any;
+                        try {
+                            const shpData = await createShpArrayBuffer(group, true);
+                            result = await shp(shpData);
+                        } catch (err) {
+                            if (group.prj && isProjectionError(err)) {
+                                const shpData = await createShpArrayBuffer(group, false);
+                                result = await shp(shpData);
+                            } else {
+                                throw err;
+                            }
+                        }
                         
                         const fc = Array.isArray(result) ? result[0] : result;
                         // Add fileName property for consistency with ZIP file processing
