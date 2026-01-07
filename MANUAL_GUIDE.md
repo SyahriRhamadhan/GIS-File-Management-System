@@ -1,4 +1,4 @@
-# Manual Guide — GIS Report Management System (Laravel + React/Inertia)
+# Manual Guide -  GIS Report Management System (Laravel + React/Inertia)
 
 Dokumen ini menjelaskan cara instalasi singkat dan penggunaan fitur utama aplikasi **GIS Report Management System**.
 
@@ -6,15 +6,15 @@ Dokumen ini menjelaskan cara instalasi singkat dan penggunaan fitur utama aplika
 
 Selain manual ini, repo sudah punya dokumentasi teknis spesifik:
 
-- `README.MD` — instalasi & perintah development
-- `UPLOAD_LIMIT_GUIDE.md` — batas upload GeoJSON 100MB (frontend + backend)
-- `GEOJSON_CONVERTER_FEATURES.md` — aturan file konversi >10MB (hanya download)
-- `PERFORMANCE_SUMMARY.md` — ringkasan optimasi performa dashboard
-- `ARCGIS_STYLE_CONVERSION.md` — dokumentasi lengkap konversi file ArcGIS `.style`
-- `STYLE_USAGE_GUIDE.md` — cara memakai simbol hasil konversi di React/TypeScript
-- `COLOR_EXTRACTION_GUIDE.md` — ekstraksi warna dari tags style
-- `QUICK_REFERENCE.md` — ringkas perintah converter style
-- `scripts/README.md` — detail script konversi `.style`
+- `README.MD` -  instalasi & perintah development
+- `UPLOAD_LIMIT_GUIDE.md` -  batas upload GeoJSON 100MB (frontend + backend)
+- `GEOJSON_CONVERTER_FEATURES.md` -  aturan file konversi >10MB (hanya download)
+- `PERFORMANCE_SUMMARY.md` -  ringkasan optimasi performa dashboard
+- `ARCGIS_STYLE_CONVERSION.md` -  dokumentasi lengkap konversi file ArcGIS `.style`
+- `STYLE_USAGE_GUIDE.md` -  cara memakai simbol hasil konversi di React/TypeScript
+- `COLOR_EXTRACTION_GUIDE.md` -  ekstraksi warna dari tags style
+- `QUICK_REFERENCE.md` -  ringkas perintah converter style
+- `scripts/README.md` -  detail script konversi `.style`
 
 ## 1) Gambaran Umum
 
@@ -86,7 +86,7 @@ Semua fitur dashboard berada di bawah middleware `auth` (dan `verified`, yang ef
 
 1. Buka halaman login:
     - Akses langsung `/login`, atau
-    - Buka URL dashboard (mis. `/dashboard`) → sistem otomatis redirect ke `/login` jika belum login.
+    - Buka URL dashboard (mis. `/dashboard`) -> sistem otomatis redirect ke `/login` jika belum login.
 2. Isi form:
     - `Email address`: masukkan email.
     - `Password`: masukkan password.
@@ -116,10 +116,10 @@ Semua fitur dashboard berada di bawah middleware `auth` (dan `verified`, yang ef
 
 **E. Flow lupa password**
 
-1. Di halaman login klik `Forgot password?` → `/forgot-password`.
+1. Di halaman login klik `Forgot password?` -> `/forgot-password`.
 2. Masukkan email, submit permintaan reset.
 3. User menerima link reset (butuh konfigurasi email).
-4. Buka link `/reset-password/{token}` → set password baru.
+4. Buka link `/reset-password/{token}` -> set password baru.
 
 Menu utama (sidebar) mengarah ke:
 
@@ -227,7 +227,7 @@ Alur umum:
     - Bisa multi-file `.geojson` (drag & drop tersedia).
     - Validasi server membatasi total upload **maks 100MB** (lihat `app/Http/Requests/StoreGeojsonRequest.php`).
     - Detail limit & contoh error: `UPLOAD_LIMIT_GUIDE.md`.
-3. (Opsional) Konversi SHP/KML/KMZ → GeoJSON di halaman create:
+3. (Opsional) Konversi SHP/KML/KMZ -> GeoJSON di halaman create:
     - File hasil konversi > **10MB** hanya dapat di-_download_ (tidak disarankan dipakai langsung di form).
     - Detail aturan >10MB: `GEOJSON_CONVERTER_FEATURES.md`.
 
@@ -252,7 +252,7 @@ Alur umum:
 
 1. Di halaman create GeoJSON, pilih fitur konversi (upload `.zip` SHP atau file KML/KMZ bila ada).
 2. Tunggu proses konversi hingga preview muncul.
-3. Jika file hasil ≤ 10MB:
+3. Jika file hasil <= 10MB:
     - Klik `Gunakan` (atau `Gunakan Semua`) untuk memasukkan ke form.
 4. Jika file hasil > 10MB:
     - Klik `Download` / `Download Semua`, lalu olah/pecah file terlebih dahulu sebelum diupload kembali.
@@ -270,7 +270,7 @@ Catatan:
 1. Dari list `/dashboard/geojson`, klik `Edit` pada item.
 2. Ubah field yang diperlukan (metadata dan/atau file GeoJSON).
 3. Jika mengupload file baru:
-    - Pastikan file valid dan ukuran ≤ 100MB.
+    - Pastikan file valid dan ukuran <= 100MB.
 4. Klik `Update/Simpan`.
 5. Pastikan notifikasi sukses muncul dan data berubah di list.
 
@@ -285,7 +285,7 @@ Fitur utama:
 
 Validasi penting:
 
-- Upload PDF dibatasi `max:2048` (±2MB) dan `mimes:pdf` (lihat `app/Http/Controllers/ReportController.php`).
+- Upload PDF dibatasi `max:2048` (+/-2MB) dan `mimes:pdf` (lihat `app/Http/Controllers/ReportController.php`).
 - Field `nomor` bersifat unik.
 
 ### Step-by-step: membuat laporan PDF
@@ -298,7 +298,7 @@ Validasi penting:
     - Pilih `GeoJSON` yang sudah ada, atau
     - Upload/isi GeoJSON (jika fitur ini digunakan pada UI create).
 5. Upload file PDF:
-    - Pastikan format PDF dan ukuran ≤ 2MB.
+    - Pastikan format PDF dan ukuran <= 2MB.
 6. Klik `Simpan`.
 7. Verifikasi:
     - Laporan muncul pada list.
@@ -374,9 +374,9 @@ Catatan UI:
 ### Step-by-step: hapus user (single) & bulk delete
 
 1. Single delete:
-    - Klik `Hapus` pada user → konfirmasi.
+    - Klik `Hapus` pada user -> konfirmasi.
 2. Bulk delete:
-    - Centang beberapa user → klik `Hapus Terpilih` → konfirmasi.
+    - Centang beberapa user -> klik `Hapus Terpilih` -> konfirmasi.
 3. Catatan kebijakan:
     - Tidak bisa hapus akun sendiri.
     - Tidak bisa menghapus `superadmin` jika akan menyisakan < 3 akun `superadmin`.
@@ -402,9 +402,9 @@ Fitur:
     - Klik simpan.
 4. Edit region:
     - Klik `Edit`.
-    - Ubah data → simpan.
+    - Ubah data -> simpan.
 5. Hapus region:
-    - Klik `Hapus` → konfirmasi.
+    - Klik `Hapus` -> konfirmasi.
 6. Jika muncul error duplikasi:
     - Kombinasi provinsi/kabupaten/kecamatan/desa sudah ada; gunakan kombinasi lain atau edit data yang sudah ada.
 
@@ -421,7 +421,7 @@ Validasi penting:
 
 - `kode_warna` wajib format hex `#RRGGBB`.
 - `kode` unik (jika diisi).
-- `layer_order` integer 0–65535.
+- `layer_order` integer 0-65535.
 
 ### Step-by-step: kelola kategori
 
@@ -433,9 +433,9 @@ Validasi penting:
     - Isi `orde0` (wajib), orde lainnya (opsional), `kode` (opsional, unik), `kode_warna` (wajib), `ket_warna` (opsional), `layer_order` (wajib).
     - Simpan.
 4. Edit kategori:
-    - Klik `Edit` pada item → ubah field → simpan.
+    - Klik `Edit` pada item -> ubah field -> simpan.
 5. Hapus kategori:
-    - Klik `Hapus` → konfirmasi.
+    - Klik `Hapus` -> konfirmasi.
 
 ## 12) Modul Pewarnaan RDTR
 
@@ -445,7 +445,7 @@ Fitur:
 
 - CRUD data warna RDTR (kode/sub_zona/CMYK/RGB/HSV/hex).
 - Pencarian dan pagination.
-- Jika `kode_warna` kosong tetapi `rgb` terisi (format “R G B”), sistem akan membentuk hex otomatis.
+- Jika `kode_warna` kosong tetapi `rgb` terisi (format "R G B"), sistem akan membentuk hex otomatis.
 
 ### Step-by-step: kelola Pewarnaan RDTR
 
@@ -459,11 +459,11 @@ Fitur:
     - Isi `kode` (unik), `sub_zona` (opsional), `rgb` (opsional), dan/atau `kode_warna` (hex).
     - Simpan.
 5. Edit data:
-    - Klik `Edit` → ubah → simpan.
+    - Klik `Edit` -> ubah -> simpan.
 6. Hapus data:
-    - Klik `Hapus` → konfirmasi.
+    - Klik `Hapus` -> konfirmasi.
 7. Catatan:
-    - Jika `kode_warna` kosong dan `rgb` berformat “R G B”, sistem akan mengisi `kode_warna` otomatis.
+    - Jika `kode_warna` kosong dan `rgb` berformat "R G B", sistem akan mengisi `kode_warna` otomatis.
 
 ## 13) SHP to GeoJSON (Converter)
 
@@ -488,7 +488,7 @@ Fitur:
 5. Download:
     - Klik `Download GeoJSON` untuk satu file, atau `Download All GeoJSON` untuk banyak file.
 
-## 14) ArcGIS Style (.style) → JSON (Simbolisasi)
+## 14) ArcGIS Style (.style) -> JSON (Simbolisasi)
 
 Repo ini menyediakan tool untuk mengonversi file ArcGIS `.style` menjadi JSON dan menggunakannya di aplikasi web.
 
@@ -523,7 +523,7 @@ Workflow yang umum dipakai:
 ## 15) Troubleshooting Cepat
 
 - Tidak ada menu Register: memang dinonaktifkan default. Ikuti `REGISTER_RESTORE_INSTRUCTIONS.md` jika perlu mengaktifkannya.
-- Upload GeoJSON gagal: pastikan total ukuran file ≤ 100MB dan file valid FeatureCollection.
+- Upload GeoJSON gagal: pastikan total ukuran file <= 100MB dan file valid FeatureCollection.
 - Hapus user gagal: cek kebijakan minimal 3 `superadmin` dan larangan hapus akun sendiri.
-- Upload PDF gagal: pastikan file PDF dan ukuran ≤ 2MB.
+- Upload PDF gagal: pastikan file PDF dan ukuran <= 2MB.
 - Simbol ArcGIS tidak muncul: pastikan `style-output/` sudah tersedia dan (jika dipakai via web) sudah dicopy ke `public/style-output/` sesuai `STYLE_USAGE_GUIDE.md`.
